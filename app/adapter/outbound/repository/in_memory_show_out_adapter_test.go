@@ -1,4 +1,4 @@
-package outbound
+package repository
 
 import (
 	"podGopher/core/port/outbound"
@@ -8,10 +8,10 @@ import (
 )
 
 func Test_should_implement_port(t *testing.T) {
-	repository := NewInMemoryShowRepository
+	repository := NewInMemoryShowRepository()
 
-	assert.NotNil(t, repository())
-	assert.Implements(t, (*outbound.SaveShowPort)(nil), repository())
+	assert.NotNil(t, repository)
+	assert.Implements(t, (*outbound.SaveShowPort)(nil), repository)
 }
 
 func Test_should_save_a_show(t *testing.T) {

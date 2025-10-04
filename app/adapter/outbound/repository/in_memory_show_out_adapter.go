@@ -1,4 +1,4 @@
-package outbound
+package repository
 
 import "podGopher/core/port/outbound"
 
