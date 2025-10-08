@@ -29,24 +29,24 @@ func newTestCreateShowCommand(title string) *inbound.CreateShowCommand {
 }
 
 func (adapter *saveAndGetShowTestAdapter) SaveShow(title string) error {
-	(*adapter).calledSave++
-	(*adapter).onSave["title"] = title
-	return (*adapter).returnsSaveShow
+	adapter.calledSave++
+	adapter.onSave["title"] = title
+	return adapter.returnsSaveShow
 }
 
 func (adapter *saveAndGetShowTestAdapter) init() {
-	(*adapter).calledSave = 0
-	(*adapter).onSave = make(map[string]interface{})
-	(*adapter).returnsExistsByTitle = make(map[string]bool)
-	(*adapter).returnsSaveShow = nil
+	adapter.calledSave = 0
+	adapter.onSave = make(map[string]interface{})
+	adapter.returnsExistsByTitle = make(map[string]bool)
+	adapter.returnsSaveShow = nil
 }
 
 func (adapter *saveAndGetShowTestAdapter) everyExistsByTitleReturns(title string, returnValue bool) {
-	(*adapter).returnsExistsByTitle[title] = returnValue
+	adapter.returnsExistsByTitle[title] = returnValue
 }
 
 func (adapter *saveAndGetShowTestAdapter) ExistsByTitle(title string) bool {
-	return (*adapter).returnsExistsByTitle[title]
+	return adapter.returnsExistsByTitle[title]
 }
 
 var mockSaveAndGetShowAdapter = newSaveAndGetShowTestAdapter()

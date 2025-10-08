@@ -7,12 +7,12 @@ type InMemoryShowOutAdapter struct {
 }
 
 func (adapter *InMemoryShowOutAdapter) SaveShow(title string) (err error) {
-	(*adapter).shows = append((*adapter).shows, title)
+	adapter.shows = append(adapter.shows, title)
 	return nil
 }
 
 func (adapter *InMemoryShowOutAdapter) ExistsByTitle(title string) bool {
-	for _, value := range (*adapter).shows {
+	for _, value := range adapter.shows {
 		if value == title {
 			return true
 		}
