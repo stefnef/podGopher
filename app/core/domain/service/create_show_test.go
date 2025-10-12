@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	error2 "podGopher/core/domain/error"
 	"podGopher/core/port/inbound"
 	"testing"
 
@@ -79,7 +80,7 @@ func Test_should_throw_error_if_show_with_name_already_exists(t *testing.T) {
 	err := createShowService.CreateShow(show)
 
 	assert.NotNil(t, err)
-	assert.Equal(t, &inbound.ShowAlreadyExistsError{Name: "Test"}, err)
+	assert.Equal(t, &error2.ShowAlreadyExistsError{Name: "Test"}, err)
 	assert.Equal(t, 0, mockSaveAndGetShowAdapter.calledSave)
 }
 

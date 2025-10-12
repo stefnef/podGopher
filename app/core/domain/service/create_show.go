@@ -1,6 +1,7 @@
 package service
 
 import (
+	error2 "podGopher/core/domain/error"
 	"podGopher/core/port/inbound"
 	"podGopher/core/port/outbound"
 )
@@ -17,7 +18,7 @@ func NewCreateShowService(repository outbound.SaveShowPort) *CreateShowService {
 
 func (service *CreateShowService) CreateShow(command *inbound.CreateShowCommand) error {
 	if exists := service.saveShowPort.ExistsByTitle(command.Title); exists != false {
-		return inbound.NewShowAlreadyExistsError(command.Title)
+		return error2.NewShowAlreadyExistsError(command.Title)
 	}
 	return service.saveShowPort.SaveShow(command.Title)
 }
