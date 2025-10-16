@@ -64,11 +64,13 @@ func Test_should_save_a_new_show(t *testing.T) {
 	mockSaveAndGetShowAdapter.everyExistsByTitleReturns("Test", false)
 
 	show := newTestCreateShowCommand("Test")
-	err := createShowService.CreateShow(show)
+	result, err := createShowService.CreateShow(show)
 
 	assert.Equal(t, 1, mockSaveAndGetShowAdapter.calledSave)
 	assert.Equal(t, "Test", mockSaveAndGetShowAdapter.onSave["title"])
 	assert.Nil(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, &inbound.CreateShowResponse{Title: "Test"}, result)
 }
 
 func Test_should_throw_error_if_show_with_name_already_exists(t *testing.T) {
@@ -77,8 +79,9 @@ func Test_should_throw_error_if_show_with_name_already_exists(t *testing.T) {
 	mockSaveAndGetShowAdapter.everyExistsByTitleReturns("Test", true)
 
 	show := newTestCreateShowCommand("Test")
-	err := createShowService.CreateShow(show)
+	result, err := createShowService.CreateShow(show)
 
+	assert.Nil(t, result)
 	assert.NotNil(t, err)
 	assert.Equal(t, &error2.ShowAlreadyExistsError{Name: "Test"}, err)
 	assert.Equal(t, 0, mockSaveAndGetShowAdapter.calledSave)
@@ -91,8 +94,9 @@ func Test_should_propagate_errors_from_adapter(t *testing.T) {
 	mockSaveAndGetShowAdapter.returnsSaveShow = expectedError
 
 	show := newTestCreateShowCommand("Fake")
-	err := createShowService.CreateShow(show)
+	result, err := createShowService.CreateShow(show)
 
+	assert.Nil(t, result)
 	assert.NotNil(t, err)
 	assert.Equal(t, expectedError, err)
 	assert.Equal(t, 1, mockSaveAndGetShowAdapter.calledSave)

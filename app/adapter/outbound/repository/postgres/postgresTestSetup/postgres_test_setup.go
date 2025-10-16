@@ -83,7 +83,7 @@ func createContainer(t *testing.T, configDir string, ctx context.Context) {
 		"postgres:16-alpine",
 		postgres.WithOrderedInitScripts(
 			filepath.Join(configDir, "postgres_init.sh"),
-			filepath.Join(configDir, "001_init_shows.sql"),
+			filepath.Join(configDir, "../setup/001_init_shows.sql"),
 		),
 		postgres.WithDatabase(testcontainersDbConfig.dbName),
 		postgres.WithUsername(testcontainersDbConfig.dbUser),

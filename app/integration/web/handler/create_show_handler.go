@@ -1,31 +1,53 @@
 package handler
 
-import "podGopher/core/port/inbound"
+import (
+	"net/http"
+	"podGopher/core/port/inbound"
+
+	"github.com/gin-gonic/gin"
+)
 
 type CreateShowHandler struct {
 	route *Route
 	port  inbound.CreateShowPort
 }
 
-type CreateShowCommand struct {
-	Title string
+type CreateShowRequestDto struct {
+	Title string `json:"title" binding:"required"`
 }
 
-func (h *CreateShowHandler) getRoute() *Route {
+type createShowResponseDto struct {
+	Title string `json:"title" binding:"required"`
+}
+
+func (h *CreateShowHandler) GetRoute() *Route {
 	return h.route
-}
-
-// TODO use responseWriter
-func (h *CreateShowHandler) handle(command interface{}) {
-	_ = h.port.CreateShow(&inbound.CreateShowCommand{Title: command.(*CreateShowCommand).Title})
 }
 
 func NewCreateShowHandler(portMap inbound.PortMap) *CreateShowHandler {
 	return &CreateShowHandler{
 		route: &Route{
-			method: "POST",
-			path:   "/show",
+			Method: http.MethodPost,
+			Path:   "/show",
 		},
 		port: portMap[inbound.CreateShow].(inbound.CreateShowPort),
+	}
+}
+
+func (h *CreateShowHandler) Handle(context *gin.Context) {
+	var request *CreateShowRequestDto
+	if err := context.BindJSON(&request); err != nil {
+		context.Abort()
+		return
+	}
+
+	h.handleCreateShow(context, request)
+}
+
+func (h *CreateShowHandler) handleCreateShow(context *gin.Context, request *CreateShowRequestDto) {
+	if createdShow, err := h.port.CreateShow(&inbound.CreateShowCommand{Title: request.Title}); err != nil {
+		_ = context.Error(err)
+	} else {
+		context.JSON(http.StatusAccepted, createShowResponseDto{Title: createdShow.Title})
 	}
 }

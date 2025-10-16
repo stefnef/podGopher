@@ -16,9 +16,12 @@ func NewCreateShowService(repository outbound.SaveShowPort) *CreateShowService {
 	}
 }
 
-func (service *CreateShowService) CreateShow(command *inbound.CreateShowCommand) error {
+func (service *CreateShowService) CreateShow(command *inbound.CreateShowCommand) (*inbound.CreateShowResponse, error) {
 	if exists := service.saveShowPort.ExistsByTitle(command.Title); exists != false {
-		return error2.NewShowAlreadyExistsError(command.Title)
+		return nil, error2.NewShowAlreadyExistsError(command.Title)
 	}
-	return service.saveShowPort.SaveShow(command.Title)
+	if err := service.saveShowPort.SaveShow(command.Title); err != nil {
+		return nil, err
+	}
+	return &inbound.CreateShowResponse{Title: command.Title}, nil
 }

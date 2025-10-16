@@ -1,15 +1,19 @@
 package handler
 
-import "podGopher/core/port/inbound"
+import (
+	"podGopher/core/port/inbound"
+
+	"github.com/gin-gonic/gin"
+)
 
 type Route struct {
-	method string
-	path   string
+	Method string
+	Path   string
 }
 
 type Handler interface {
-	getRoute() *Route
-	handle(command interface{})
+	GetRoute() *Route
+	Handle(context *gin.Context)
 }
 
 func CreateHandlers(portMap inbound.PortMap) []Handler {
