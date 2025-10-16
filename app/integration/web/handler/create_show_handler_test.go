@@ -24,11 +24,21 @@ func (s *createShowTestService) CreateShow(command *inbound.CreateShowCommand) (
 }
 
 var mockCreateShowService = new(createShowTestService)
-var createShowHandler = NewCreateShowHandler(mockCreateShowService)
+var createShowHandler = NewCreateShowHandler(inbound.PortMap{
+	inbound.CreateShow: mockCreateShowService,
+})
 
 func Test_should_implement_handler_for_create_show(t *testing.T) {
 	assert.NotNil(t, createShowHandler)
 	assert.Implements(t, (*Handler)(nil), createShowHandler)
+}
+
+func Test_should_panic_if_no_port_was_found_on_create_show_handler(t *testing.T) {
+	assert.Panics(t, func() {
+		NewCreateShowHandler(inbound.PortMap{
+			inbound.PortInvalid: mockCreateShowService,
+		})
+	})
 }
 
 func Test_should_return_route_on_create_show(t *testing.T) {

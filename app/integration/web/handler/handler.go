@@ -1,5 +1,7 @@
 package handler
 
+import "podGopher/core/port/inbound"
+
 type Route struct {
 	method string
 	path   string
@@ -10,8 +12,8 @@ type Handler interface {
 	handle(command interface{})
 }
 
-func CreateHandlers() []Handler { //TODO use portMap
+func CreateHandlers(portMap inbound.PortMap) []Handler {
 	return []Handler{
-		NewCreateShowHandler(nil),
+		NewCreateShowHandler(portMap),
 	}
 }

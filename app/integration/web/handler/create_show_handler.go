@@ -3,8 +3,8 @@ package handler
 import "podGopher/core/port/inbound"
 
 type CreateShowHandler struct {
-	route   *Route
-	service inbound.CreateShowPort
+	route *Route
+	port  inbound.CreateShowPort
 }
 
 type CreateShowCommand struct {
@@ -17,15 +17,15 @@ func (h *CreateShowHandler) getRoute() *Route {
 
 // TODO use responseWriter
 func (h *CreateShowHandler) handle(command interface{}) {
-	_ = h.service.CreateShow(&inbound.CreateShowCommand{Title: command.(*CreateShowCommand).Title})
+	_ = h.port.CreateShow(&inbound.CreateShowCommand{Title: command.(*CreateShowCommand).Title})
 }
 
-func NewCreateShowHandler(service inbound.CreateShowPort) *CreateShowHandler {
+func NewCreateShowHandler(portMap inbound.PortMap) *CreateShowHandler {
 	return &CreateShowHandler{
 		route: &Route{
 			method: "POST",
 			path:   "/show",
 		},
-		service: service,
+		port: portMap[inbound.CreateShow].(inbound.CreateShowPort),
 	}
 }
