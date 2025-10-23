@@ -4,23 +4,16 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"os"
 	"path/filepath"
+	"podGopher/adapter/outbound/repository/postgres/migration"
+	"podGopher/env"
 	"testing"
 
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	postgresClient "gocloud.dev/postgres"
 )
-
-var testcontainersDbConfig = struct {
-	dbName     string
-	dbUser     string
-	dbPassword string
-}{
-	dbName:     "podcasts",
-	dbUser:     "user",
-	dbPassword: "password",
-}
 
 var postgresContainer *postgres.PostgresContainer
 
@@ -42,7 +35,23 @@ func StartTestcontainersPostgres(t *testing.T, configDir string) *sql.DB {
 
 	db := createAndVerifyConnection(t, ctx, dsn)
 
+	executeMigration(t, configDir)
+
 	return db
+}
+
+func executeMigration(t *testing.T, configDir string) {
+	if err := os.Setenv(string(env.MigrationDir), configDir+"../migration/files"); err != nil {
+		t.Fatal(err)
+	}
+
+	m, err := migration.NewMigration()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := m.Migrate(); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func createAndVerifyConnection(t *testing.T, ctx context.Context, dsn string) *sql.DB {
@@ -66,28 +75,40 @@ func createConnectionUrl(t *testing.T, ctx context.Context) string {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	if err := os.Setenv(string(env.DBHost), host); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Setenv(string(env.DBPort), mappedPort.Port()); err != nil {
+		t.Fatal(err)
+	}
+
 	dsn := fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		testcontainersDbConfig.dbUser,
-		testcontainersDbConfig.dbPassword,
-		host,
-		mappedPort.Port(),
-		testcontainersDbConfig.dbName,
+		env.DBUser.GetValue(),
+		env.DBPassword.GetValue(),
+		env.DBHost.GetValue(),
+		env.DBPort.GetValue(),
+		env.DBName.GetValue(),
 	)
 	return dsn
 }
 
 func createContainer(t *testing.T, configDir string, ctx context.Context) {
 	var err error
+
+	if err := env.Load(configDir + "../../../../../env/.testcontainers-env"); err != nil {
+		t.Fatal(err)
+	}
+
 	postgresContainer, err = postgres.Run(ctx,
 		"postgres:16-alpine",
 		postgres.WithOrderedInitScripts(
 			filepath.Join(configDir, "postgres_init.sh"),
-			filepath.Join(configDir, "../setup/001_init_shows.sql"),
 		),
-		postgres.WithDatabase(testcontainersDbConfig.dbName),
-		postgres.WithUsername(testcontainersDbConfig.dbUser),
-		postgres.WithPassword(testcontainersDbConfig.dbPassword),
+		postgres.WithDatabase(env.DBName.GetValue()),
+		postgres.WithUsername(env.DBUser.GetValue()),
+		postgres.WithPassword(env.DBPassword.GetValue()),
 		postgres.BasicWaitStrategies(),
 	)
 	if err != nil || postgresContainer == nil {

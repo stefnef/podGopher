@@ -28,7 +28,7 @@ func Test_should_implement_port(t *testing.T) {
 }
 
 func Test_should_save_a_show(t *testing.T) {
-	db := postgresTestSetup.StartTestcontainersPostgres(t, "postgresTestSetup")
+	db := postgresTestSetup.StartTestcontainersPostgres(t, "postgresTestSetup/")
 
 	defer teardown(t, db)
 
