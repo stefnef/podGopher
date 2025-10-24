@@ -12,6 +12,14 @@ import (
 
 func NewRouter(portMap inbound.PortMap) *gin.Engine {
 	router := gin.Default()
+	setHandlers(portMap, router)
+
+	_ = router.SetTrustedProxies(nil)
+
+	return router
+}
+
+func setHandlers(portMap inbound.PortMap, router *gin.Engine) {
 	var handlers = handler.CreateHandlers(portMap)
 
 	for _, handlerImpl := range handlers {
@@ -21,7 +29,6 @@ func NewRouter(portMap inbound.PortMap) *gin.Engine {
 			router.POST(route.Path, handlerImpl.Handle, handleError)
 		}
 	}
-	return router
 }
 
 func handleError(context *gin.Context) {

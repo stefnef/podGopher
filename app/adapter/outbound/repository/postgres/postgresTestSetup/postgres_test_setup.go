@@ -3,7 +3,6 @@ package postgresTestSetup
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"os"
 	"path/filepath"
 	"podGopher/adapter/outbound/repository/postgres/migration"
@@ -83,14 +82,7 @@ func createConnectionUrl(t *testing.T, ctx context.Context) string {
 		t.Fatal(err)
 	}
 
-	dsn := fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		env.DBUser.GetValue(),
-		env.DBPassword.GetValue(),
-		env.DBHost.GetValue(),
-		env.DBPort.GetValue(),
-		env.DBName.GetValue(),
-	)
+	dsn := migration.GetPostgresConnectionString()
 	return dsn
 }
 
