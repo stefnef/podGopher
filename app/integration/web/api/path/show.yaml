@@ -1,0 +1,10 @@
+show:
+  post:
+    tags:
+      - show
+    description: Adds a new show
+    requestBody:
+      $ref: "../request/show.yaml#/components/requestBodies/showPostBody"
+    responses:
+      201:
+        $ref: "../response/show.yaml#/components/responses/showResponse"

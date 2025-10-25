@@ -1,0 +1,11 @@
+components:
+  schemas:
+    showTitle:
+      type: string
+      minLength: 1
+      maxLength: 10
+
+    showId:
+      type: string
+      minLength: 16
+      maxLength: 256

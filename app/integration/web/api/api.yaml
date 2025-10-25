@@ -1,0 +1,16 @@
+openapi: 3.0.3
+info:
+  title: podGopher
+  description: podGopher is a cms for manage multiple podcasts with multiple shows.
+  version: 1.0.0
+servers:
+  - description: Dev
+    url: 'http://localhost:3000'
+
+tags:
+  - name: show
+    description: A podcast show
+
+paths:
+  /show:
+    $ref: "./path/show.yaml#/show"

@@ -1,0 +1,6 @@
+DBName:podgopher
+DBUser:user
+DBPassword:secret
+DBHost:localhost
+DBPort:5432
+MigrationDir:adapter/outbound/repository/postgres/migration/files
