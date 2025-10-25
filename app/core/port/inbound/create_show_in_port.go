@@ -6,6 +6,7 @@ type CreateShowCommand struct {
 
 type CreateShowResponse struct {
 	Title string
+	Id    string
 }
 
 type CreateShowPort interface {

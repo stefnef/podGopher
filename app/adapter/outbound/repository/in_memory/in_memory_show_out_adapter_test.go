@@ -17,8 +17,9 @@ func Test_should_implement_port(t *testing.T) {
 func Test_should_save_a_show(t *testing.T) {
 	repository := NewInMemoryShowRepository()
 
-	err := repository.SaveShow("Some title")
+	id, err := repository.SaveShow("Some title")
 	assert.Nil(t, err)
+	assert.NotEmpty(t, id)
 }
 
 func Test_should_return_false_if_show_does_not_exist(t *testing.T) {
@@ -31,7 +32,7 @@ func Test_should_return_false_if_show_does_not_exist(t *testing.T) {
 func Test_should_return_true_if_show_exists(t *testing.T) {
 	repository := NewInMemoryShowRepository()
 
-	_ = repository.SaveShow("Some title")
+	_, _ = repository.SaveShow("Some title")
 	exists := repository.ExistsByTitle("Some title")
 
 	assert.True(t, exists)

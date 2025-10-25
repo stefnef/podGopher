@@ -77,9 +77,11 @@ func Test_should_call_service_on_create_show(t *testing.T) {
 			Title: "some title",
 		},
 		&inbound.CreateShowResponse{
+			Id:    "some-id",
 			Title: "Mocked Title",
 		},
 		&createShowResponseDto{
+			Id:    "some-id",
 			Title: "Mocked Title",
 		},
 	}

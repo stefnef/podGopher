@@ -13,7 +13,8 @@ type saveAndGetShowTestAdapter struct {
 	calledSave           int
 	onSave               map[string]interface{}
 	returnsExistsByTitle map[string]bool
-	returnsSaveShow      error
+	returnsIdOnSaveShow  string
+	withErrorOnSaveShow  error
 }
 
 func newSaveAndGetShowTestAdapter() *saveAndGetShowTestAdapter {
@@ -29,17 +30,18 @@ func newTestCreateShowCommand(title string) *inbound.CreateShowCommand {
 	return show
 }
 
-func (adapter *saveAndGetShowTestAdapter) SaveShow(title string) error {
+func (adapter *saveAndGetShowTestAdapter) SaveShow(title string) (string, error) {
 	adapter.calledSave++
 	adapter.onSave["title"] = title
-	return adapter.returnsSaveShow
+	return adapter.returnsIdOnSaveShow, adapter.withErrorOnSaveShow
 }
 
 func (adapter *saveAndGetShowTestAdapter) init() {
 	adapter.calledSave = 0
 	adapter.onSave = make(map[string]interface{})
 	adapter.returnsExistsByTitle = make(map[string]bool)
-	adapter.returnsSaveShow = nil
+	adapter.returnsIdOnSaveShow = ""
+	adapter.withErrorOnSaveShow = nil
 }
 
 func (adapter *saveAndGetShowTestAdapter) everyExistsByTitleReturns(title string, returnValue bool) {
@@ -62,6 +64,8 @@ func Test_should_save_a_new_show(t *testing.T) {
 	defer mockSaveAndGetShowAdapter.init()
 
 	mockSaveAndGetShowAdapter.everyExistsByTitleReturns("Test", false)
+	mockSaveAndGetShowAdapter.returnsIdOnSaveShow = "some-id"
+	expectedCreatedShow := &inbound.CreateShowResponse{Title: "Test", Id: "some-id"}
 
 	show := newTestCreateShowCommand("Test")
 	result, err := createShowService.CreateShow(show)
@@ -70,7 +74,8 @@ func Test_should_save_a_new_show(t *testing.T) {
 	assert.Equal(t, "Test", mockSaveAndGetShowAdapter.onSave["title"])
 	assert.Nil(t, err)
 	assert.NotNil(t, result)
-	assert.Equal(t, &inbound.CreateShowResponse{Title: "Test"}, result)
+	assert.IsType(t, (*inbound.CreateShowResponse)(nil), result)
+	assert.Equal(t, expectedCreatedShow, result)
 }
 
 func Test_should_throw_error_if_show_with_name_already_exists(t *testing.T) {
@@ -91,7 +96,7 @@ func Test_should_propagate_errors_from_adapter(t *testing.T) {
 	defer mockSaveAndGetShowAdapter.init()
 
 	expectedError := errors.New("some error")
-	mockSaveAndGetShowAdapter.returnsSaveShow = expectedError
+	mockSaveAndGetShowAdapter.withErrorOnSaveShow = expectedError
 
 	show := newTestCreateShowCommand("Fake")
 	result, err := createShowService.CreateShow(show)

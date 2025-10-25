@@ -20,8 +20,9 @@ func (service *CreateShowService) CreateShow(command *inbound.CreateShowCommand)
 	if exists := service.saveShowPort.ExistsByTitle(command.Title); exists != false {
 		return nil, error2.NewShowAlreadyExistsError(command.Title)
 	}
-	if err := service.saveShowPort.SaveShow(command.Title); err != nil {
+	id, err := service.saveShowPort.SaveShow(command.Title)
+	if err != nil {
 		return nil, err
 	}
-	return &inbound.CreateShowResponse{Title: command.Title}, nil
+	return &inbound.CreateShowResponse{Title: command.Title, Id: id}, nil
 }

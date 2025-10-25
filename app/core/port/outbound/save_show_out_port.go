@@ -1,6 +1,6 @@
 package outbound
 
 type SaveShowPort interface {
-	SaveShow(title string) (err error)
+	SaveShow(title string) (id string, err error)
 	ExistsByTitle(title string) bool
 }

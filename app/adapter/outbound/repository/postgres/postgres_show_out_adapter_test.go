@@ -41,8 +41,9 @@ func Test_should_save_a_show(t *testing.T) {
 	})
 
 	t.Run("should save a show", func(t *testing.T) {
-		err := repository.SaveShow(showTitle)
+		id, err := repository.SaveShow(showTitle)
 		assert.Nil(t, err)
+		assert.NotEmpty(t, id)
 	})
 
 	t.Run("should should return true if show exists", func(t *testing.T) {

@@ -1,14 +1,19 @@
 package in_memory
 
-import "podGopher/core/port/outbound"
+import (
+	"podGopher/core/port/outbound"
+
+	"github.com/google/uuid"
+)
 
 type InMemoryShowOutAdapter struct {
-	shows []string
+	shows map[string]string
 }
 
-func (adapter *InMemoryShowOutAdapter) SaveShow(title string) (err error) {
-	adapter.shows = append(adapter.shows, title)
-	return nil
+func (adapter *InMemoryShowOutAdapter) SaveShow(title string) (id string, err error) {
+	id = uuid.NewString()
+	adapter.shows[id] = title
+	return id, nil
 }
 
 func (adapter *InMemoryShowOutAdapter) ExistsByTitle(title string) bool {
@@ -21,5 +26,5 @@ func (adapter *InMemoryShowOutAdapter) ExistsByTitle(title string) bool {
 }
 
 func NewInMemoryShowRepository() outbound.SaveShowPort {
-	return &InMemoryShowOutAdapter{shows: make([]string, 0)}
+	return &InMemoryShowOutAdapter{shows: make(map[string]string)}
 }

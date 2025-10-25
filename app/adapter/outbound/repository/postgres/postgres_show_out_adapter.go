@@ -11,22 +11,22 @@ type PostgresShowOutAdapter struct {
 	db *sql.DB
 }
 
-func (adapter *PostgresShowOutAdapter) SaveShow(title string) (err error) {
+func (adapter *PostgresShowOutAdapter) SaveShow(title string) (id string, err error) {
 	var stmt *sql.Stmt
-	id := uuid.NewString()
+	id = uuid.NewString()
 
 	if stmt, err = adapter.db.Prepare("INSERT INTO shows (id, title) VALUES ($1, $2);"); err != nil {
-		return err
+		return id, err
 	}
 	defer func(stmt *sql.Stmt) {
 		_ = stmt.Close()
 	}(stmt)
 
 	if _, err = stmt.Exec(id, title); err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return id, nil
 }
 
 func (adapter *PostgresShowOutAdapter) ExistsByTitle(title string) bool {
