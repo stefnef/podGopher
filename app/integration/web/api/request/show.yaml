@@ -1,0 +1,18 @@
+components:
+  requestBodies:
+    showPostBody:
+      required: true
+      description: "Values of newly created show"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/showPostDto"
+
+  schemas:
+    showPostDto:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          $ref: "../model/show.yaml#/components/schemas/showTitle"
