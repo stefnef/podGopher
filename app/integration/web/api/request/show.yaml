@@ -2,17 +2,25 @@ components:
   requestBodies:
     showPostBody:
       required: true
-      description: "Values of newly created show"
+      description: "Values of a newly created show"
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/showPostDto"
+          examples:
+            success:
+              value:
+                title: "Show Title"
+                slug: "show-title"
 
   schemas:
     showPostDto:
       type: object
       required:
         - title
+        - slug
       properties:
         title:
           $ref: "../model/show.yaml#/components/schemas/showTitle"
+        slug:
+          $ref: "../model/show.yaml#/components/schemas/showSlug"

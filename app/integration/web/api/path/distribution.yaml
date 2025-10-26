@@ -1,0 +1,24 @@
+distribution:
+  post:
+    tags:
+      - distribution
+    description: Create a new distribution
+    parameters:
+      - $ref: "../parameter/show.yaml#/components/parameters/showId"
+    requestBody:
+      $ref: "../request/distribution.yaml#/components/requestBodies/distributionPostBody"
+    responses:
+      201:
+        $ref: "../response/distribution.yaml#/components/responses/distributionResponse"
+
+distributionId:
+  get:
+    tags:
+      - distribution
+    description: Retrieve a show's distribution with given id
+    parameters:
+      - $ref: "../parameter/show.yaml#/components/parameters/showId"
+      - $ref: "../parameter/distribution.yaml#/components/parameters/distributionId"
+    responses:
+      200:
+        $ref: "../response/distribution.yaml#/components/responses/distributionResponse"

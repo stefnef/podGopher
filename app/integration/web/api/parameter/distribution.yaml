@@ -1,0 +1,15 @@
+components:
+  parameters:
+    distributionId:
+      in: path
+      required: true
+      name: distributionId
+      schema:
+        $ref: "../model/distribution.yaml#/components/schemas/distributionId"
+
+    distributionSlug:
+      in: path
+      required: true
+      name: distributionSlug
+      schema:
+        $ref: "../model/distribution.yaml#/components/schemas/distributionSlug"

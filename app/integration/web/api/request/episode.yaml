@@ -1,0 +1,22 @@
+components:
+  requestBodies:
+    episodePostBody:
+      required: true
+      description: "Values of a newly created episode"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/episodePostDto"
+          examples:
+            success:
+              value:
+                title: "New Episode"
+
+  schemas:
+    episodePostDto:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          $ref: "../model/episode.yaml#/components/schemas/episodeTitle"

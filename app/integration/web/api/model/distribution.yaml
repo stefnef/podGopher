@@ -1,0 +1,21 @@
+components:
+  schemas:
+    distributionId:
+      description: "unique distribution id"
+      type: string
+      minLength: 16
+      maxLength: 256
+      example: "distribution-id"
+
+    distributionTitle:
+      type: string
+      minLength: 1
+      maxLength: 256
+      example: "New Distribution"
+
+    distributionSlug:
+      description: "A distribution slug used to identify feeds"
+      type: string
+      minLength: 16
+      maxLength: 256
+      example: "new-distribution"

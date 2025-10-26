@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: podGopher
-  description: podGopher is a cms for manage multiple podcasts with multiple shows.
+  description: podGopher is a cms which manages multiple podcast shows.
   version: 1.0.0
 servers:
   - description: Dev
@@ -10,7 +10,28 @@ servers:
 tags:
   - name: show
     description: A podcast show
+  - name: episode
+    description: A podcast episode which belongs to a podcast show
+  - name: distribution
+    description: Configuration of podcast rss feeds.
+  - name: rss
+    description: Available rss feeds
 
 paths:
   /show:
     $ref: "./path/show.yaml#/show"
+  /show/{showId}:
+    $ref: "./path/show.yaml#/showId"
+
+  /show/{showId}/episode:
+    $ref: "./path/episode.yaml#/episode"
+  /show/{showId}/episode/{episodeId}:
+    $ref: "./path/episode.yaml#/episodeId"
+
+  /show/{showId}/distribution:
+    $ref: "./path/distribution.yaml#/distribution"
+  /show/{showId}/distribution/{distributionId}:
+    $ref: "./path/distribution.yaml#/distributionId"
+
+  /show/{showSlug}/feed/{distributionSlug}:
+    $ref: "./path/rss.yaml#/distributionSlug"

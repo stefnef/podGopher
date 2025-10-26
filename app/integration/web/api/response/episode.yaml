@@ -1,0 +1,25 @@
+components:
+  responses:
+    episodeResponse:
+      description: "A single episode"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/episodeResponseDto"
+          examples:
+            success:
+              value:
+                id: "episode-id"
+                title: "New Episode"
+
+  schemas:
+    episodeResponseDto:
+      type: object
+      required:
+        - id
+        - title
+      properties:
+        id:
+          $ref: "../model/episode.yaml#/components/schemas/episodeId"
+        title:
+          $ref: "../model/episode.yaml#/components/schemas/episodeTitle"

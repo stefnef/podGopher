@@ -1,0 +1,15 @@
+components:
+  parameters:
+    showId:
+      in: path
+      required: true
+      name: showId
+      schema:
+        $ref: "../model/show.yaml#/components/schemas/showId"
+
+    showSlug:
+      in: path
+      required: true
+      name: showSlug
+      schema:
+        $ref: "../model/show.yaml#/components/schemas/showSlug"
