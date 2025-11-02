@@ -2,36 +2,34 @@ package repository
 
 import (
 	"database/sql"
+	"podGopher/core/domain/model"
 	"podGopher/core/port/outbound"
-
-	"github.com/google/uuid"
 )
 
 type PostgresShowOutAdapter struct {
 	db *sql.DB
 }
 
-func (adapter *PostgresShowOutAdapter) SaveShow(title string) (id string, err error) {
+func (adapter *PostgresShowOutAdapter) SaveShow(show *model.Show) (err error) {
 	var stmt *sql.Stmt
-	id = uuid.NewString()
 
-	if stmt, err = adapter.db.Prepare("INSERT INTO shows (id, title) VALUES ($1, $2);"); err != nil {
-		return id, err
+	if stmt, err = adapter.db.Prepare("INSERT INTO shows (id, title, slug) VALUES ($1, $2, $3);"); err != nil {
+		return err
 	}
 	defer func(stmt *sql.Stmt) {
 		_ = stmt.Close()
 	}(stmt)
 
-	if _, err = stmt.Exec(id, title); err != nil {
-		return "", err
+	if _, err = stmt.Exec(show.Id, show.Title, show.Slug); err != nil {
+		return err
 	}
 
-	return id, nil
+	return nil
 }
 
-func (adapter *PostgresShowOutAdapter) ExistsByTitle(title string) bool {
-	query := "SELECT EXISTS(SELECT 1 FROM shows where title = $1)"
-	row := adapter.db.QueryRow(query, title)
+func (adapter *PostgresShowOutAdapter) ExistsByTitleOrSlug(title string, slug string) bool {
+	query := "SELECT EXISTS(SELECT 1 FROM shows where title = $1 or slug = $2)"
+	row := adapter.db.QueryRow(query, title, slug)
 
 	var exists bool
 	err := row.Scan(&exists)

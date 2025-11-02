@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	error2 "podGopher/core/domain/error"
+	"podGopher/core/domain/model"
 	"podGopher/core/port/inbound"
 	"testing"
 
@@ -10,11 +11,10 @@ import (
 )
 
 type saveAndGetShowTestAdapter struct {
-	calledSave           int
-	onSave               map[string]interface{}
-	returnsExistsByTitle map[string]bool
-	returnsIdOnSaveShow  string
-	withErrorOnSaveShow  error
+	calledSave                   int
+	onSave                       map[string]*model.Show
+	returnsOnExistsByTitleOrSlug map[string]bool
+	withErrorOnSaveShow          error
 }
 
 func newSaveAndGetShowTestAdapter() *saveAndGetShowTestAdapter {
@@ -26,30 +26,30 @@ func newSaveAndGetShowTestAdapter() *saveAndGetShowTestAdapter {
 func newTestCreateShowCommand(title string) *inbound.CreateShowCommand {
 	show := &inbound.CreateShowCommand{
 		Title: title,
+		Slug:  title + "-Slug",
 	}
 	return show
 }
 
-func (adapter *saveAndGetShowTestAdapter) SaveShow(title string) (string, error) {
+func (adapter *saveAndGetShowTestAdapter) SaveShow(show *model.Show) error {
 	adapter.calledSave++
-	adapter.onSave["title"] = title
-	return adapter.returnsIdOnSaveShow, adapter.withErrorOnSaveShow
+	adapter.onSave["show"] = show
+	return adapter.withErrorOnSaveShow
 }
 
 func (adapter *saveAndGetShowTestAdapter) init() {
 	adapter.calledSave = 0
-	adapter.onSave = make(map[string]interface{})
-	adapter.returnsExistsByTitle = make(map[string]bool)
-	adapter.returnsIdOnSaveShow = ""
+	adapter.onSave = make(map[string]*model.Show)
+	adapter.returnsOnExistsByTitleOrSlug = make(map[string]bool)
 	adapter.withErrorOnSaveShow = nil
 }
 
-func (adapter *saveAndGetShowTestAdapter) everyExistsByTitleReturns(title string, returnValue bool) {
-	adapter.returnsExistsByTitle[title] = returnValue
+func (adapter *saveAndGetShowTestAdapter) everyExistsByTitleOrSlugReturns(title string, slug string, returnValue bool) {
+	adapter.returnsOnExistsByTitleOrSlug[title+slug] = returnValue
 }
 
-func (adapter *saveAndGetShowTestAdapter) ExistsByTitle(title string) bool {
-	return adapter.returnsExistsByTitle[title]
+func (adapter *saveAndGetShowTestAdapter) ExistsByTitleOrSlug(title string, slug string) bool {
+	return adapter.returnsOnExistsByTitleOrSlug[title+slug]
 }
 
 var mockSaveAndGetShowAdapter = newSaveAndGetShowTestAdapter()
@@ -63,25 +63,35 @@ func Test_should_implement_CreateShowInPort(t *testing.T) {
 func Test_should_save_a_new_show(t *testing.T) {
 	defer mockSaveAndGetShowAdapter.init()
 
-	mockSaveAndGetShowAdapter.everyExistsByTitleReturns("Test", false)
-	mockSaveAndGetShowAdapter.returnsIdOnSaveShow = "some-id"
-	expectedCreatedShow := &inbound.CreateShowResponse{Title: "Test", Id: "some-id"}
+	mockSaveAndGetShowAdapter.everyExistsByTitleOrSlugReturns("Test", "Test-Slug", false)
+	createShowCommand := newTestCreateShowCommand("Test")
 
-	show := newTestCreateShowCommand("Test")
-	result, err := createShowService.CreateShow(show)
+	result, err := createShowService.CreateShow(createShowCommand)
 
+	savedShow := mockSaveAndGetShowAdapter.onSave["show"]
+
+	expectedSavedShow := &model.Show{
+		Id:    savedShow.Id,
+		Title: "Test",
+		Slug:  "Test-Slug",
+	}
+	assert.NotNil(t, savedShow)
 	assert.Equal(t, 1, mockSaveAndGetShowAdapter.calledSave)
-	assert.Equal(t, "Test", mockSaveAndGetShowAdapter.onSave["title"])
+	assert.Equal(t, expectedSavedShow, savedShow)
+	assert.NotEmpty(t, savedShow.Id)
+
 	assert.Nil(t, err)
 	assert.NotNil(t, result)
 	assert.IsType(t, (*inbound.CreateShowResponse)(nil), result)
+
+	expectedCreatedShow := &inbound.CreateShowResponse{Id: savedShow.Id, Title: "Test", Slug: "Test-Slug"}
 	assert.Equal(t, expectedCreatedShow, result)
 }
 
 func Test_should_throw_error_if_show_with_name_already_exists(t *testing.T) {
 	defer mockSaveAndGetShowAdapter.init()
 
-	mockSaveAndGetShowAdapter.everyExistsByTitleReturns("Test", true)
+	mockSaveAndGetShowAdapter.everyExistsByTitleOrSlugReturns("Test", "Test-Slug", true)
 
 	show := newTestCreateShowCommand("Test")
 	result, err := createShowService.CreateShow(show)

@@ -40,7 +40,8 @@ func Test_should_load_context(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 
 	t.Run("should add a show", func(t *testing.T) {
-		response, err := http.Post("http://localhost:3000/show", "application/json", bytes.NewBuffer([]byte(`{"Title":"some title"}`)))
+		postShowRequest := `{"Title":"some title", "Slug":"some slug"}`
+		response, err := http.Post("http://localhost:3000/show", "application/json", bytes.NewBuffer([]byte(postShowRequest)))
 		if err != nil {
 			t.Fatal(err)
 		}

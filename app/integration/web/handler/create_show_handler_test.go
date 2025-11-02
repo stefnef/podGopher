@@ -72,17 +72,20 @@ func Test_should_call_service_on_create_show(t *testing.T) {
 		expectedPortResponse *inbound.CreateShowResponse
 		expectedWebResponse  *createShowResponseDto
 	}{
-		`{"Title":"some title"}`,
+		`{"Title":"some title", "Slug":"some slug"}`,
 		&inbound.CreateShowCommand{
 			Title: "some title",
+			Slug:  "some slug",
 		},
 		&inbound.CreateShowResponse{
 			Id:    "some-id",
 			Title: "Mocked Title",
+			Slug:  "Mocked Slug",
 		},
 		&createShowResponseDto{
 			Id:    "some-id",
 			Title: "Mocked Title",
+			Slug:  "Mocked Slug",
 		},
 	}
 
@@ -111,7 +114,7 @@ func Test_should_propagate_error_on_create_show(t *testing.T) {
 		webCommand           string
 		expectedPortResponse error
 	}{
-		`{"Title":"some title"}`,
+		`{"Title":"some title", "Slug":"some slug"}`,
 		expectedError,
 	}
 
@@ -130,13 +133,9 @@ func Test_abort_if_dto_is_invalid_on_create_show(t *testing.T) {
 	var context, recorder = GetTestGinContext()
 
 	test := struct {
-		webCommand          string
-		expectedWebResponse *createShowResponseDto
+		webCommand string
 	}{
 		`{"Bad":"dto"}`,
-		&createShowResponseDto{
-			Title: "Mocked Title",
-		},
 	}
 
 	context.Request = httptest.NewRequest("POST", "/show", bytes.NewBuffer([]byte(test.webCommand)))

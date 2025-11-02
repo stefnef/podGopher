@@ -83,7 +83,8 @@ func Test_should_handle_errors(t *testing.T) {
 
 func doRequest(method string, url string) *httptest.ResponseRecorder {
 	recorder := httptest.NewRecorder()
-	req, _ := http.NewRequest(method, url, bytes.NewBuffer([]byte(`{"Title":"some title"}`)))
+	postShowRequest := `{"Title":"some title", "Slug":"some slug"}`
+	req, _ := http.NewRequest(method, url, bytes.NewBuffer([]byte(postShowRequest)))
 	router.ServeHTTP(recorder, req)
 	return recorder
 }

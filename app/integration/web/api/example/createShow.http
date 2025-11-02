@@ -2,5 +2,6 @@ POST http://localhost:3000/show
 Content-Type: application/json
 
 {
-  "Title": "some-title"
+  "Title": "some-title",
+  "Slug": "some-title-slug"
 }

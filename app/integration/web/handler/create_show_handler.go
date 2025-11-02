@@ -14,11 +14,13 @@ type CreateShowHandler struct {
 
 type CreateShowRequestDto struct {
 	Title string `json:"title" binding:"required"`
+	Slug  string `json:"slug" binding:"required"`
 }
 
 type createShowResponseDto struct {
 	Id    string `json:"id" binding:"required"`
 	Title string `json:"title" binding:"required"`
+	Slug  string `json:"slug" binding:"required"`
 }
 
 func (h *CreateShowHandler) GetRoute() *Route {
@@ -46,10 +48,10 @@ func (h *CreateShowHandler) Handle(context *gin.Context) {
 }
 
 func (h *CreateShowHandler) handleCreateShow(context *gin.Context, request *CreateShowRequestDto) {
-	if createdShow, err := h.port.CreateShow(&inbound.CreateShowCommand{Title: request.Title}); err != nil {
+	if createdShow, err := h.port.CreateShow(&inbound.CreateShowCommand{Title: request.Title, Slug: request.Slug}); err != nil {
 		_ = context.Error(err)
 	} else {
-		responseDto := createShowResponseDto{Id: createdShow.Id, Title: createdShow.Title}
+		responseDto := createShowResponseDto{Id: createdShow.Id, Title: createdShow.Title, Slug: createdShow.Slug}
 		context.JSON(http.StatusAccepted, responseDto)
 	}
 }

@@ -7,7 +7,7 @@ type ShowAlreadyExistsError struct {
 }
 
 func (e ShowAlreadyExistsError) Error() string {
-	return fmt.Sprintf("show with title '%s' already exists", e.Name)
+	return fmt.Sprintf("show with title '%s' or given slug already exists", e.Name)
 }
 
 func NewShowAlreadyExistsError(name string) *ShowAlreadyExistsError {
