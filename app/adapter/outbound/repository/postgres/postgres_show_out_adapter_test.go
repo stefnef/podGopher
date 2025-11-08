@@ -88,3 +88,33 @@ func Test_should_save_a_show(t *testing.T) {
 		assert.Equal(t, show.Slug, slug)
 	})
 }
+
+func Test_should_retrieve_a_show(t *testing.T) {
+	db := postgresTestSetup.StartTestcontainersPostgres(t, "postgresTestSetup/")
+
+	defer teardown(t, db)
+
+	repository := NewPostgresShowRepository(db)
+	show := &model.Show{
+		Id:    uuid.NewString(),
+		Title: "Some title",
+		Slug:  ("Some title") + "-Slug",
+	}
+
+	err := repository.SaveShow(show)
+	assert.Nil(t, err)
+
+	t.Run("should return nil if show does not exist", func(t *testing.T) {
+		foundShow, err := repository.GetShowOrNil(uuid.NewString())
+		assert.Nil(t, err)
+		assert.Nil(t, foundShow)
+	})
+
+	t.Run("should retrieve a show", func(t *testing.T) {
+		foundShow, err := repository.GetShowOrNil(show.Id)
+		assert.Nil(t, err)
+		assert.NotNil(t, foundShow)
+		assert.Equal(t, show.Id, foundShow.Id)
+	})
+
+}

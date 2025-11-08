@@ -27,17 +27,22 @@ func setHandlers(portMap inbound.PortMap, router *gin.Engine) {
 		switch route.Method {
 		case http.MethodPost:
 			router.POST(route.Path, handlerImpl.Handle, handleError)
+		case http.MethodGet:
+			router.GET(route.Path, handlerImpl.Handle, handleError)
 		}
 	}
 }
 
 func handleError(context *gin.Context) {
 	var alreadyExists *error2.ShowAlreadyExistsError
+	var showNotFound *error2.ShowNotFoundError
 
 	for _, err := range context.Errors {
 		switch {
 		case errors.As(err.Err, &alreadyExists):
 			context.AbortWithStatusJSON(http.StatusBadRequest, err.JSON())
+		case errors.As(err.Err, &showNotFound):
+			context.AbortWithStatusJSON(http.StatusNotFound, err.JSON())
 		default:
 			context.AbortWithStatusJSON(http.StatusInternalServerError, err.JSON())
 		}

@@ -17,6 +17,10 @@ type responseMock struct {
 	failsWith error
 }
 
+var exampleRequests = map[string]string{
+	"postShow": `{"Title":"some title", "Slug":"some slug"}`,
+}
+
 var response responseMock
 
 type mockInboundPort struct{}
@@ -26,9 +30,15 @@ func (port *mockInboundPort) CreateShow(*inbound.CreateShowCommand) (show *inbou
 	return &inbound.CreateShowResponse{Title: "CreateShow"}, response.failsWith
 }
 
+func (port *mockInboundPort) GetShow(*inbound.GetShowCommand) (show *inbound.GetShowResponse, err error) {
+	response.Text += "GetShow"
+	return &inbound.GetShowResponse{}, response.failsWith
+}
+
 var mockPort = new(mockInboundPort)
 var router = NewRouter(inbound.PortMap{
 	inbound.CreateShow: mockPort,
+	inbound.GetShow:    mockPort,
 })
 
 func setup() {
@@ -36,7 +46,7 @@ func setup() {
 }
 
 func Test_should_return_NotFound_on_wrong_path(t *testing.T) {
-	recorder := doRequest("GET", "/")
+	recorder := doRequest("GET", "/", "")
 
 	assert.Equal(t, "404 page not found", recorder.Body.String())
 	assert.Equal(t, http.StatusNotFound, recorder.Code)
@@ -44,9 +54,16 @@ func Test_should_return_NotFound_on_wrong_path(t *testing.T) {
 
 func Test_should_post_a_show(t *testing.T) {
 	setup()
-	doRequest("POST", "/show")
+	doRequest("POST", "/show", exampleRequests["postShow"])
 
 	assert.Equal(t, "CreateShow", response.Text)
+}
+
+func Test_should_get_a_show(t *testing.T) {
+	setup()
+	doRequest("GET", "/show/some-show-id", "")
+
+	assert.Equal(t, "GetShow", response.Text)
 }
 
 func Test_should_handle_errors(t *testing.T) {
@@ -62,6 +79,11 @@ func Test_should_handle_errors(t *testing.T) {
 			400,
 			"FAKE",
 		},
+		"Show_not_found_error": {
+			error2.NewShowNotFoundError("FAKE"),
+			404,
+			"FAKE",
+		},
 		"unknown": {
 			errors.New("FAKE"),
 			500,
@@ -73,7 +95,7 @@ func Test_should_handle_errors(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			response.failsWith = test.err
 
-			recorder := doRequest("POST", "/show")
+			recorder := doRequest("POST", "/show", exampleRequests["postShow"])
 
 			assert.Equal(t, test.expectedCode, recorder.Code)
 			assert.Contains(t, recorder.Body.String(), test.expectedMsg)
@@ -81,10 +103,9 @@ func Test_should_handle_errors(t *testing.T) {
 	}
 }
 
-func doRequest(method string, url string) *httptest.ResponseRecorder {
+func doRequest(method string, url string, requestBody string) *httptest.ResponseRecorder {
 	recorder := httptest.NewRecorder()
-	postShowRequest := `{"Title":"some title", "Slug":"some slug"}`
-	req, _ := http.NewRequest(method, url, bytes.NewBuffer([]byte(postShowRequest)))
+	req, _ := http.NewRequest(method, url, bytes.NewBuffer([]byte(requestBody)))
 	router.ServeHTTP(recorder, req)
 	return recorder
 }

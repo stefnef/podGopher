@@ -17,7 +17,7 @@ type CreateShowRequestDto struct {
 	Slug  string `json:"slug" binding:"required"`
 }
 
-type createShowResponseDto struct {
+type showResponseDto struct {
 	Id    string `json:"id" binding:"required"`
 	Title string `json:"title" binding:"required"`
 	Slug  string `json:"slug" binding:"required"`
@@ -51,7 +51,7 @@ func (h *CreateShowHandler) handleCreateShow(context *gin.Context, request *Crea
 	if createdShow, err := h.port.CreateShow(&inbound.CreateShowCommand{Title: request.Title, Slug: request.Slug}); err != nil {
 		_ = context.Error(err)
 	} else {
-		responseDto := createShowResponseDto{Id: createdShow.Id, Title: createdShow.Title, Slug: createdShow.Slug}
+		responseDto := showResponseDto{Id: createdShow.Id, Title: createdShow.Title, Slug: createdShow.Slug}
 		context.JSON(http.StatusAccepted, responseDto)
 	}
 }

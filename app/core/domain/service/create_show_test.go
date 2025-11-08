@@ -102,7 +102,7 @@ func Test_should_throw_error_if_show_with_name_already_exists(t *testing.T) {
 	assert.Equal(t, 0, mockSaveAndGetShowAdapter.calledSave)
 }
 
-func Test_should_propagate_errors_from_adapter(t *testing.T) {
+func Test_should_propagate_errors_from_adapter_on_create(t *testing.T) {
 	defer mockSaveAndGetShowAdapter.init()
 
 	expectedError := errors.New("some error")

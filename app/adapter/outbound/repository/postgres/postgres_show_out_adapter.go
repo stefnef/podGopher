@@ -3,7 +3,6 @@ package repository
 import (
 	"database/sql"
 	"podGopher/core/domain/model"
-	"podGopher/core/port/outbound"
 )
 
 type PostgresShowOutAdapter struct {
@@ -39,6 +38,17 @@ func (adapter *PostgresShowOutAdapter) ExistsByTitleOrSlug(title string, slug st
 	return exists
 }
 
-func NewPostgresShowRepository(db *sql.DB) outbound.SaveShowPort {
+func (adapter *PostgresShowOutAdapter) GetShowOrNil(id string) (show *model.Show, err error) {
+	query := "SELECT * FROM shows where id = $1"
+	row := adapter.db.QueryRow(query, id)
+
+	show = &model.Show{}
+	if err = row.Scan(&show.Id, &show.Title, &show.Slug); err != nil {
+		return nil, nil
+	}
+	return show, nil
+}
+
+func NewPostgresShowRepository(db *sql.DB) *PostgresShowOutAdapter {
 	return &PostgresShowOutAdapter{db: db}
 }

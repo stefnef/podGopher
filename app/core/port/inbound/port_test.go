@@ -19,6 +19,10 @@ func Test_should_map_to_string(t *testing.T) {
 			CreateShow,
 			"INBOUND_CREATE_SHOW",
 		},
+		"GET_SHOW": {
+			GetShow,
+			"INBOUND_GET_SHOW",
+		},
 	}
 
 	for name, test := range tests {

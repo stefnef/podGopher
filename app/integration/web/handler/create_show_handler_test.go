@@ -13,23 +13,23 @@ import (
 )
 
 type createShowTestService struct {
-	called             int
-	command            *inbound.CreateShowCommand
-	returnsCreatedShow *inbound.CreateShowResponse
-	failsWith          error
+	called              int
+	command             *inbound.CreateShowCommand
+	returnsOnCreateShow *inbound.CreateShowResponse
+	failsWith           error
 }
 
 func (s *createShowTestService) init() {
 	s.called = 0
 	s.command = nil
-	s.returnsCreatedShow = nil
+	s.returnsOnCreateShow = nil
 	s.failsWith = nil
 }
 
 func (s *createShowTestService) CreateShow(command *inbound.CreateShowCommand) (show *inbound.CreateShowResponse, err error) {
 	s.called++
 	s.command = command
-	return s.returnsCreatedShow, s.failsWith
+	return s.returnsOnCreateShow, s.failsWith
 }
 
 var mockCreateShowService = new(createShowTestService)
@@ -43,10 +43,12 @@ func Test_should_implement_handler_for_create_show(t *testing.T) {
 }
 
 func Test_should_panic_if_no_port_was_found_on_create_show_handler(t *testing.T) {
+	invalidPortMap := inbound.PortMap{
+		inbound.PortInvalid: mockCreateShowService,
+	}
+
 	assert.Panics(t, func() {
-		NewCreateShowHandler(inbound.PortMap{
-			inbound.PortInvalid: mockCreateShowService,
-		})
+		NewCreateShowHandler(invalidPortMap)
 	})
 }
 
@@ -63,14 +65,14 @@ func Test_should_return_route_on_create_show(t *testing.T) {
 
 func Test_should_call_service_on_create_show(t *testing.T) {
 	defer mockCreateShowService.init()
-	var createdShowDto *createShowResponseDto
+	var createdShowDto *showResponseDto
 	var context, recorder = GetTestGinContext()
 
 	test := struct {
 		webCommand           string
 		expectedPortCommand  *inbound.CreateShowCommand
 		expectedPortResponse *inbound.CreateShowResponse
-		expectedWebResponse  *createShowResponseDto
+		expectedWebResponse  *showResponseDto
 	}{
 		`{"Title":"some title", "Slug":"some slug"}`,
 		&inbound.CreateShowCommand{
@@ -82,14 +84,14 @@ func Test_should_call_service_on_create_show(t *testing.T) {
 			Title: "Mocked Title",
 			Slug:  "Mocked Slug",
 		},
-		&createShowResponseDto{
+		&showResponseDto{
 			Id:    "some-id",
 			Title: "Mocked Title",
 			Slug:  "Mocked Slug",
 		},
 	}
 
-	mockCreateShowService.returnsCreatedShow = test.expectedPortResponse
+	mockCreateShowService.returnsOnCreateShow = test.expectedPortResponse
 
 	context.Request = httptest.NewRequest("POST", "/show", bytes.NewBuffer([]byte(test.webCommand)))
 
@@ -111,7 +113,7 @@ func Test_should_propagate_error_on_create_show(t *testing.T) {
 	expectedError := errors.New("some error")
 
 	test := struct {
-		webCommand           string
+		requestBody          string
 		expectedPortResponse error
 	}{
 		`{"Title":"some title", "Slug":"some slug"}`,
@@ -120,7 +122,7 @@ func Test_should_propagate_error_on_create_show(t *testing.T) {
 
 	mockCreateShowService.failsWith = test.expectedPortResponse
 
-	context.Request = httptest.NewRequest("POST", "/show", bytes.NewBuffer([]byte(test.webCommand)))
+	context.Request = httptest.NewRequest("POST", "/show", bytes.NewBuffer([]byte(test.requestBody)))
 
 	createShowHandler.Handle(context)
 

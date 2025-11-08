@@ -67,8 +67,10 @@ func (app *App) Stop() {
 func (app *App) createPortMap() inbound.PortMap {
 	var repository = repository2.NewPostgresShowRepository(app.db)
 	var createShowPort = service.NewCreateShowService(repository)
+	var getShowPort = service.NewGetShowService(repository)
 	return inbound.PortMap{
 		inbound.CreateShow: createShowPort,
+		inbound.GetShow:    getShowPort,
 	}
 }
 
