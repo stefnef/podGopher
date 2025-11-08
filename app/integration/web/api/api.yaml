@@ -33,5 +33,5 @@ paths:
   /show/{showId}/distribution/{distributionId}:
     $ref: "./path/distribution.yaml#/distributionId"
 
-  /show/{showSlug}/feed/{distributionSlug}:
+  /rss/{showSlug}/{distributionSlug}:
     $ref: "./path/rss.yaml#/distributionSlug"
