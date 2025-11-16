@@ -12,7 +12,7 @@ type PostgresShowOutAdapter struct {
 func (adapter *PostgresShowOutAdapter) SaveShow(show *model.Show) (err error) {
 	var stmt *sql.Stmt
 
-	if stmt, err = adapter.db.Prepare("INSERT INTO shows (id, title, slug) VALUES ($1, $2, $3);"); err != nil {
+	if stmt, err = adapter.db.Prepare("INSERT INTO show (id, title, slug) VALUES ($1, $2, $3);"); err != nil {
 		return err
 	}
 	defer func(stmt *sql.Stmt) {
@@ -27,7 +27,7 @@ func (adapter *PostgresShowOutAdapter) SaveShow(show *model.Show) (err error) {
 }
 
 func (adapter *PostgresShowOutAdapter) ExistsByTitleOrSlug(title string, slug string) bool {
-	query := "SELECT EXISTS(SELECT 1 FROM shows where title = $1 or slug = $2)"
+	query := "SELECT EXISTS(SELECT 1 FROM show where title = $1 or slug = $2)"
 	row := adapter.db.QueryRow(query, title, slug)
 
 	var exists bool
@@ -39,7 +39,7 @@ func (adapter *PostgresShowOutAdapter) ExistsByTitleOrSlug(title string, slug st
 }
 
 func (adapter *PostgresShowOutAdapter) GetShowOrNil(id string) (show *model.Show, err error) {
-	query := "SELECT * FROM shows where id = $1"
+	query := "SELECT * FROM show where id = $1"
 	row := adapter.db.QueryRow(query, id)
 
 	show = &model.Show{}

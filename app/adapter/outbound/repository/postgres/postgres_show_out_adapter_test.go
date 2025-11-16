@@ -43,7 +43,7 @@ func Test_should_save_a_show(t *testing.T) {
 		Slug:  showSlug,
 	}
 
-	t.Run("should should return false if show with title or slug does not exist", func(t *testing.T) {
+	t.Run("should return false if show with title or slug does not exist", func(t *testing.T) {
 		exists := repository.ExistsByTitleOrSlug(showTitle, showSlug)
 		assert.False(t, exists)
 	})
@@ -53,22 +53,22 @@ func Test_should_save_a_show(t *testing.T) {
 		assert.Nil(t, err)
 	})
 
-	t.Run("should should return true if show with title exists", func(t *testing.T) {
+	t.Run("should return true if show with title exists", func(t *testing.T) {
 		exists := repository.ExistsByTitleOrSlug(showTitle, "some-other-slug")
 		assert.True(t, exists)
 	})
 
-	t.Run("should should return true if show with slug exists", func(t *testing.T) {
+	t.Run("should return true if show with slug exists", func(t *testing.T) {
 		exists := repository.ExistsByTitleOrSlug("some-other-title", showSlug)
 		assert.True(t, exists)
 	})
 
-	t.Run("should should return true if show with title and slug exists", func(t *testing.T) {
+	t.Run("should return true if show with title and slug exists", func(t *testing.T) {
 		exists := repository.ExistsByTitleOrSlug(showTitle, showSlug)
 		assert.True(t, exists)
 	})
 
-	t.Run("should should return false if show with title or slug does not exists", func(t *testing.T) {
+	t.Run("should return false if show with title or slug does not exists", func(t *testing.T) {
 		exists := repository.ExistsByTitleOrSlug("some-other-title", "some-other-slug")
 		assert.False(t, exists)
 	})
@@ -77,7 +77,7 @@ func Test_should_save_a_show(t *testing.T) {
 		var id string
 		var title string
 		var slug string
-		err := db.QueryRow("SELECT * FROM shows WHERE id = $1", show.Id).
+		err := db.QueryRow("SELECT * FROM show WHERE id = $1", show.Id).
 			Scan(&id, &title, &slug)
 		if err != nil {
 			t.Fatal(err)

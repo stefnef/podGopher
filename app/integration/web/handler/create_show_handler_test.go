@@ -104,7 +104,7 @@ func Test_should_call_service_on_create_show(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Empty(t, context.Errors)
 	assert.Equal(t, test.expectedWebResponse, createdShowDto)
-	assert.Equal(t, http.StatusAccepted, recorder.Code)
+	assert.Equal(t, http.StatusCreated, recorder.Code)
 }
 
 func Test_should_propagate_error_on_create_show(t *testing.T) {

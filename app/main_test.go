@@ -45,6 +45,6 @@ func Test_should_load_context(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		assert.Equal(t, http.StatusAccepted, response.StatusCode)
+		assert.Equal(t, http.StatusCreated, response.StatusCode)
 	})
 }

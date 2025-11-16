@@ -52,6 +52,6 @@ func (h *CreateShowHandler) handleCreateShow(context *gin.Context, request *Crea
 		_ = context.Error(err)
 	} else {
 		responseDto := showResponseDto{Id: createdShow.Id, Title: createdShow.Title, Slug: createdShow.Slug}
-		context.JSON(http.StatusAccepted, responseDto)
+		context.JSON(http.StatusCreated, responseDto)
 	}
 }

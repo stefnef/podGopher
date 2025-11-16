@@ -42,7 +42,7 @@ func Test_should_implement_GetShowInPort(t *testing.T) {
 }
 
 func Test_should_return_not_found_if_show_was_not_found(t *testing.T) {
-	defer mockGetShowAdapter.init()
+	defer initAdapter()
 
 	mockGetShowAdapter.returnsOnGetOrNilShow["non-existing-show-id"] = nil
 	show := mockGetShowAdapter.returnsOnGetOrNilShow["non-existing-show-id"]
@@ -58,7 +58,7 @@ func Test_should_return_not_found_if_show_was_not_found(t *testing.T) {
 }
 
 func Test_should_propagate_errors_from_adapter_on_get(t *testing.T) {
-	defer mockGetShowAdapter.init()
+	defer initAdapter()
 
 	expectedError := errors.New("some error")
 	mockGetShowAdapter.withErrorOnGetOrNilShow = expectedError
@@ -72,7 +72,7 @@ func Test_should_propagate_errors_from_adapter_on_get(t *testing.T) {
 }
 
 func Test_retrieve_show_from_repository_on_get(t *testing.T) {
-	defer mockGetShowAdapter.init()
+	defer initAdapter()
 
 	expectedShow := &model.Show{
 		Id:    "some-id",

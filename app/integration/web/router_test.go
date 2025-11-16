@@ -18,7 +18,8 @@ type responseMock struct {
 }
 
 var exampleRequests = map[string]string{
-	"postShow": `{"Title":"some title", "Slug":"some slug"}`,
+	"postShow":    `{"Title":"some title", "Slug":"some slug"}`,
+	"postEpisode": `{"Title":"some title"}`,
 }
 
 var response responseMock
@@ -35,10 +36,16 @@ func (port *mockInboundPort) GetShow(*inbound.GetShowCommand) (show *inbound.Get
 	return &inbound.GetShowResponse{}, response.failsWith
 }
 
+func (port *mockInboundPort) CreateEpisode(*inbound.CreateEpisodeCommand) (episode *inbound.CreateEpisodeResponse, err error) {
+	response.Text += "PostEpisode"
+	return &inbound.CreateEpisodeResponse{}, response.failsWith
+}
+
 var mockPort = new(mockInboundPort)
 var router = NewRouter(inbound.PortMap{
-	inbound.CreateShow: mockPort,
-	inbound.GetShow:    mockPort,
+	inbound.CreateShow:    mockPort,
+	inbound.GetShow:       mockPort,
+	inbound.CreateEpisode: mockPort,
 })
 
 func setup() {
@@ -66,6 +73,13 @@ func Test_should_get_a_show(t *testing.T) {
 	assert.Equal(t, "GetShow", response.Text)
 }
 
+func Test_should_post_an_episode(t *testing.T) {
+	setup()
+	doRequest("POST", "/show/show-id/episode", exampleRequests["postEpisode"])
+
+	assert.Equal(t, "PostEpisode", response.Text)
+}
+
 func Test_should_handle_errors(t *testing.T) {
 	setup()
 
@@ -82,6 +96,11 @@ func Test_should_handle_errors(t *testing.T) {
 		"Show_not_found_error": {
 			error2.NewShowNotFoundError("FAKE"),
 			404,
+			"FAKE",
+		},
+		"Episode_already_exists": {
+			error2.NewEpisodeAlreadyExistsError("FAKE"),
+			400,
 			"FAKE",
 		},
 		"unknown": {

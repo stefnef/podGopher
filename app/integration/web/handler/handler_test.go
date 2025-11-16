@@ -13,14 +13,15 @@ import (
 
 func Test_should_create_handlers(t *testing.T) {
 	portMap := inbound.PortMap{
-		inbound.CreateShow: service.NewCreateShowService(nil),
-		inbound.GetShow:    service.NewGetShowService(nil),
+		inbound.CreateShow:    service.NewCreateShowService(nil),
+		inbound.GetShow:       service.NewGetShowService(nil),
+		inbound.CreateEpisode: service.NewCreateEpisodeService(nil, nil),
 	}
 
 	var handlers = CreateHandlers(portMap)
 
 	assert.NotEmpty(t, handlers)
-	assert.Len(t, handlers, 2)
+	assert.Len(t, handlers, 3)
 }
 
 func GetTestGinContext() (*gin.Context, *httptest.ResponseRecorder) {
