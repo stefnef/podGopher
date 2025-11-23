@@ -1,0 +1,26 @@
+components:
+  requestBodies:
+    distributionPostBody:
+      required: true
+      description: "Values of a newly created distribution"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/distributionPostDto"
+          examples:
+            success:
+              value:
+                title: "New Distribution"
+                slug: "new-distribution"
+
+  schemas:
+    distributionPostDto:
+      type: object
+      required:
+        - title
+        - slug
+      properties:
+        title:
+          $ref: "../model/distribution.yaml#/components/schemas/distributionTitle"
+        slug:
+          $ref: "../model/distribution.yaml#/components/schemas/distributionSlug"

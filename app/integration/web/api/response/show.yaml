@@ -6,6 +6,14 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/showResponseDto"
+          examples:
+            success:
+              value:
+                id: "some-id"
+                title: "Show Title"
+                slug: "show-title"
+                episodes:
+                  - id: "episode-id"
 
   schemas:
     showResponseDto:
@@ -13,8 +21,16 @@ components:
       required:
         - id
         - title
+        - slug
+        - episodes
       properties:
         id:
           $ref: "../model/show.yaml#/components/schemas/showId"
         title:
           $ref: "../model/show.yaml#/components/schemas/showTitle"
+        slug:
+          $ref: "../model/show.yaml#/components/schemas/showSlug"
+        episodes:
+          type: array
+          items:
+            $ref: "../model/episode.yaml#/components/schemas/episodeId"

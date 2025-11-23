@@ -2,9 +2,20 @@ show:
   post:
     tags:
       - show
-    description: Adds a new show
+    description: Create a new show
     requestBody:
       $ref: "../request/show.yaml#/components/requestBodies/showPostBody"
     responses:
       201:
+        $ref: "../response/show.yaml#/components/responses/showResponse"
+
+showId:
+  get:
+    tags:
+      - show
+    description: Retrieve a show with given id
+    parameters:
+      - $ref: "../parameter/show.yaml#/components/parameters/showId"
+    responses:
+      200:
         $ref: "../response/show.yaml#/components/responses/showResponse"

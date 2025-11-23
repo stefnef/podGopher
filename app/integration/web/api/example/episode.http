@@ -1,0 +1,16 @@
+# Create a new episode
+POST {{host}}/show/{{showId}}/episode
+Content-Type: application/json
+
+{
+  "Title": "some-episode-title"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+
+    client.global.set("episodeId", response.body.id)
+%}
+

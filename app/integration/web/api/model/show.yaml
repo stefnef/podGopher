@@ -1,11 +1,19 @@
 components:
   schemas:
-    showTitle:
-      type: string
-      minLength: 1
-      maxLength: 10
-
     showId:
+      description: "unique show id"
       type: string
       minLength: 16
       maxLength: 256
+      example: "show-id"
+
+    showTitle:
+      type: string
+      minLength: 1
+      maxLength: 256
+
+    showSlug:
+      type: string
+      minLength: 1
+      maxLength: 256
+      example: "show-title"

@@ -16,10 +16,15 @@ import (
 
 var postgresContainer *postgres.PostgresContainer
 
-func TeardownTestcontainersPostgres(t *testing.T) {
-	if err := testcontainers.TerminateContainer(postgresContainer); err != nil {
-		t.Fatalf("failed to terminate container: %s", err)
-	}
+func Teardown(t *testing.T, db *sql.DB) {
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+			t.Fatalf("Failed to close database connection: %v", err)
+		}
+	}(db)
+
+	defer teardownTestcontainersPostgres(t)
 }
 
 func StartTestcontainersPostgres(t *testing.T, configDir string) *sql.DB {
@@ -37,6 +42,12 @@ func StartTestcontainersPostgres(t *testing.T, configDir string) *sql.DB {
 	executeMigration(t, configDir)
 
 	return db
+}
+
+func teardownTestcontainersPostgres(t *testing.T) {
+	if err := testcontainers.TerminateContainer(postgresContainer); err != nil {
+		t.Fatalf("failed to terminate container: %s", err)
+	}
 }
 
 func executeMigration(t *testing.T, configDir string) {

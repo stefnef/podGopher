@@ -1,0 +1,8 @@
+components:
+  parameters:
+    episodeId:
+      in: path
+      required: true
+      name: episodeId
+      schema:
+        $ref: "../model/episode.yaml#/components/schemas/episodeId"

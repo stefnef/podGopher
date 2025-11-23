@@ -1,0 +1,13 @@
+components:
+  schemas:
+    episodeTitle:
+      type: string
+      minLength: 1
+      maxLength: 256
+
+    episodeId:
+      description: "unique episode id"
+      type: string
+      minLength: 16
+      maxLength: 256
+      example: "episode-id"

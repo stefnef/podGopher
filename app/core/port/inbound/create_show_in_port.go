@@ -2,11 +2,13 @@ package inbound
 
 type CreateShowCommand struct {
 	Title string
+	Slug  string
 }
 
 type CreateShowResponse struct {
-	Title string
 	Id    string
+	Title string
+	Slug  string
 }
 
 type CreateShowPort interface {

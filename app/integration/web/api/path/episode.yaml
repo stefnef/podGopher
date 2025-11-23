@@ -1,0 +1,24 @@
+episode:
+  post:
+    tags:
+      - episode
+    description: Create a new episode
+    parameters:
+      - $ref: "../parameter/show.yaml#/components/parameters/showId"
+    requestBody:
+      $ref: "../request/episode.yaml#/components/requestBodies/episodePostBody"
+    responses:
+      201:
+        $ref: "../response/episode.yaml#/components/responses/episodeResponse"
+
+episodeId:
+  get:
+    tags:
+      - episode
+    description: Retrieve a show's episode with given id
+    parameters:
+      - $ref: "../parameter/show.yaml#/components/parameters/showId"
+      - $ref: "../parameter/episode.yaml#/components/parameters/episodeId"
+    responses:
+      200:
+        $ref: "../response/episode.yaml#/components/responses/episodeResponse"

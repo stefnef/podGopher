@@ -1,0 +1,36 @@
+components:
+  responses:
+    distributionResponse:
+      description: "A single distribution"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/distributionResponseDto"
+          examples:
+            success:
+              value:
+                id: "distribution-id"
+                title: "New Distribution"
+                slug: "new-distribution"
+                episodes:
+                  - id: "episode-id"
+
+  schemas:
+    distributionResponseDto:
+      type: object
+      required:
+        - id
+        - title
+        - slug
+        - episodes
+      properties:
+        id:
+          $ref: "../model/distribution.yaml#/components/schemas/distributionId"
+        title:
+          $ref: "../model/distribution.yaml#/components/schemas/distributionTitle"
+        slug:
+          $ref: "../model/distribution.yaml#/components/schemas/distributionSlug"
+        episodes:
+          type: array
+          items:
+            $ref: "../model/episode.yaml#/components/schemas/episodeId"

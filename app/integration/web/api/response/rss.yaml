@@ -1,0 +1,32 @@
+components:
+  responses:
+    rssResponse:
+      description: "A show's rss feeds"
+      content:
+        application/rss+xml:
+          schema:
+            $ref: "#/components/schemas/rssResponseDto"
+          examples:
+            success:
+              value:
+                id: "distribution-slug"
+                title: "New distribution"
+                episodes:
+                  - id: "episode-id"
+
+  schemas:
+    rssResponseDto:
+      type: object
+      required:
+        - id
+        - title
+        - episodes
+      properties:
+        id:
+          $ref: "../model/distribution.yaml#/components/schemas/distributionSlug"
+        title:
+          $ref: "../model/distribution.yaml#/components/schemas/distributionTitle"
+        episodes:
+          type: array
+          items:
+            $ref: "../model/episode.yaml#/components/schemas/episodeId"

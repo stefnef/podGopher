@@ -4,9 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"log"
-	repository2 "podGopher/adapter/outbound/repository/postgres"
+	repositoryEpisode "podGopher/adapter/outbound/repository/postgres/episode"
 	"podGopher/adapter/outbound/repository/postgres/migration"
-	"podGopher/core/domain/service"
+	repositoryShow "podGopher/adapter/outbound/repository/postgres/show"
+	"podGopher/core/domain/service/episode"
+	"podGopher/core/domain/service/show"
 	"podGopher/core/port/inbound"
 	"podGopher/env"
 	"podGopher/integration/web"
@@ -65,10 +67,15 @@ func (app *App) Stop() {
 }
 
 func (app *App) createPortMap() inbound.PortMap {
-	var repository = repository2.NewPostgresShowRepository(app.db)
-	var createShowPort = service.NewCreateShowService(repository)
+	var showRepository = repositoryShow.NewPostgresShowRepository(app.db)
+	var episodeRepository = repositoryEpisode.NewPostgresEpisodeRepository(app.db)
+	var createShowPort = show.NewCreateShowService(showRepository)
+	var getShowPort = show.NewGetShowService(showRepository)
+	var createEpisodePort = episode.NewCreateEpisodeService(showRepository, episodeRepository)
 	return inbound.PortMap{
-		inbound.CreateShow: createShowPort,
+		inbound.CreateShow:    createShowPort,
+		inbound.GetShow:       getShowPort,
+		inbound.CreateEpisode: createEpisodePort,
 	}
 }
 

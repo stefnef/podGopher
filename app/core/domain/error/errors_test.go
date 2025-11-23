@@ -7,8 +7,31 @@ import (
 )
 
 func Test_show_already_exists_is_an_error(t *testing.T) {
-	err := NewShowAlreadyExistsError("some-name")
+	tests := map[string]struct {
+		err                 error
+		expectedErrorString string
+	}{
+		"ShowAlreadyExistsError": {
+			NewShowAlreadyExistsError("some-name"),
+			"show with title 'some-name' or given slug already exists",
+		},
 
-	assert.Implements(t, (*error)(nil), err)
-	assert.ErrorContains(t, err, "show with title 'some-name' already exists")
+		"ShowNotFoundError": {
+			NewShowNotFoundError("some-id"),
+			"show with id 'some-id' does not exist",
+		},
+
+		"ShowEpisodeExistsError": {
+			NewEpisodeAlreadyExistsError("some-name"),
+			"episode with title 'some-name' already exists",
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			assert.Implements(t, (*error)(nil), test.err)
+			assert.ErrorContains(t, test.err, test.expectedErrorString)
+		})
+	}
+
 }

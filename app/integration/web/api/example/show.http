@@ -1,0 +1,21 @@
+# Create a new show
+POST {{host}}/show
+Content-Type: application/json
+
+{
+  "Title": "some-title",
+  "Slug": "some-title-slug"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+
+    client.global.set("showId", response.body.id)
+%}
+
+###
+# Get a show
+GET {{host}}/show/{{showId}}
+Content-Type: application/json

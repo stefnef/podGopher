@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	error2 "podGopher/core/domain/error"
+	"podGopher/core/domain/service/episode"
+	"podGopher/core/domain/service/show"
 	"podGopher/core/port/inbound"
 	"testing"
 
@@ -17,6 +19,11 @@ type responseMock struct {
 	failsWith error
 }
 
+var exampleRequests = map[string]string{
+	"postShow":    `{"Title":"some title", "Slug":"some slug"}`,
+	"postEpisode": `{"Title":"some title"}`,
+}
+
 var response responseMock
 
 type mockInboundPort struct{}
@@ -26,9 +33,21 @@ func (port *mockInboundPort) CreateShow(*inbound.CreateShowCommand) (show *inbou
 	return &inbound.CreateShowResponse{Title: "CreateShow"}, response.failsWith
 }
 
+func (port *mockInboundPort) GetShow(*inbound.GetShowCommand) (show *inbound.GetShowResponse, err error) {
+	response.Text += "GetShow"
+	return &inbound.GetShowResponse{}, response.failsWith
+}
+
+func (port *mockInboundPort) CreateEpisode(*inbound.CreateEpisodeCommand) (episode *inbound.CreateEpisodeResponse, err error) {
+	response.Text += "PostEpisode"
+	return &inbound.CreateEpisodeResponse{}, response.failsWith
+}
+
 var mockPort = new(mockInboundPort)
 var router = NewRouter(inbound.PortMap{
-	inbound.CreateShow: mockPort,
+	inbound.CreateShow:    mockPort,
+	inbound.GetShow:       mockPort,
+	inbound.CreateEpisode: mockPort,
 })
 
 func setup() {
@@ -36,7 +55,7 @@ func setup() {
 }
 
 func Test_should_return_NotFound_on_wrong_path(t *testing.T) {
-	recorder := doRequest("GET", "/")
+	recorder := doRequest("GET", "/", "")
 
 	assert.Equal(t, "404 page not found", recorder.Body.String())
 	assert.Equal(t, http.StatusNotFound, recorder.Code)
@@ -44,9 +63,23 @@ func Test_should_return_NotFound_on_wrong_path(t *testing.T) {
 
 func Test_should_post_a_show(t *testing.T) {
 	setup()
-	doRequest("POST", "/show")
+	doRequest("POST", "/show", exampleRequests["postShow"])
 
 	assert.Equal(t, "CreateShow", response.Text)
+}
+
+func Test_should_get_a_show(t *testing.T) {
+	setup()
+	doRequest("GET", "/show/some-show-id", "")
+
+	assert.Equal(t, "GetShow", response.Text)
+}
+
+func Test_should_post_an_episode(t *testing.T) {
+	setup()
+	doRequest("POST", "/show/show-id/episode", exampleRequests["postEpisode"])
+
+	assert.Equal(t, "PostEpisode", response.Text)
 }
 
 func Test_should_handle_errors(t *testing.T) {
@@ -62,6 +95,16 @@ func Test_should_handle_errors(t *testing.T) {
 			400,
 			"FAKE",
 		},
+		"Show_not_found_error": {
+			error2.NewShowNotFoundError("FAKE"),
+			404,
+			"FAKE",
+		},
+		"Episode_already_exists": {
+			error2.NewEpisodeAlreadyExistsError("FAKE"),
+			400,
+			"FAKE",
+		},
 		"unknown": {
 			errors.New("FAKE"),
 			500,
@@ -73,7 +116,7 @@ func Test_should_handle_errors(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			response.failsWith = test.err
 
-			recorder := doRequest("POST", "/show")
+			recorder := doRequest("POST", "/show", exampleRequests["postShow"])
 
 			assert.Equal(t, test.expectedCode, recorder.Code)
 			assert.Contains(t, recorder.Body.String(), test.expectedMsg)
@@ -81,9 +124,22 @@ func Test_should_handle_errors(t *testing.T) {
 	}
 }
 
-func doRequest(method string, url string) *httptest.ResponseRecorder {
+func Test_should_create_handlers(t *testing.T) {
+	portMap := inbound.PortMap{
+		inbound.CreateShow:    show.NewCreateShowService(nil),
+		inbound.GetShow:       show.NewGetShowService(nil),
+		inbound.CreateEpisode: episode.NewCreateEpisodeService(nil, nil),
+	}
+
+	var handlers = CreateHandlers(portMap)
+
+	assert.NotEmpty(t, handlers)
+	assert.Len(t, handlers, 3)
+}
+
+func doRequest(method string, url string, requestBody string) *httptest.ResponseRecorder {
 	recorder := httptest.NewRecorder()
-	req, _ := http.NewRequest(method, url, bytes.NewBuffer([]byte(`{"Title":"some title"}`)))
+	req, _ := http.NewRequest(method, url, bytes.NewBuffer([]byte(requestBody)))
 	router.ServeHTTP(recorder, req)
 	return recorder
 }
