@@ -1,4 +1,4 @@
-package service
+package show
 
 import (
 	error2 "podGopher/core/domain/error"

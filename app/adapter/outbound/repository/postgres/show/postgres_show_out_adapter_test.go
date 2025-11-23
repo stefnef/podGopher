@@ -1,7 +1,6 @@
-package repository
+package show
 
 import (
-	"database/sql"
 	"podGopher/adapter/outbound/repository/postgres/postgresTestSetup"
 	"podGopher/core/domain/model"
 	"podGopher/core/port/outbound"
@@ -11,17 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func teardown(t *testing.T, db *sql.DB) {
-	defer func(db *sql.DB) {
-		err := db.Close()
-		if err != nil {
-			t.Fatalf("Failed to close database connection: %v", err)
-		}
-	}(db)
-
-	defer postgresTestSetup.TeardownTestcontainersPostgres(t)
-}
-
 func Test_should_implement_port(t *testing.T) {
 	repository := NewPostgresShowRepository(nil)
 
@@ -30,9 +18,9 @@ func Test_should_implement_port(t *testing.T) {
 }
 
 func Test_should_save_a_show(t *testing.T) {
-	db := postgresTestSetup.StartTestcontainersPostgres(t, "postgresTestSetup/")
+	db := postgresTestSetup.StartTestcontainersPostgres(t, "../postgresTestSetup/")
 
-	defer teardown(t, db)
+	defer postgresTestSetup.Teardown(t, db)
 
 	repository := NewPostgresShowRepository(db)
 	showTitle := "Some title"
@@ -90,9 +78,9 @@ func Test_should_save_a_show(t *testing.T) {
 }
 
 func Test_should_retrieve_a_show(t *testing.T) {
-	db := postgresTestSetup.StartTestcontainersPostgres(t, "postgresTestSetup/")
+	db := postgresTestSetup.StartTestcontainersPostgres(t, "../postgresTestSetup/")
 
-	defer teardown(t, db)
+	defer postgresTestSetup.Teardown(t, db)
 
 	repository := NewPostgresShowRepository(db)
 	show := &model.Show{

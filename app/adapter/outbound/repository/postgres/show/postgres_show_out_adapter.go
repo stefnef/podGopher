@@ -1,4 +1,4 @@
-package repository
+package show
 
 import (
 	"database/sql"

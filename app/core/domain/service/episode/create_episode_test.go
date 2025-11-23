@@ -1,4 +1,4 @@
-package service
+package episode
 
 import (
 	"errors"
@@ -9,56 +9,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 )
-
-type saveAndGetEpisodeTestAdapter struct {
-	calledSave             int
-	onSaveCalledWith       *model.Episode
-	returnsOnExistsByTitle map[string]bool
-	withErrorOnSaveEpisode error
-}
-
-func newSaveAndGetEpisodeTestAdapter() *saveAndGetEpisodeTestAdapter {
-	adapter := &saveAndGetEpisodeTestAdapter{}
-	adapter.init()
-	return adapter
-}
-
-func newTestCreateEpisodeCommand(title string) *inbound.CreateEpisodeCommand {
-	episode := &inbound.CreateEpisodeCommand{
-		ShowId: "test-show-id",
-		Title:  title,
-	}
-	return episode
-}
-
-func (adapter *saveAndGetEpisodeTestAdapter) SaveEpisode(episode *model.Episode) error {
-	adapter.calledSave++
-	adapter.onSaveCalledWith = episode
-	return adapter.withErrorOnSaveEpisode
-}
-
-func (adapter *saveAndGetEpisodeTestAdapter) init() {
-	adapter.calledSave = 0
-	adapter.onSaveCalledWith = nil
-	adapter.returnsOnExistsByTitle = make(map[string]bool)
-	adapter.withErrorOnSaveEpisode = nil
-}
-
-func (adapter *saveAndGetEpisodeTestAdapter) everyExistsByTitleReturns(title string, returnValue bool) {
-	adapter.returnsOnExistsByTitle[title] = returnValue
-}
-
-func (adapter *saveAndGetEpisodeTestAdapter) ExistsByTitle(title string) bool {
-	return adapter.returnsOnExistsByTitle[title]
-}
-
-func initAdapter() {
-	mockGetShowAdapter.init()
-	mockSaveAndGetEpisodeAdapter.init()
-	mockSaveAndGetShowAdapter.init()
-}
-
-var mockSaveAndGetEpisodeAdapter = newSaveAndGetEpisodeTestAdapter()
 
 var createEpisodeService = NewCreateEpisodeService(mockGetShowAdapter, mockSaveAndGetEpisodeAdapter)
 

@@ -1,4 +1,4 @@
-package handler
+package show
 
 import (
 	"bytes"
@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"podGopher/core/port/inbound"
+	"podGopher/integration/web/handler"
+	"podGopher/integration/web/handler/handlerTestSetup"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -39,7 +41,7 @@ var createShowHandler = NewCreateShowHandler(inbound.PortMap{
 
 func Test_should_implement_handler_for_create_show(t *testing.T) {
 	assert.NotNil(t, createShowHandler)
-	assert.Implements(t, (*Handler)(nil), createShowHandler)
+	assert.Implements(t, (*handler.Handler)(nil), createShowHandler)
 }
 
 func Test_should_panic_if_no_port_was_found_on_create_show_handler(t *testing.T) {
@@ -55,7 +57,7 @@ func Test_should_panic_if_no_port_was_found_on_create_show_handler(t *testing.T)
 func Test_should_return_route_on_create_show(t *testing.T) {
 	var route = createShowHandler.GetRoute()
 
-	var expectedRoute = &Route{
+	var expectedRoute = &handler.Route{
 		Method: "POST",
 		Path:   "/show",
 	}
@@ -66,7 +68,7 @@ func Test_should_return_route_on_create_show(t *testing.T) {
 func Test_should_call_service_on_create_show(t *testing.T) {
 	defer mockCreateShowService.init()
 	var createdShowDto *showResponseDto
-	var context, recorder = GetTestGinContext()
+	var context, recorder = handlerTestSetup.GetTestGinContext(t)
 
 	test := struct {
 		webCommand           string
@@ -109,7 +111,7 @@ func Test_should_call_service_on_create_show(t *testing.T) {
 
 func Test_should_propagate_error_on_create_show(t *testing.T) {
 	defer mockCreateShowService.init()
-	var context, _ = GetTestGinContext()
+	var context, _ = handlerTestSetup.GetTestGinContext(t)
 	expectedError := errors.New("some error")
 
 	test := struct {
@@ -132,7 +134,7 @@ func Test_should_propagate_error_on_create_show(t *testing.T) {
 
 func Test_abort_if_dto_is_invalid_on_create_show(t *testing.T) {
 	defer mockCreateShowService.init()
-	var context, recorder = GetTestGinContext()
+	var context, recorder = handlerTestSetup.GetTestGinContext(t)
 
 	test := struct {
 		webCommand string

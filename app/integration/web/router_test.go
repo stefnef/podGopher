@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	error2 "podGopher/core/domain/error"
+	"podGopher/core/domain/service/episode"
+	"podGopher/core/domain/service/show"
 	"podGopher/core/port/inbound"
 	"testing"
 
@@ -120,6 +122,19 @@ func Test_should_handle_errors(t *testing.T) {
 			assert.Contains(t, recorder.Body.String(), test.expectedMsg)
 		})
 	}
+}
+
+func Test_should_create_handlers(t *testing.T) {
+	portMap := inbound.PortMap{
+		inbound.CreateShow:    show.NewCreateShowService(nil),
+		inbound.GetShow:       show.NewGetShowService(nil),
+		inbound.CreateEpisode: episode.NewCreateEpisodeService(nil, nil),
+	}
+
+	var handlers = CreateHandlers(portMap)
+
+	assert.NotEmpty(t, handlers)
+	assert.Len(t, handlers, 3)
 }
 
 func doRequest(method string, url string, requestBody string) *httptest.ResponseRecorder {

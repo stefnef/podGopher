@@ -6,6 +6,8 @@ import (
 	error2 "podGopher/core/domain/error"
 	"podGopher/core/port/inbound"
 	"podGopher/integration/web/handler"
+	"podGopher/integration/web/handler/episode"
+	"podGopher/integration/web/handler/show"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,8 +21,16 @@ func NewRouter(portMap inbound.PortMap) *gin.Engine {
 	return router
 }
 
+func CreateHandlers(portMap inbound.PortMap) []handler.Handler {
+	return []handler.Handler{
+		show.NewCreateShowHandler(portMap),
+		show.NewGetShowHandler(portMap),
+		episode.NewCreateEpisodeHandler(portMap),
+	}
+}
+
 func setHandlers(portMap inbound.PortMap, router *gin.Engine) {
-	var handlers = handler.CreateHandlers(portMap)
+	var handlers = CreateHandlers(portMap)
 
 	for _, handlerImpl := range handlers {
 		route := handlerImpl.GetRoute()

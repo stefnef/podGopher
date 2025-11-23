@@ -1,4 +1,4 @@
-package repository
+package episode
 
 import (
 	"database/sql"

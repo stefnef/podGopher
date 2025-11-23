@@ -1,4 +1,4 @@
-package service
+package episode
 
 import (
 	error2 "podGopher/core/domain/error"

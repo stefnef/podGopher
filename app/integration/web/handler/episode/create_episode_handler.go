@@ -1,14 +1,15 @@
-package handler
+package episode
 
 import (
 	"net/http"
 	"podGopher/core/port/inbound"
+	"podGopher/integration/web/handler"
 
 	"github.com/gin-gonic/gin"
 )
 
 type CreateEpisodeHandler struct {
-	route *Route
+	route *handler.Route
 	port  inbound.CreateEpisodePort
 }
 
@@ -22,13 +23,13 @@ type episodeResponseDto struct {
 	Title  string `json:"title" binding:"required"`
 }
 
-func (h *CreateEpisodeHandler) GetRoute() *Route {
+func (h *CreateEpisodeHandler) GetRoute() *handler.Route {
 	return h.route
 }
 
 func NewCreateEpisodeHandler(portMap inbound.PortMap) *CreateEpisodeHandler {
 	return &CreateEpisodeHandler{
-		route: &Route{
+		route: &handler.Route{
 			Method: http.MethodPost,
 			Path:   "/show/:showId/episode",
 		},

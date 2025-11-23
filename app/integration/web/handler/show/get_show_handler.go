@@ -1,20 +1,21 @@
-package handler
+package show
 
 import (
 	"net/http"
 	"podGopher/core/port/inbound"
+	"podGopher/integration/web/handler"
 
 	"github.com/gin-gonic/gin"
 )
 
 type GetShowHandler struct {
-	route *Route
+	route *handler.Route
 	port  inbound.GetShowPort
 }
 
 func NewGetShowHandler(portMap inbound.PortMap) *GetShowHandler {
 	return &GetShowHandler{
-		route: &Route{
+		route: &handler.Route{
 			Method: http.MethodGet,
 			Path:   "/show/:showId",
 		},
@@ -22,7 +23,7 @@ func NewGetShowHandler(portMap inbound.PortMap) *GetShowHandler {
 	}
 }
 
-func (h *GetShowHandler) GetRoute() *Route {
+func (h *GetShowHandler) GetRoute() *handler.Route {
 	return h.route
 }
 

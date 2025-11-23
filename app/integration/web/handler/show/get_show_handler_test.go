@@ -1,4 +1,4 @@
-package handler
+package show
 
 import (
 	"bytes"
@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"podGopher/core/port/inbound"
+	"podGopher/integration/web/handler"
+	"podGopher/integration/web/handler/handlerTestSetup"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -40,7 +42,7 @@ var getShowHandler = NewGetShowHandler(inbound.PortMap{
 
 func Test_should_implement_handler_for_get_show(t *testing.T) {
 	assert.NotNil(t, getShowHandler)
-	assert.Implements(t, (*Handler)(nil), getShowHandler)
+	assert.Implements(t, (*handler.Handler)(nil), getShowHandler)
 }
 
 func Test_should_panic_if_no_port_was_found_on_get_show_handler(t *testing.T) {
@@ -56,7 +58,7 @@ func Test_should_panic_if_no_port_was_found_on_get_show_handler(t *testing.T) {
 func Test_should_return_route_on_get_show(t *testing.T) {
 	var route = getShowHandler.GetRoute()
 
-	var expectedRoute = &Route{
+	var expectedRoute = &handler.Route{
 		Method: "GET",
 		Path:   "/show/:showId",
 	}
@@ -66,7 +68,7 @@ func Test_should_return_route_on_get_show(t *testing.T) {
 
 func Test_should_propagate_error_on_get_show(t *testing.T) {
 	defer mockGetShowService.init()
-	var context, _ = GetTestGinContext()
+	var context, _ = handlerTestSetup.GetTestGinContext(t)
 	expectedError := errors.New("some error")
 
 	test := struct {
@@ -90,7 +92,7 @@ func Test_should_propagate_error_on_get_show(t *testing.T) {
 func Test_should_call_service_on_get_show(t *testing.T) {
 	defer mockGetShowService.init()
 	var getShowDto *showResponseDto
-	var context, recorder = GetTestGinContext()
+	var context, recorder = handlerTestSetup.GetTestGinContext(t)
 
 	test := struct {
 		webParameterShowId   string

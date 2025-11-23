@@ -1,4 +1,4 @@
-package service
+package show
 
 import (
 	"errors"
@@ -10,19 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type getShowTestAdapter struct {
-	called                  int
-	returnsOnGetOrNilShow   map[string]*model.Show
-	withErrorOnGetOrNilShow error
-}
-
-func (a *getShowTestAdapter) GetShowOrNil(Id string) (*model.Show, error) {
-	a.called++
-	show := a.returnsOnGetOrNilShow[Id]
-	return show, a.withErrorOnGetOrNilShow
-}
-
-var mockGetShowAdapter = newGetShowTestAdapter()
 var getShowService = NewGetShowService(mockGetShowAdapter)
 
 func newGetShowTestAdapter() *getShowTestAdapter {

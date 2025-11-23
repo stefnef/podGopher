@@ -1,4 +1,4 @@
-package handler
+package episode
 
 import (
 	"bytes"
@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"podGopher/core/port/inbound"
+	"podGopher/integration/web/handler"
+	"podGopher/integration/web/handler/handlerTestSetup"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -40,7 +42,7 @@ var createEpisodeHandler = NewCreateEpisodeHandler(inbound.PortMap{
 
 func Test_should_implement_handler_for_create_episode(t *testing.T) {
 	assert.NotNil(t, createEpisodeHandler)
-	assert.Implements(t, (*Handler)(nil), createEpisodeHandler)
+	assert.Implements(t, (*handler.Handler)(nil), createEpisodeHandler)
 }
 
 func Test_should_panic_if_no_port_was_found_on_create_episode_handler(t *testing.T) {
@@ -56,7 +58,7 @@ func Test_should_panic_if_no_port_was_found_on_create_episode_handler(t *testing
 func Test_should_return_route_on_create_episode(t *testing.T) {
 	var route = createEpisodeHandler.GetRoute()
 
-	var expectedRoute = &Route{
+	var expectedRoute = &handler.Route{
 		Method: "POST",
 		Path:   "/show/:showId/episode",
 	}
@@ -66,7 +68,7 @@ func Test_should_return_route_on_create_episode(t *testing.T) {
 
 func Test_should_propagate_error_on_create_episode(t *testing.T) {
 	defer mockCreateEpisodeService.init()
-	var context, _ = GetTestGinContext()
+	var context, _ = handlerTestSetup.GetTestGinContext(t)
 	expectedError := errors.New("some error")
 
 	test := struct {
@@ -92,7 +94,7 @@ func Test_should_propagate_error_on_create_episode(t *testing.T) {
 func Test_should_call_service_on_create_episode(t *testing.T) {
 	defer mockCreateEpisodeService.init()
 	var createEpisodeDto *episodeResponseDto
-	var context, recorder = GetTestGinContext()
+	var context, recorder = handlerTestSetup.GetTestGinContext(t)
 
 	test := struct {
 		webParameterShowId   string

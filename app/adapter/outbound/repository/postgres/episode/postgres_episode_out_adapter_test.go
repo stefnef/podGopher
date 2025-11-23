@@ -1,7 +1,8 @@
-package repository
+package episode
 
 import (
 	"podGopher/adapter/outbound/repository/postgres/postgresTestSetup"
+	repositoryShow "podGopher/adapter/outbound/repository/postgres/show"
 	"podGopher/core/domain/model"
 	"podGopher/core/port/outbound"
 	"testing"
@@ -18,8 +19,8 @@ func Test_episode_repository_should_implement_port(t *testing.T) {
 }
 
 func Test_should_not_save_episode_if_show_does_not_exist(t *testing.T) {
-	db := postgresTestSetup.StartTestcontainersPostgres(t, "postgresTestSetup/")
-	defer teardown(t, db)
+	db := postgresTestSetup.StartTestcontainersPostgres(t, "../postgresTestSetup/")
+	defer postgresTestSetup.Teardown(t, db)
 
 	nonExistingShowId := uuid.NewString()
 
@@ -34,12 +35,12 @@ func Test_should_not_save_episode_if_show_does_not_exist(t *testing.T) {
 }
 
 func Test_should_save_an_episode(t *testing.T) {
-	db := postgresTestSetup.StartTestcontainersPostgres(t, "postgresTestSetup/")
-	defer teardown(t, db)
+	db := postgresTestSetup.StartTestcontainersPostgres(t, "../postgresTestSetup/")
+	defer postgresTestSetup.Teardown(t, db)
 
 	showUuid := uuid.NewString()
 
-	showRepository := NewPostgresShowRepository(db)
+	showRepository := repositoryShow.NewPostgresShowRepository(db)
 	repository := NewPostgresEpisodeRepository(db)
 	episodeTitle := "Some title"
 	episode := &model.Episode{
