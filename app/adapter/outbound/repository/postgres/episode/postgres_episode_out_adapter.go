@@ -10,6 +10,33 @@ type PostgresEpisodeOutAdapter struct {
 }
 
 func (adapter *PostgresEpisodeOutAdapter) SaveEpisode(episode *model.Episode) (err error) {
+	if err = adapter.createEpisodeEntry(episode); err != nil {
+		return err
+	}
+	if err = adapter.createShowEpisodeMappingEntry(episode); err != nil {
+		return err //TODO clean up on error -> transactional
+	}
+	return nil
+}
+
+func (adapter *PostgresEpisodeOutAdapter) createShowEpisodeMappingEntry(episode *model.Episode) (err error) {
+	var stmt *sql.Stmt
+
+	if stmt, err = adapter.db.Prepare("INSERT INTO show_episodes (show_id, episode_id) VALUES ($1, $2);"); err != nil {
+		return err
+	}
+	defer func(stmt *sql.Stmt) {
+		_ = stmt.Close()
+	}(stmt)
+
+	if _, err = stmt.Exec(episode.ShowId, episode.Id); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (adapter *PostgresEpisodeOutAdapter) createEpisodeEntry(episode *model.Episode) (err error) {
 	var stmt *sql.Stmt
 
 	if stmt, err = adapter.db.Prepare("INSERT INTO episode (id, show_id, title) VALUES ($1, $2, $3);"); err != nil {

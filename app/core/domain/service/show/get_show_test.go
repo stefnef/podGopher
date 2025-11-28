@@ -51,14 +51,16 @@ func Test_retrieve_show_from_repository_on_get(t *testing.T) {
 	defer initAdapter()
 
 	expectedShow := &model.Show{
-		Id:    "some-id",
-		Title: "some title",
-		Slug:  "some-slug",
+		Id:       "some-id",
+		Title:    "some title",
+		Slug:     "some-slug",
+		Episodes: []string{"some-episode-id"},
 	}
 	expectedShowResponse := &inbound.GetShowResponse{
-		Id:    "some-id",
-		Title: "some title",
-		Slug:  "some-slug",
+		Id:       "some-id",
+		Title:    "some title",
+		Slug:     "some-slug",
+		Episodes: []string{"some-episode-id"},
 	}
 	mockGetShowAdapter.withErrorOnGetOrNilShow = nil
 	mockGetShowAdapter.returnsOnGetOrNilShow["some-id"] = expectedShow

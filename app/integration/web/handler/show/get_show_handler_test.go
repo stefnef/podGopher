@@ -92,43 +92,91 @@ func Test_should_propagate_error_on_get_show(t *testing.T) {
 func Test_should_call_service_on_get_show(t *testing.T) {
 	defer mockGetShowService.init()
 	var getShowDto *showResponseDto
-	var context, recorder = handlerTestSetup.GetTestGinContext(t)
 
-	test := struct {
-		webParameterShowId   string
-		expectedPortCommand  *inbound.GetShowCommand
-		expectedPortResponse *inbound.GetShowResponse
-		expectedWebResponse  *showResponseDto
-	}{
-		`some-show-id`,
-		&inbound.GetShowCommand{
-			Id: "some-show-id",
+	type testParameterStruct struct {
+		webParameterShowId  string
+		expectedPortCommand *inbound.GetShowCommand
+		mockedPortResponse  *inbound.GetShowResponse
+		expectedWebResponse *showResponseDto
+	}
+
+	tests := []testParameterStruct{
+		{
+			`some-show-without-episodes-id`,
+			&inbound.GetShowCommand{
+				Id: "some-show-without-episodes-id",
+			},
+			&inbound.GetShowResponse{
+				Id:       "some-id",
+				Title:    "Mocked Title",
+				Slug:     "Mocked Slug",
+				Episodes: []string{},
+			},
+			&showResponseDto{
+				Id:       "some-id",
+				Title:    "Mocked Title",
+				Slug:     "Mocked Slug",
+				Episodes: []string{},
+			},
 		},
-		&inbound.GetShowResponse{
-			Id:    "some-id",
-			Title: "Mocked Title",
-			Slug:  "Mocked Slug",
+		{
+			`some-show-null-episodes`,
+			&inbound.GetShowCommand{
+				Id: "some-show-null-episodes",
+			},
+			&inbound.GetShowResponse{
+				Id:       "some-id",
+				Title:    "Mocked Title",
+				Slug:     "Mocked Slug",
+				Episodes: nil,
+			},
+			&showResponseDto{
+				Id:       "some-id",
+				Title:    "Mocked Title",
+				Slug:     "Mocked Slug",
+				Episodes: []string{},
+			},
 		},
-		&showResponseDto{
-			Id:    "some-id",
-			Title: "Mocked Title",
-			Slug:  "Mocked Slug",
+		{
+			`some-show-with-episodes-id`,
+			&inbound.GetShowCommand{
+				Id: "some-show-with-episodes-id",
+			},
+			&inbound.GetShowResponse{
+				Id:       "some-id",
+				Title:    "Mocked Title",
+				Slug:     "Mocked Slug",
+				Episodes: []string{"some-episode-id"},
+			},
+			&showResponseDto{
+				Id:       "some-id",
+				Title:    "Mocked Title",
+				Slug:     "Mocked Slug",
+				Episodes: []string{"some-episode-id"},
+			},
 		},
 	}
 
-	mockGetShowService.returnsOnGetShow = test.expectedPortResponse
+	for _, tc := range tests {
+		var context, recorder = handlerTestSetup.GetTestGinContext(t)
+		mockGetShowService.init()
 
-	context.Request = httptest.NewRequest("GET", "/show/"+test.webParameterShowId, bytes.NewBuffer([]byte("")))
-	context.AddParam("showId", test.webParameterShowId)
+		t.Run(tc.webParameterShowId, func(t *testing.T) {
+			mockGetShowService.returnsOnGetShow = tc.mockedPortResponse
 
-	getShowHandler.Handle(context)
+			context.Request = httptest.NewRequest("GET", "/show/"+tc.webParameterShowId, bytes.NewBuffer([]byte("")))
+			context.AddParam("showId", tc.webParameterShowId)
 
-	var err = json.Unmarshal(recorder.Body.Bytes(), &getShowDto)
+			getShowHandler.Handle(context)
 
-	assert.Equal(t, 1, mockGetShowService.called)
-	assert.Equal(t, test.expectedPortCommand, mockGetShowService.command)
-	assert.Nil(t, err)
-	assert.Empty(t, context.Errors)
-	assert.Equal(t, test.expectedWebResponse, getShowDto)
-	assert.Equal(t, http.StatusOK, recorder.Code)
+			var err = json.Unmarshal(recorder.Body.Bytes(), &getShowDto)
+
+			assert.Equal(t, 1, mockGetShowService.called)
+			assert.Equal(t, tc.expectedPortCommand, mockGetShowService.command)
+			assert.Nil(t, err)
+			assert.Empty(t, context.Errors)
+			assert.Equal(t, tc.expectedWebResponse, getShowDto)
+			assert.Equal(t, http.StatusOK, recorder.Code)
+		})
+	}
 }
