@@ -12,17 +12,6 @@ import (
 
 var getShowService = NewGetShowService(mockGetShowAdapter)
 
-func newGetShowTestAdapter() *getShowTestAdapter {
-	adapter := &getShowTestAdapter{}
-	adapter.init()
-	return adapter
-}
-func (a *getShowTestAdapter) init() {
-	a.called = 0
-	a.returnsOnGetOrNilShow = make(map[string]*model.Show)
-	a.withErrorOnGetOrNilShow = nil
-}
-
 func Test_should_implement_GetShowInPort(t *testing.T) {
 	assert.NotNil(t, getShowService)
 	assert.Implements(t, (*inbound.GetShowPort)(nil), getShowService)

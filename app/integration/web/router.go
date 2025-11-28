@@ -26,6 +26,7 @@ func CreateHandlers(portMap inbound.PortMap) []handler.Handler {
 		show.NewCreateShowHandler(portMap),
 		show.NewGetShowHandler(portMap),
 		episode.NewCreateEpisodeHandler(portMap),
+		episode.NewGetEpisodeHandler(portMap),
 	}
 }
 
@@ -46,6 +47,7 @@ func setHandlers(portMap inbound.PortMap, router *gin.Engine) {
 func handleError(context *gin.Context) {
 	var showAlreadyExists *error2.ShowAlreadyExistsError
 	var episodeAlreadyExists *error2.EpisodeAlreadyExistsError
+	var episodeNotFound *error2.EpisodeNotFoundError
 	var showNotFound *error2.ShowNotFoundError
 
 	for _, err := range context.Errors {
@@ -56,6 +58,8 @@ func handleError(context *gin.Context) {
 			context.AbortWithStatusJSON(http.StatusNotFound, err.JSON())
 		case errors.As(err.Err, &episodeAlreadyExists):
 			context.AbortWithStatusJSON(http.StatusBadRequest, err.JSON())
+		case errors.As(err.Err, &episodeNotFound):
+			context.AbortWithStatusJSON(http.StatusNotFound, err.JSON())
 		default:
 			context.AbortWithStatusJSON(http.StatusInternalServerError, err.JSON())
 		}

@@ -21,9 +21,14 @@ func Test_show_already_exists_is_an_error(t *testing.T) {
 			"show with id 'some-id' does not exist",
 		},
 
-		"ShowEpisodeExistsError": {
+		"EpisodeAlreadyExistsError": {
 			NewEpisodeAlreadyExistsError("some-name"),
 			"episode with title 'some-name' already exists",
+		},
+
+		"EpisodeNotFoundError": {
+			NewEpisodeNotFoundError("some-id"),
+			"episode with id 'some-id' does not exist",
 		},
 	}
 

@@ -6,10 +6,13 @@ import (
 )
 
 type saveAndGetEpisodeTestAdapter struct {
-	calledSave             int
-	onSaveCalledWith       *model.Episode
-	returnsOnExistsByTitle map[string]bool
-	withErrorOnSaveEpisode error
+	calledGet                  int
+	calledSave                 int
+	onSaveCalledWith           *model.Episode
+	returnsOnExistsByTitle     map[string]bool
+	withErrorOnSaveEpisode     error
+	withErrorOnGetEpisodeOrNil error
+	returnsOnGetEpisodeOrNil   map[string]*model.Episode
 }
 
 type getShowTestAdapter struct {
@@ -37,17 +40,20 @@ func (adapter *saveAndGetEpisodeTestAdapter) SaveEpisode(episode *model.Episode)
 	return adapter.withErrorOnSaveEpisode
 }
 
-func (a *getShowTestAdapter) GetShowOrNil(Id string) (*model.Show, error) {
+func (a *getShowTestAdapter) GetShowOrNil(id string) (*model.Show, error) {
 	a.called++
-	show := a.returnsOnGetOrNilShow[Id]
+	show := a.returnsOnGetOrNilShow[id]
 	return show, nil
 }
 
 func (adapter *saveAndGetEpisodeTestAdapter) init() {
+	adapter.calledGet = 0
 	adapter.calledSave = 0
 	adapter.onSaveCalledWith = nil
 	adapter.returnsOnExistsByTitle = make(map[string]bool)
+	adapter.returnsOnGetEpisodeOrNil = make(map[string]*model.Episode)
 	adapter.withErrorOnSaveEpisode = nil
+	adapter.withErrorOnGetEpisodeOrNil = nil
 }
 
 func (adapter *saveAndGetEpisodeTestAdapter) everyExistsByTitleReturns(title string, returnValue bool) {
@@ -56,6 +62,11 @@ func (adapter *saveAndGetEpisodeTestAdapter) everyExistsByTitleReturns(title str
 
 func (adapter *saveAndGetEpisodeTestAdapter) ExistsByTitle(title string) bool {
 	return adapter.returnsOnExistsByTitle[title]
+}
+
+func (adapter *saveAndGetEpisodeTestAdapter) GetEpisodeOrNil(id string) (*model.Episode, error) {
+	adapter.calledGet++
+	return adapter.returnsOnGetEpisodeOrNil[id], adapter.withErrorOnGetEpisodeOrNil
 }
 
 func (a *getShowTestAdapter) init() {

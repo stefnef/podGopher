@@ -38,6 +38,17 @@ func (adapter *PostgresEpisodeOutAdapter) ExistsByTitle(title string) bool {
 	return exists
 }
 
+func (adapter *PostgresEpisodeOutAdapter) GetEpisodeOrNil(id string) (episode *model.Episode, err error) {
+	query := "SELECT * FROM episode where id = $1"
+	row := adapter.db.QueryRow(query, id)
+
+	episode = &model.Episode{}
+	if err = row.Scan(&episode.Id, &episode.ShowId, &episode.Title); err != nil {
+		return nil, nil
+	}
+	return episode, nil
+}
+
 func NewPostgresEpisodeRepository(db *sql.DB) *PostgresEpisodeOutAdapter {
 	return &PostgresEpisodeOutAdapter{db: db}
 }
