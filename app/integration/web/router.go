@@ -61,7 +61,7 @@ func handleError(context *gin.Context) {
 		case errors.As(err.Err, &episodeNotFound):
 			context.AbortWithStatusJSON(http.StatusNotFound, err.JSON())
 		default:
-			context.AbortWithStatusJSON(http.StatusInternalServerError, err.JSON())
+			context.AbortWithStatusJSON(http.StatusInternalServerError, map[string]string{"error": "Internal Server Error"})
 		}
 	}
 	context.Next()

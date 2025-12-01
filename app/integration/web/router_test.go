@@ -126,7 +126,7 @@ func Test_should_handle_errors(t *testing.T) {
 		"unknown": {
 			errors.New("FAKE"),
 			500,
-			"FAKE",
+			"Internal Server Error",
 		},
 	}
 

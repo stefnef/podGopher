@@ -10,19 +10,25 @@ type PostgresEpisodeOutAdapter struct {
 }
 
 func (adapter *PostgresEpisodeOutAdapter) SaveEpisode(episode *model.Episode) (err error) {
-	if err = adapter.createEpisodeEntry(episode); err != nil {
+	transaction, _ := adapter.db.Begin()
+	defer func(transaction *sql.Tx) {
+		_ = transaction.Rollback()
+	}(transaction)
+
+	if err = adapter.createEpisodeEntry(episode, transaction); err != nil {
 		return err
 	}
-	if err = adapter.createShowEpisodeMappingEntry(episode); err != nil {
-		return err //TODO clean up on error -> transactional
+	if err = adapter.createShowEpisodeMappingEntry(episode, transaction); err != nil {
+		return err
 	}
+	_ = transaction.Commit()
 	return nil
 }
 
-func (adapter *PostgresEpisodeOutAdapter) createShowEpisodeMappingEntry(episode *model.Episode) (err error) {
+func (adapter *PostgresEpisodeOutAdapter) createShowEpisodeMappingEntry(episode *model.Episode, transaction *sql.Tx) (err error) {
 	var stmt *sql.Stmt
 
-	if stmt, err = adapter.db.Prepare("INSERT INTO show_episodes (show_id, episode_id) VALUES ($1, $2);"); err != nil {
+	if stmt, err = transaction.Prepare("INSERT INTO show_episodes (show_id, episode_id) VALUES ($1, $2);"); err != nil {
 		return err
 	}
 	defer func(stmt *sql.Stmt) {
@@ -36,10 +42,10 @@ func (adapter *PostgresEpisodeOutAdapter) createShowEpisodeMappingEntry(episode 
 	return nil
 }
 
-func (adapter *PostgresEpisodeOutAdapter) createEpisodeEntry(episode *model.Episode) (err error) {
+func (adapter *PostgresEpisodeOutAdapter) createEpisodeEntry(episode *model.Episode, transaction *sql.Tx) (err error) {
 	var stmt *sql.Stmt
 
-	if stmt, err = adapter.db.Prepare("INSERT INTO episode (id, show_id, title) VALUES ($1, $2, $3);"); err != nil {
+	if stmt, err = transaction.Prepare("INSERT INTO episode (id, show_id, title) VALUES ($1, $2, $3);"); err != nil {
 		return err
 	}
 	defer func(stmt *sql.Stmt) {
