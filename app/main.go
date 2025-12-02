@@ -72,10 +72,12 @@ func (app *App) createPortMap() inbound.PortMap {
 	var createShowPort = show.NewCreateShowService(showRepository)
 	var getShowPort = show.NewGetShowService(showRepository)
 	var createEpisodePort = episode.NewCreateEpisodeService(showRepository, episodeRepository)
+	var getEpisodePort = episode.NewGetEpisodeService(showRepository, episodeRepository)
 	return inbound.PortMap{
 		inbound.CreateShow:    createShowPort,
 		inbound.GetShow:       getShowPort,
 		inbound.CreateEpisode: createEpisodePort,
+		inbound.GetEpisode:    getEpisodePort,
 	}
 }
 

@@ -14,3 +14,7 @@ Content-Type: application/json
     client.global.set("episodeId", response.body.id)
 %}
 
+###
+# Get an episode
+GET {{host}}/show/{{showId}}/episode/{{episodeId}}
+Content-Type: application/json

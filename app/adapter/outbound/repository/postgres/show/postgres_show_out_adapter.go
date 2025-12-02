@@ -39,12 +39,44 @@ func (adapter *PostgresShowOutAdapter) ExistsByTitleOrSlug(title string, slug st
 }
 
 func (adapter *PostgresShowOutAdapter) GetShowOrNil(id string) (show *model.Show, err error) {
-	query := "SELECT * FROM show where id = $1"
-	row := adapter.db.QueryRow(query, id)
+	query := "SELECT s.*, se.episode_id FROM show s LEFT JOIN show_episodes se ON se.show_id = s.id WHERE s.id = $1;"
+	rows, _ := adapter.db.Query(query, id)
+	defer func(rows *sql.Rows) {
+		_ = rows.Close()
+	}(rows)
 
-	show = &model.Show{}
-	if err = row.Scan(&show.Id, &show.Title, &show.Slug); err != nil {
-		return nil, nil
+	for rows.Next() {
+		show, err = parseNextShow(rows, show)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return show, nil
+}
+
+func parseNextShow(rows *sql.Rows, show *model.Show) (*model.Show, error) {
+	var (
+		showId string
+		title  string
+		slug   string
+		eId    sql.NullString
+	)
+
+	if err := rows.Scan(&showId, &title, &slug, &eId); err != nil {
+		return nil, err
+	}
+
+	if show == nil {
+		show = &model.Show{
+			Id:    showId,
+			Title: title,
+			Slug:  slug,
+		}
+	}
+
+	if eId.Valid {
+		show.Episodes = append(show.Episodes, eId.String)
 	}
 	return show, nil
 }

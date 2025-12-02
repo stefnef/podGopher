@@ -26,6 +26,17 @@ func newTestCreateShowCommand(title string) *inbound.CreateShowCommand {
 	return show
 }
 
+func newGetShowTestAdapter() *getShowTestAdapter {
+	adapter := &getShowTestAdapter{}
+	adapter.init()
+	return adapter
+}
+func (a *getShowTestAdapter) init() {
+	a.called = 0
+	a.returnsOnGetOrNilShow = make(map[string]*model.Show)
+	a.withErrorOnGetOrNilShow = nil
+}
+
 func (adapter *saveAndGetShowTestAdapter) SaveShow(show *model.Show) error {
 	adapter.calledSave++
 	adapter.onSave["show"] = show
@@ -53,9 +64,9 @@ type getShowTestAdapter struct {
 	withErrorOnGetOrNilShow error
 }
 
-func (a *getShowTestAdapter) GetShowOrNil(Id string) (*model.Show, error) {
+func (a *getShowTestAdapter) GetShowOrNil(id string) (*model.Show, error) {
 	a.called++
-	show := a.returnsOnGetOrNilShow[Id]
+	show := a.returnsOnGetOrNilShow[id]
 	return show, a.withErrorOnGetOrNilShow
 }
 

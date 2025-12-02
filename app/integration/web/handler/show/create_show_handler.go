@@ -19,9 +19,10 @@ type CreateShowRequestDto struct {
 }
 
 type showResponseDto struct {
-	Id    string `json:"id" binding:"required"`
-	Title string `json:"title" binding:"required"`
-	Slug  string `json:"slug" binding:"required"`
+	Id       string   `json:"id" binding:"required"`
+	Title    string   `json:"title" binding:"required"`
+	Slug     string   `json:"slug" binding:"required"`
+	Episodes []string `json:"episodes" binding:"required"`
 }
 
 func (h *CreateShowHandler) GetRoute() *handler.Route {

@@ -83,3 +83,46 @@ func Test_should_save_an_episode(t *testing.T) {
 		assert.Equal(t, episode.ShowId, showId)
 	})
 }
+
+func Test_should_retrieve_an_episode(t *testing.T) {
+	db := postgresTestSetup.StartTestcontainersPostgres(t, "../postgresTestSetup/")
+
+	defer postgresTestSetup.Teardown(t, db)
+
+	showUuid := uuid.NewString()
+	showRepository := repositoryShow.NewPostgresShowRepository(db)
+
+	repository := NewPostgresEpisodeRepository(db)
+	show := &model.Show{
+		Id:    showUuid,
+		Title: "Some title",
+		Slug:  "Some-Slug",
+	}
+	episode := &model.Episode{
+		Id:     uuid.NewString(),
+		ShowId: showUuid,
+		Title:  "Some title",
+	}
+
+	err := showRepository.SaveShow(show)
+	assert.Nil(t, err)
+
+	err = repository.SaveEpisode(episode)
+	assert.Nil(t, err)
+
+	t.Run("should return nil if episode does not exist", func(t *testing.T) {
+		foundEpisode, err := repository.GetEpisodeOrNil(uuid.NewString())
+		assert.Nil(t, err)
+		assert.Nil(t, foundEpisode)
+	})
+
+	t.Run("should retrieve an episode", func(t *testing.T) {
+		foundEpisode, err := repository.GetEpisodeOrNil(episode.Id)
+		assert.Nil(t, err)
+		assert.NotNil(t, foundEpisode)
+		assert.Equal(t, show.Id, foundEpisode.ShowId)
+		assert.Equal(t, episode.Id, foundEpisode.Id)
+		assert.Equal(t, episode.Title, foundEpisode.Title)
+	})
+
+}

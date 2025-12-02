@@ -43,11 +43,17 @@ func (port *mockInboundPort) CreateEpisode(*inbound.CreateEpisodeCommand) (episo
 	return &inbound.CreateEpisodeResponse{}, response.failsWith
 }
 
+func (port *mockInboundPort) GetEpisode(*inbound.GetEpisodeCommand) (episode *inbound.GetEpisodeResponse, err error) {
+	response.Text += "GetEpisode"
+	return &inbound.GetEpisodeResponse{}, response.failsWith
+}
+
 var mockPort = new(mockInboundPort)
 var router = NewRouter(inbound.PortMap{
 	inbound.CreateShow:    mockPort,
 	inbound.GetShow:       mockPort,
 	inbound.CreateEpisode: mockPort,
+	inbound.GetEpisode:    mockPort,
 })
 
 func setup() {
@@ -82,6 +88,13 @@ func Test_should_post_an_episode(t *testing.T) {
 	assert.Equal(t, "PostEpisode", response.Text)
 }
 
+func Test_should_get_an_episode(t *testing.T) {
+	setup()
+	doRequest("GET", "/show/some-show-id/episode/some-episode-id", "")
+
+	assert.Equal(t, "GetEpisode", response.Text)
+}
+
 func Test_should_handle_errors(t *testing.T) {
 	setup()
 
@@ -105,10 +118,15 @@ func Test_should_handle_errors(t *testing.T) {
 			400,
 			"FAKE",
 		},
+		"Episode_not_found": {
+			error2.NewEpisodeNotFoundError("FAKE"),
+			404,
+			"FAKE",
+		},
 		"unknown": {
 			errors.New("FAKE"),
 			500,
-			"FAKE",
+			"Internal Server Error",
 		},
 	}
 
@@ -129,12 +147,13 @@ func Test_should_create_handlers(t *testing.T) {
 		inbound.CreateShow:    show.NewCreateShowService(nil),
 		inbound.GetShow:       show.NewGetShowService(nil),
 		inbound.CreateEpisode: episode.NewCreateEpisodeService(nil, nil),
+		inbound.GetEpisode:    episode.NewGetEpisodeService(nil, nil),
 	}
 
 	var handlers = CreateHandlers(portMap)
 
 	assert.NotEmpty(t, handlers)
-	assert.Len(t, handlers, 3)
+	assert.Len(t, handlers, len(portMap))
 }
 
 func doRequest(method string, url string, requestBody string) *httptest.ResponseRecorder {

@@ -1,6 +1,7 @@
 package show
 
 import (
+	repositoryEpisode "podGopher/adapter/outbound/repository/postgres/episode"
 	"podGopher/adapter/outbound/repository/postgres/postgresTestSetup"
 	"podGopher/core/domain/model"
 	"podGopher/core/port/outbound"
@@ -26,9 +27,10 @@ func Test_should_save_a_show(t *testing.T) {
 	showTitle := "Some title"
 	showSlug := showTitle + "-Slug"
 	show := &model.Show{
-		Id:    uuid.NewString(),
-		Title: showTitle,
-		Slug:  showSlug,
+		Id:       uuid.NewString(),
+		Title:    showTitle,
+		Slug:     showSlug,
+		Episodes: []string{},
 	}
 
 	t.Run("should return false if show with title or slug does not exist", func(t *testing.T) {
@@ -103,6 +105,63 @@ func Test_should_retrieve_a_show(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotNil(t, foundShow)
 		assert.Equal(t, show.Id, foundShow.Id)
+		assert.Empty(t, foundShow.Episodes)
 	})
 
+}
+
+func Test_should_reference_episodes(t *testing.T) {
+	db := postgresTestSetup.StartTestcontainersPostgres(t, "../postgresTestSetup/")
+
+	defer postgresTestSetup.Teardown(t, db)
+
+	showRepository := NewPostgresShowRepository(db)
+
+	episodeRepository := repositoryEpisode.NewPostgresEpisodeRepository(db)
+	showWithEpisodes := &model.Show{
+		Id:    uuid.NewString(),
+		Title: "first show",
+		Slug:  "first-show-Slug",
+	}
+	showWithoutEpisodes := &model.Show{
+		Id:    uuid.NewString(),
+		Title: "show",
+		Slug:  "show-Slug",
+	}
+
+	err := showRepository.SaveShow(showWithEpisodes)
+	assert.Nil(t, err)
+
+	err = showRepository.SaveShow(showWithoutEpisodes)
+	assert.Nil(t, err)
+
+	err = episodeRepository.SaveEpisode(&model.Episode{
+		Id:     uuid.NewString(),
+		ShowId: showWithEpisodes.Id,
+		Title:  "first episode",
+	})
+	assert.Nil(t, err)
+
+	err = episodeRepository.SaveEpisode(&model.Episode{
+		Id:     uuid.NewString(),
+		ShowId: showWithEpisodes.Id,
+		Title:  "first episode",
+	})
+	assert.Nil(t, err)
+
+	t.Run("should retrieve a show with episodes", func(t *testing.T) {
+		foundShow, err := showRepository.GetShowOrNil(showWithEpisodes.Id)
+
+		assert.Nil(t, err)
+		assert.NotNil(t, foundShow)
+		assert.Len(t, foundShow.Episodes, 2)
+	})
+
+	t.Run("should not retrieve non-referenced episodes", func(t *testing.T) {
+		foundShow, err := showRepository.GetShowOrNil(showWithoutEpisodes.Id)
+
+		assert.Nil(t, err)
+		assert.NotNil(t, foundShow)
+		assert.Len(t, foundShow.Episodes, 0)
+	})
 }

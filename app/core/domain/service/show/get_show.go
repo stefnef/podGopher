@@ -27,8 +27,9 @@ func (s *GetShowService) GetShow(command *inbound.GetShowCommand) (showResponse 
 		return nil, error2.NewShowNotFoundError(command.Id)
 	}
 	return &inbound.GetShowResponse{
-		Id:    show.Id,
-		Title: show.Title,
-		Slug:  show.Slug,
+		Id:       show.Id,
+		Title:    show.Title,
+		Slug:     show.Slug,
+		Episodes: show.Episodes,
 	}, nil
 }

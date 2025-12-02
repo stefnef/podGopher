@@ -10,6 +10,10 @@ type EpisodeAlreadyExistsError struct {
 	Name string
 }
 
+type EpisodeNotFoundError struct {
+	Id string
+}
+
 type ShowNotFoundError struct {
 	Id string
 }
@@ -26,6 +30,10 @@ func (e EpisodeAlreadyExistsError) Error() string {
 	return fmt.Sprintf("episode with title '%s' already exists", e.Name)
 }
 
+func (e EpisodeNotFoundError) Error() string {
+	return fmt.Sprintf("episode with id '%v' does not exist", e.Id)
+}
+
 func NewShowAlreadyExistsError(name string) *ShowAlreadyExistsError {
 	return &ShowAlreadyExistsError{name}
 }
@@ -36,4 +44,8 @@ func NewShowNotFoundError(id string) *ShowNotFoundError {
 
 func NewEpisodeAlreadyExistsError(name string) *EpisodeAlreadyExistsError {
 	return &EpisodeAlreadyExistsError{name}
+}
+
+func NewEpisodeNotFoundError(id string) *EpisodeNotFoundError {
+	return &EpisodeNotFoundError{id}
 }

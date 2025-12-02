@@ -32,7 +32,15 @@ func (h *GetShowHandler) Handle(context *gin.Context) {
 	if err != nil {
 		_ = context.Error(err)
 	} else {
-		responseDto := showResponseDto{Id: foundShow.Id, Title: foundShow.Title, Slug: foundShow.Slug}
+		responseDto := showResponseDto{Id: foundShow.Id, Title: foundShow.Title, Slug: foundShow.Slug, Episodes: episodesToDto(foundShow)}
 		context.JSON(http.StatusOK, responseDto)
 	}
+}
+
+func episodesToDto(foundShow *inbound.GetShowResponse) []string {
+	var episodesDto []string
+	if episodesDto = foundShow.Episodes; episodesDto == nil {
+		episodesDto = []string{}
+	}
+	return episodesDto
 }

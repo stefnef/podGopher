@@ -9,4 +9,5 @@ const (
 	CreateShow
 	GetShow
 	CreateEpisode
+	GetEpisode
 )
