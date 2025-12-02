@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	error2 "podGopher/core/domain/error"
 	"podGopher/core/port/inbound"
 	"podGopher/integration/web/handler"
 	"podGopher/integration/web/handler/handlerTestSetup"
@@ -84,11 +85,26 @@ func Test_should_propagate_error_on_get_episode(t *testing.T) {
 	mockGetEpisodeService.failsWith = test.expectedPortResponse
 
 	context.Request = httptest.NewRequest("GET", "/show/"+test.paramShowId+"/episode/"+test.paramEpisodeId, bytes.NewBuffer([]byte("")))
+	context.AddParam("showId", test.paramShowId)
+	context.AddParam("episodeId", test.paramEpisodeId)
 
 	getEpisodeHandler.Handle(context)
 
 	assert.NotEmpty(t, context.Errors)
 	assert.Equal(t, expectedError, (*context.Errors[0]).Err)
+}
+
+func Test_should_query_showId_param_on_get_episode(t *testing.T) {
+	defer mockGetEpisodeService.init()
+	var context, _ = handlerTestSetup.GetTestGinContext(t)
+
+	context.Request = httptest.NewRequest("GET", "/show//episode/some-episode-id", bytes.NewBuffer([]byte("")))
+	context.AddParam("episodeId", "some-episode-id")
+
+	getEpisodeHandler.Handle(context)
+
+	assert.NotEmpty(t, context.Errors)
+	assert.Equal(t, error2.NewShowNotFoundError(""), (*context.Errors[0]).Err)
 }
 
 func Test_should_call_service_on_get_episode(t *testing.T) {

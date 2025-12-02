@@ -2,6 +2,7 @@ package episode
 
 import (
 	"net/http"
+	error2 "podGopher/core/domain/error"
 	"podGopher/core/port/inbound"
 	"podGopher/integration/web/handler"
 
@@ -18,9 +19,16 @@ func (h GetEpisodeHandler) GetRoute() *handler.Route {
 }
 
 func (h GetEpisodeHandler) Handle(context *gin.Context) {
+	showId := context.Param("showId")
+	episodeId := context.Param("episodeId")
+	if showId == "" {
+		_ = context.Error(error2.NewShowNotFoundError(""))
+		return
+	}
+
 	foundEpisode, err := h.port.GetEpisode(&inbound.GetEpisodeCommand{
-		EpisodeId: context.Param("episodeId"),
-		ShowId:    context.Param("showId"),
+		EpisodeId: episodeId,
+		ShowId:    showId,
 	})
 	if err != nil {
 		_ = context.Error(err)
