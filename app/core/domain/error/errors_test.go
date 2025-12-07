@@ -30,6 +30,16 @@ func Test_show_already_exists_is_an_error(t *testing.T) {
 			NewEpisodeNotFoundError("some-id"),
 			"episode with id 'some-id' does not exist",
 		},
+
+		"DistributionAlreadyExistsError": {
+			NewDistributionAlreadyExistsError("some-name"),
+			"distribution with title 'some-name' or given slug already exists",
+		},
+
+		"DistributionNotFoundError": {
+			NewDistributionNotFoundError("some-id"),
+			"distribution with id 'some-id' does not exist",
+		},
 	}
 
 	for name, test := range tests {

@@ -18,6 +18,14 @@ type ShowNotFoundError struct {
 	Id string
 }
 
+type DistributionAlreadyExistsError struct {
+	Name string
+}
+
+type DistributionNotFoundError struct {
+	Id string
+}
+
 func (e ShowNotFoundError) Error() string {
 	return fmt.Sprintf("show with id '%v' does not exist", e.Id)
 }
@@ -34,6 +42,14 @@ func (e EpisodeNotFoundError) Error() string {
 	return fmt.Sprintf("episode with id '%v' does not exist", e.Id)
 }
 
+func (e DistributionAlreadyExistsError) Error() string {
+	return fmt.Sprintf("distribution with title '%s' or given slug already exists", e.Name)
+}
+
+func (e DistributionNotFoundError) Error() string {
+	return fmt.Sprintf("distribution with id '%v' does not exist", e.Id)
+}
+
 func NewShowAlreadyExistsError(name string) *ShowAlreadyExistsError {
 	return &ShowAlreadyExistsError{name}
 }
@@ -48,4 +64,12 @@ func NewEpisodeAlreadyExistsError(name string) *EpisodeAlreadyExistsError {
 
 func NewEpisodeNotFoundError(id string) *EpisodeNotFoundError {
 	return &EpisodeNotFoundError{id}
+}
+
+func NewDistributionAlreadyExistsError(name string) *DistributionAlreadyExistsError {
+	return &DistributionAlreadyExistsError{name}
+}
+
+func NewDistributionNotFoundError(id string) *DistributionNotFoundError {
+	return &DistributionNotFoundError{id}
 }
