@@ -23,6 +23,7 @@ components:
         - title
         - slug
         - episodes
+        - distributions
       properties:
         id:
           $ref: "../model/show.yaml#/components/schemas/showId"
@@ -34,3 +35,7 @@ components:
           type: array
           items:
             $ref: "../model/episode.yaml#/components/schemas/episodeId"
+        distributions:
+          type: array
+          items:
+            $ref: "../model/distribution.yaml#/components/schemas/distributionId"

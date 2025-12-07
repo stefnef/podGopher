@@ -11,15 +11,19 @@ components:
               value:
                 id: "episode-id"
                 title: "New Episode"
+                showId: "show-id"
 
   schemas:
     episodeResponseDto:
       type: object
       required:
         - id
+        - showId
         - title
       properties:
         id:
           $ref: "../model/episode.yaml#/components/schemas/episodeId"
         title:
           $ref: "../model/episode.yaml#/components/schemas/episodeTitle"
+        showId:
+          $ref: "../model/show.yaml#/components/schemas/showId"
