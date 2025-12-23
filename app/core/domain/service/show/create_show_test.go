@@ -55,7 +55,7 @@ func Test_should_throw_error_if_show_with_name_already_exists(t *testing.T) {
 
 	assert.Nil(t, result)
 	assert.NotNil(t, err)
-	assert.Equal(t, &error2.ShowAlreadyExistsError{Name: "Test"}, err)
+	assert.Equal(t, error2.NewShowAlreadyExistsError("Test"), err)
 	assert.Equal(t, 0, mockSaveAndGetShowAdapter.calledSave)
 }
 

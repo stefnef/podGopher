@@ -30,7 +30,7 @@ func Test_should_throw_error_if_show_does_not_exist_on_get_episode(t *testing.T)
 
 	assert.Nil(t, result)
 	assert.NotNil(t, err)
-	assert.Equal(t, &error2.ShowNotFoundError{Id: "i-do-not-exist"}, err)
+	assert.Equal(t, error2.NewShowNotFoundError("i-do-not-exist"), err)
 	assert.Equal(t, 0, mockSaveAndGetEpisodeAdapter.calledGet)
 }
 
@@ -60,7 +60,7 @@ func Test_should_return_not_found_if_episode_was_not_found_on_get(t *testing.T) 
 
 	assert.Nil(t, foundShow)
 	assert.NotNil(t, err)
-	assert.Equal(t, &error2.EpisodeNotFoundError{Id: "id-with-error"}, err)
+	assert.Equal(t, error2.NewEpisodeNotFoundError("id-with-error"), err)
 	assert.Equal(t, 1, mockSaveAndGetEpisodeAdapter.calledGet)
 }
 

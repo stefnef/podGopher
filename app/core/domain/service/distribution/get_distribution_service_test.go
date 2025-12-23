@@ -30,7 +30,7 @@ func Test_should_throw_error_if_show_does_not_exist_on_get_distribution(t *testi
 
 	assert.Nil(t, result)
 	assert.NotNil(t, err)
-	assert.Equal(t, &error2.ShowNotFoundError{Id: "i-do-not-exist"}, err)
+	assert.Equal(t, error2.NewShowNotFoundError("i-do-not-exist"), err)
 	assert.Equal(t, 0, mockSaveAndGetDistributionAdapter.calledGet)
 }
 
@@ -60,7 +60,7 @@ func Test_should_return_not_found_if_distribution_was_not_found_on_get(t *testin
 
 	assert.Nil(t, foundShow)
 	assert.NotNil(t, err)
-	assert.Equal(t, &error2.DistributionNotFoundError{Id: "id-with-error"}, err)
+	assert.Equal(t, error2.NewDistributionNotFoundError("id-with-error"), err)
 	assert.Equal(t, 1, mockSaveAndGetDistributionAdapter.calledGet)
 }
 

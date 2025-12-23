@@ -27,7 +27,7 @@ func Test_should_throw_error_if_distribution_with_name_already_exists(t *testing
 
 	assert.Nil(t, result)
 	assert.NotNil(t, err)
-	assert.Equal(t, &error2.DistributionAlreadyExistsError{Name: "Test"}, err)
+	assert.Equal(t, error2.NewDistributionAlreadyExistsError("Test"), err)
 	assert.Equal(t, 0, mockSaveAndGetDistributionAdapter.calledSave)
 }
 
@@ -58,7 +58,7 @@ func Test_should_throw_error_if_show_does_not_exist_on_save_distribution(t *test
 
 	assert.Nil(t, result)
 	assert.NotNil(t, err)
-	assert.Equal(t, &error2.ShowNotFoundError{Id: "test-show-id"}, err)
+	assert.Equal(t, error2.NewShowNotFoundError("test-show-id"), err)
 	assert.Equal(t, 0, mockSaveAndGetDistributionAdapter.calledSave)
 }
 

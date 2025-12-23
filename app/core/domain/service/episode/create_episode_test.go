@@ -27,7 +27,7 @@ func Test_should_throw_error_if_episode_with_name_already_exists(t *testing.T) {
 
 	assert.Nil(t, result)
 	assert.NotNil(t, err)
-	assert.Equal(t, &error2.EpisodeAlreadyExistsError{Name: "Test"}, err)
+	assert.Equal(t, error2.NewEpisodeAlreadyExistsError("Test"), err)
 	assert.Equal(t, 0, mockSaveAndGetEpisodeAdapter.calledSave)
 }
 
@@ -58,7 +58,7 @@ func Test_should_throw_error_if_show_does_not_exist_on_save_episode(t *testing.T
 
 	assert.Nil(t, result)
 	assert.NotNil(t, err)
-	assert.Equal(t, &error2.ShowNotFoundError{Id: "test-show-id"}, err)
+	assert.Equal(t, error2.NewShowNotFoundError("test-show-id"), err)
 	assert.Equal(t, 0, mockSaveAndGetEpisodeAdapter.calledSave)
 }
 

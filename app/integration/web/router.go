@@ -48,27 +48,19 @@ func setHandlers(portMap inbound.PortMap, router *gin.Engine) {
 }
 
 func handleError(context *gin.Context) {
-	var showAlreadyExists *error2.ShowAlreadyExistsError
-	var showNotFound *error2.ShowNotFoundError
-	var episodeAlreadyExists *error2.EpisodeAlreadyExistsError
-	var episodeNotFound *error2.EpisodeNotFoundError
-	var distributionAlreadyExists *error2.DistributionAlreadyExistsError
-	var distributionNotFound *error2.DistributionNotFoundError
+	var modelError *error2.ModelError
 
 	for _, err := range context.Errors {
 		switch {
-		case errors.As(err.Err, &showAlreadyExists):
-			context.AbortWithStatusJSON(http.StatusBadRequest, err.JSON())
-		case errors.As(err.Err, &showNotFound):
-			context.AbortWithStatusJSON(http.StatusNotFound, err.JSON())
-		case errors.As(err.Err, &episodeAlreadyExists):
-			context.AbortWithStatusJSON(http.StatusBadRequest, err.JSON())
-		case errors.As(err.Err, &episodeNotFound):
-			context.AbortWithStatusJSON(http.StatusNotFound, err.JSON())
-		case errors.As(err.Err, &distributionAlreadyExists):
-			context.AbortWithStatusJSON(http.StatusBadRequest, err.JSON())
-		case errors.As(err.Err, &distributionNotFound):
-			context.AbortWithStatusJSON(http.StatusNotFound, err.JSON())
+		case errors.As(err.Err, &modelError):
+			switch err.Err.(*error2.ModelError).Category() {
+			case error2.AlreadyExists:
+				context.AbortWithStatusJSON(http.StatusBadRequest, err.JSON())
+			case error2.NotFound:
+				context.AbortWithStatusJSON(http.StatusNotFound, err.JSON())
+			default:
+				context.AbortWithStatusJSON(http.StatusInternalServerError, err.JSON())
+			}
 		default:
 			context.AbortWithStatusJSON(http.StatusInternalServerError, map[string]string{"error": "Internal Server Error"})
 		}

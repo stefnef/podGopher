@@ -2,74 +2,57 @@ package error
 
 import "fmt"
 
-type ShowAlreadyExistsError struct {
-	Name string
+type Category int
+
+const (
+	Unknown Category = iota
+	AlreadyExists
+	NotFound
+)
+
+type CustomError interface {
+	Category() Category
 }
 
-type EpisodeAlreadyExistsError struct {
-	Name string
+type ModelError struct {
+	ModelCategory Category
+	Context       string
 }
 
-type EpisodeNotFoundError struct {
-	Id string
+func (e ModelError) Error() string {
+	return e.Context
 }
 
-type ShowNotFoundError struct {
-	Id string
+func (e ModelError) Category() Category {
+	return e.ModelCategory
 }
 
-type DistributionAlreadyExistsError struct {
-	Name string
+func NewShowAlreadyExistsError(name string) *ModelError {
+	context := fmt.Sprintf("show with title '%v' or given slug already exists", name)
+	return &ModelError{AlreadyExists, context}
 }
 
-type DistributionNotFoundError struct {
-	Id string
+func NewShowNotFoundError(id string) *ModelError {
+	context := fmt.Sprintf("show with id '%v' does not exist", id)
+	return &ModelError{NotFound, context}
 }
 
-func (e ShowNotFoundError) Error() string {
-	return fmt.Sprintf("show with id '%v' does not exist", e.Id)
+func NewEpisodeAlreadyExistsError(name string) *ModelError {
+	context := fmt.Sprintf("episode with title '%v' already exists", name)
+	return &ModelError{AlreadyExists, context}
 }
 
-func (e ShowAlreadyExistsError) Error() string {
-	return fmt.Sprintf("show with title '%s' or given slug already exists", e.Name)
+func NewEpisodeNotFoundError(id string) *ModelError {
+	context := fmt.Sprintf("episode with id '%v' does not exist", id)
+	return &ModelError{NotFound, context}
 }
 
-func (e EpisodeAlreadyExistsError) Error() string {
-	return fmt.Sprintf("episode with title '%s' already exists", e.Name)
+func NewDistributionAlreadyExistsError(name string) *ModelError {
+	context := fmt.Sprintf("distribution with title '%v' or given slug already exists", name)
+	return &ModelError{AlreadyExists, context}
 }
 
-func (e EpisodeNotFoundError) Error() string {
-	return fmt.Sprintf("episode with id '%v' does not exist", e.Id)
-}
-
-func (e DistributionAlreadyExistsError) Error() string {
-	return fmt.Sprintf("distribution with title '%s' or given slug already exists", e.Name)
-}
-
-func (e DistributionNotFoundError) Error() string {
-	return fmt.Sprintf("distribution with id '%v' does not exist", e.Id)
-}
-
-func NewShowAlreadyExistsError(name string) *ShowAlreadyExistsError {
-	return &ShowAlreadyExistsError{name}
-}
-
-func NewShowNotFoundError(id string) *ShowNotFoundError {
-	return &ShowNotFoundError{id}
-}
-
-func NewEpisodeAlreadyExistsError(name string) *EpisodeAlreadyExistsError {
-	return &EpisodeAlreadyExistsError{name}
-}
-
-func NewEpisodeNotFoundError(id string) *EpisodeNotFoundError {
-	return &EpisodeNotFoundError{id}
-}
-
-func NewDistributionAlreadyExistsError(name string) *DistributionAlreadyExistsError {
-	return &DistributionAlreadyExistsError{name}
-}
-
-func NewDistributionNotFoundError(id string) *DistributionNotFoundError {
-	return &DistributionNotFoundError{id}
+func NewDistributionNotFoundError(id string) *ModelError {
+	context := fmt.Sprintf("distribution with id '%v' does not exist", id)
+	return &ModelError{NotFound, context}
 }

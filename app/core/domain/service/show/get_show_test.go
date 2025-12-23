@@ -29,7 +29,7 @@ func Test_should_return_not_found_if_show_was_not_found(t *testing.T) {
 
 	assert.Nil(t, result)
 	assert.NotNil(t, err)
-	assert.Equal(t, &error2.ShowNotFoundError{Id: "non-existing-show-id"}, err)
+	assert.Equal(t, error2.NewShowNotFoundError("non-existing-show-id"), err)
 	assert.Equal(t, 1, mockGetShowAdapter.called)
 }
 

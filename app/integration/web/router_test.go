@@ -131,35 +131,20 @@ func Test_should_handle_errors(t *testing.T) {
 		expectedCode int
 		expectedMsg  string
 	}{
-		"show_already_exists": {
-			error2.NewShowAlreadyExistsError("FAKE"),
-			400,
-			"FAKE",
+		"already_exists": {
+			err:          &error2.ModelError{ModelCategory: error2.AlreadyExists, Context: "FAKE"},
+			expectedCode: 400,
+			expectedMsg:  "FAKE",
 		},
-		"Show_not_found_error": {
-			error2.NewShowNotFoundError("FAKE"),
+		"not_found": {
+			&error2.ModelError{ModelCategory: error2.NotFound, Context: "Not found FAKE"},
 			404,
-			"FAKE",
+			"Not found FAKE",
 		},
-		"Episode_already_exists": {
-			error2.NewEpisodeAlreadyExistsError("FAKE"),
-			400,
-			"FAKE",
-		},
-		"Episode_not_found": {
-			error2.NewEpisodeNotFoundError("FAKE"),
-			404,
-			"FAKE",
-		},
-		"Distribution_already_exists": {
-			error2.NewDistributionAlreadyExistsError("FAKE"),
-			400,
-			"FAKE",
-		},
-		"Distribution_not_found": {
-			error2.NewDistributionNotFoundError("FAKE"),
-			404,
-			"FAKE",
+		"model_unknown": {
+			&error2.ModelError{ModelCategory: error2.Unknown, Context: "Unknown FAKE"},
+			500,
+			"Unknown FAKE",
 		},
 		"unknown": {
 			errors.New("FAKE"),
