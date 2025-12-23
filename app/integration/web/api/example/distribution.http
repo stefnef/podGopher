@@ -1,0 +1,21 @@
+# Create a new distribution
+POST {{host}}/show/{{showId}}/distribution
+Content-Type: application/json
+
+{
+  "Title": "some-distribution-title",
+  "Slug": "some-distribution-slug"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+
+    client.global.set("distributionId", response.body.id)
+%}
+
+###
+# Get an distribution
+GET {{host}}/show/{{showId}}/distribution/{{distributionId}}
+Content-Type: application/json

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	error2 "podGopher/core/domain/error"
+	"podGopher/core/domain/service/distribution"
 	"podGopher/core/domain/service/episode"
 	"podGopher/core/domain/service/show"
 	"podGopher/core/port/inbound"
@@ -20,8 +21,9 @@ type responseMock struct {
 }
 
 var exampleRequests = map[string]string{
-	"postShow":    `{"Title":"some title", "Slug":"some slug"}`,
-	"postEpisode": `{"Title":"some title"}`,
+	"postShow":         `{"Title":"some title", "Slug":"some slug"}`,
+	"postEpisode":      `{"Title":"some title"}`,
+	"postDistribution": `{"Title":"some title", "Slug":"some slug"}`,
 }
 
 var response responseMock
@@ -48,12 +50,18 @@ func (port *mockInboundPort) GetEpisode(*inbound.GetEpisodeCommand) (episode *in
 	return &inbound.GetEpisodeResponse{}, response.failsWith
 }
 
+func (port *mockInboundPort) CreateDistribution(*inbound.CreateDistributionCommand) (distribution *inbound.CreateDistributionResponse, err error) {
+	response.Text += "PostDistribution"
+	return &inbound.CreateDistributionResponse{}, response.failsWith
+}
+
 var mockPort = new(mockInboundPort)
 var router = NewRouter(inbound.PortMap{
-	inbound.CreateShow:    mockPort,
-	inbound.GetShow:       mockPort,
-	inbound.CreateEpisode: mockPort,
-	inbound.GetEpisode:    mockPort,
+	inbound.CreateShow:         mockPort,
+	inbound.GetShow:            mockPort,
+	inbound.CreateEpisode:      mockPort,
+	inbound.GetEpisode:         mockPort,
+	inbound.CreateDistribution: mockPort,
 })
 
 func setup() {
@@ -95,6 +103,13 @@ func Test_should_get_an_episode(t *testing.T) {
 	assert.Equal(t, "GetEpisode", response.Text)
 }
 
+func Test_should_post_a_distribution(t *testing.T) {
+	setup()
+	doRequest("POST", "/show/show-id/distribution", exampleRequests["postDistribution"])
+
+	assert.Equal(t, "PostDistribution", response.Text)
+}
+
 func Test_should_handle_errors(t *testing.T) {
 	setup()
 
@@ -123,6 +138,16 @@ func Test_should_handle_errors(t *testing.T) {
 			404,
 			"FAKE",
 		},
+		"Distribution_already_exists": {
+			error2.NewDistributionAlreadyExistsError("FAKE"),
+			400,
+			"FAKE",
+		},
+		"Distribution_not_found": {
+			error2.NewDistributionNotFoundError("FAKE"),
+			404,
+			"FAKE",
+		},
 		"unknown": {
 			errors.New("FAKE"),
 			500,
@@ -144,10 +169,11 @@ func Test_should_handle_errors(t *testing.T) {
 
 func Test_should_create_handlers(t *testing.T) {
 	portMap := inbound.PortMap{
-		inbound.CreateShow:    show.NewCreateShowService(nil),
-		inbound.GetShow:       show.NewGetShowService(nil),
-		inbound.CreateEpisode: episode.NewCreateEpisodeService(nil, nil),
-		inbound.GetEpisode:    episode.NewGetEpisodeService(nil, nil),
+		inbound.CreateShow:         show.NewCreateShowService(nil),
+		inbound.GetShow:            show.NewGetShowService(nil),
+		inbound.CreateEpisode:      episode.NewCreateEpisodeService(nil, nil),
+		inbound.GetEpisode:         episode.NewGetEpisodeService(nil, nil),
+		inbound.CreateDistribution: distribution.NewCreateDistributionService(nil, nil),
 	}
 
 	var handlers = CreateHandlers(portMap)

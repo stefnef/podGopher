@@ -10,4 +10,6 @@ const (
 	GetShow
 	CreateEpisode
 	GetEpisode
+	CreateDistribution
+	GetDistribution
 )
