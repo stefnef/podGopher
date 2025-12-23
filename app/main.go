@@ -78,6 +78,7 @@ func (app *App) createPortMap() inbound.PortMap {
 	var createEpisodePort = episode.NewCreateEpisodeService(showRepository, episodeRepository)
 	var getEpisodePort = episode.NewGetEpisodeService(showRepository, episodeRepository)
 	var createDistributionPort = distribution.NewCreateDistributionService(showRepository, distributionRepository)
+	var getDistributionPort = distribution.NewGetDistributionService(showRepository, distributionRepository)
 
 	return inbound.PortMap{
 		inbound.CreateShow:         createShowPort,
@@ -85,6 +86,7 @@ func (app *App) createPortMap() inbound.PortMap {
 		inbound.CreateEpisode:      createEpisodePort,
 		inbound.GetEpisode:         getEpisodePort,
 		inbound.CreateDistribution: createDistributionPort,
+		inbound.GetDistribution:    getDistributionPort,
 	}
 }
 

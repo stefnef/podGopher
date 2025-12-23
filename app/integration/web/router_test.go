@@ -55,6 +55,11 @@ func (port *mockInboundPort) CreateDistribution(*inbound.CreateDistributionComma
 	return &inbound.CreateDistributionResponse{}, response.failsWith
 }
 
+func (port *mockInboundPort) GetDistribution(*inbound.GetDistributionCommand) (distribution *inbound.GetDistributionResponse, err error) {
+	response.Text += "GetDistribution"
+	return &inbound.GetDistributionResponse{}, response.failsWith
+}
+
 var mockPort = new(mockInboundPort)
 var router = NewRouter(inbound.PortMap{
 	inbound.CreateShow:         mockPort,
@@ -62,6 +67,7 @@ var router = NewRouter(inbound.PortMap{
 	inbound.CreateEpisode:      mockPort,
 	inbound.GetEpisode:         mockPort,
 	inbound.CreateDistribution: mockPort,
+	inbound.GetDistribution:    mockPort,
 })
 
 func setup() {
@@ -108,6 +114,13 @@ func Test_should_post_a_distribution(t *testing.T) {
 	doRequest("POST", "/show/show-id/distribution", exampleRequests["postDistribution"])
 
 	assert.Equal(t, "PostDistribution", response.Text)
+}
+
+func Test_should_get_a_distribution(t *testing.T) {
+	setup()
+	doRequest("GET", "/show/some-show-id/distribution/some-distribution-id", "")
+
+	assert.Equal(t, "GetDistribution", response.Text)
 }
 
 func Test_should_handle_errors(t *testing.T) {
@@ -174,6 +187,7 @@ func Test_should_create_handlers(t *testing.T) {
 		inbound.CreateEpisode:      episode.NewCreateEpisodeService(nil, nil),
 		inbound.GetEpisode:         episode.NewGetEpisodeService(nil, nil),
 		inbound.CreateDistribution: distribution.NewCreateDistributionService(nil, nil),
+		inbound.GetDistribution:    distribution.NewGetDistributionService(nil, nil),
 	}
 
 	var handlers = CreateHandlers(portMap)

@@ -29,6 +29,7 @@ func CreateHandlers(portMap inbound.PortMap) []handler.Handler {
 		episode.NewCreateEpisodeHandler(portMap),
 		episode.NewGetEpisodeHandler(portMap),
 		distribution.NewCreateDistributionHandler(portMap),
+		distribution.NewGetDistributionHandler(portMap),
 	}
 }
 
