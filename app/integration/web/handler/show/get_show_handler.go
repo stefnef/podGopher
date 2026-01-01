@@ -3,6 +3,7 @@ package show
 import (
 	"net/http"
 	"podGopher/core/port/inbound"
+	"podGopher/core/port/inbound/show"
 	"podGopher/integration/web/handler"
 
 	"github.com/gin-gonic/gin"
@@ -10,7 +11,7 @@ import (
 
 type GetShowHandler struct {
 	route *handler.Route
-	port  inbound.GetShowPort
+	port  show.GetShowPort
 }
 
 func NewGetShowHandler(portMap inbound.PortMap) *GetShowHandler {
@@ -19,7 +20,7 @@ func NewGetShowHandler(portMap inbound.PortMap) *GetShowHandler {
 			Method: http.MethodGet,
 			Path:   "/show/:showId",
 		},
-		port: portMap[inbound.GetShow].(inbound.GetShowPort),
+		port: portMap[inbound.GetShow].(show.GetShowPort),
 	}
 }
 
@@ -28,7 +29,7 @@ func (h *GetShowHandler) GetRoute() *handler.Route {
 }
 
 func (h *GetShowHandler) Handle(context *gin.Context) {
-	foundShow, err := h.port.GetShow(&inbound.GetShowCommand{Id: context.Param("showId")})
+	foundShow, err := h.port.GetShow(&show.GetShowCommand{Id: context.Param("showId")})
 	if err != nil {
 		_ = context.Error(err)
 	} else {
@@ -37,7 +38,7 @@ func (h *GetShowHandler) Handle(context *gin.Context) {
 	}
 }
 
-func episodesToDto(foundShow *inbound.GetShowResponse) []string {
+func episodesToDto(foundShow *show.GetShowResponse) []string {
 	var episodesDto []string
 	if episodesDto = foundShow.Episodes; episodesDto == nil {
 		episodesDto = []string{}

@@ -1,4 +1,4 @@
-package outbound
+package show
 
 import "podGopher/core/domain/model"
 

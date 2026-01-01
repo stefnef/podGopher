@@ -2,7 +2,7 @@ package show
 
 import (
 	"podGopher/core/domain/model"
-	"podGopher/core/port/inbound"
+	onCreateShow "podGopher/core/port/inbound/show"
 )
 
 type saveAndGetShowTestAdapter struct {
@@ -18,8 +18,8 @@ func newSaveAndGetShowTestAdapter() *saveAndGetShowTestAdapter {
 	return adapter
 }
 
-func newTestCreateShowCommand(title string) *inbound.CreateShowCommand {
-	show := &inbound.CreateShowCommand{
+func newTestCreateShowCommand(title string) *onCreateShow.CreateShowCommand {
+	show := &onCreateShow.CreateShowCommand{
 		Title: title,
 		Slug:  title + "-Slug",
 	}

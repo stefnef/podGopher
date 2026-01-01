@@ -1,27 +1,28 @@
 package episode
 
 import (
-	error2 "podGopher/core/domain/error"
+	domainError "podGopher/core/domain/error"
 	"podGopher/core/domain/model"
-	"podGopher/core/port/inbound"
-	"podGopher/core/port/outbound"
+	onGetEpisode "podGopher/core/port/inbound/episode"
+	forGetEpisode "podGopher/core/port/outbound/episode"
+	forGetShow "podGopher/core/port/outbound/show"
 )
 
 type GetEpisodeService struct {
-	getShowOutPort    outbound.GetShowPort
-	getEpisodeOutPort outbound.GetEpisodePort
+	getShowOutPort    forGetShow.GetShowPort
+	getEpisodeOutPort forGetEpisode.GetEpisodePort
 }
 
-func NewGetEpisodeService(showRepository outbound.GetShowPort, episodeRepository outbound.GetEpisodePort) *GetEpisodeService {
+func NewGetEpisodeService(showRepository forGetShow.GetShowPort, episodeRepository forGetEpisode.GetEpisodePort) *GetEpisodeService {
 	return &GetEpisodeService{
 		getShowOutPort:    showRepository,
 		getEpisodeOutPort: episodeRepository,
 	}
 }
 
-func (service *GetEpisodeService) GetEpisode(command *inbound.GetEpisodeCommand) (episode *inbound.GetEpisodeResponse, err error) {
+func (service *GetEpisodeService) GetEpisode(command *onGetEpisode.GetEpisodeCommand) (episode *onGetEpisode.GetEpisodeResponse, err error) {
 	if show, _ := service.getShowOutPort.GetShowOrNil(command.ShowId); show == nil {
-		return nil, error2.NewShowNotFoundError(command.ShowId)
+		return nil, domainError.NewShowNotFoundError(command.ShowId)
 	}
 
 	var foundEpisode *model.Episode
@@ -30,10 +31,10 @@ func (service *GetEpisodeService) GetEpisode(command *inbound.GetEpisodeCommand)
 	}
 
 	if foundEpisode == nil {
-		return nil, error2.NewEpisodeNotFoundError(command.EpisodeId)
+		return nil, domainError.NewEpisodeNotFoundError(command.EpisodeId)
 	}
 
-	return &inbound.GetEpisodeResponse{
+	return &onGetEpisode.GetEpisodeResponse{
 		Id:     foundEpisode.Id,
 		ShowId: foundEpisode.ShowId,
 		Title:  foundEpisode.Title,

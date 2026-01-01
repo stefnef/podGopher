@@ -3,6 +3,7 @@ package distribution
 import (
 	"net/http"
 	"podGopher/core/port/inbound"
+	"podGopher/core/port/inbound/distribution"
 	"podGopher/integration/web/handler"
 
 	"github.com/gin-gonic/gin"
@@ -10,7 +11,7 @@ import (
 
 type CreateDistributionHandler struct {
 	route *handler.Route
-	port  inbound.CreateDistributionPort
+	port  distribution.CreateDistributionPort
 }
 
 type CreateDistributionRequestDto struct {
@@ -36,7 +37,7 @@ func NewCreateDistributionHandler(portMap inbound.PortMap) *CreateDistributionHa
 			Method: http.MethodPost,
 			Path:   "/show/:showId/distribution",
 		},
-		port: portMap[inbound.CreateDistribution].(inbound.CreateDistributionPort),
+		port: portMap[inbound.CreateDistribution].(distribution.CreateDistributionPort),
 	}
 }
 
@@ -57,7 +58,7 @@ func (h *CreateDistributionHandler) Handle(context *gin.Context) {
 }
 
 func (h *CreateDistributionHandler) handleCreateDistribution(context *gin.Context, showId string, request *CreateDistributionRequestDto) {
-	command := &inbound.CreateDistributionCommand{
+	command := &distribution.CreateDistributionCommand{
 		ShowId: showId,
 		Title:  request.Title,
 		Slug:   request.Slug,

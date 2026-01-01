@@ -2,7 +2,7 @@ package distribution
 
 import (
 	"podGopher/core/domain/model"
-	"podGopher/core/port/inbound"
+	onCreateDistribution "podGopher/core/port/inbound/distribution"
 )
 
 type saveAndGetDistributionTestAdapter struct {
@@ -26,8 +26,8 @@ func newSaveAndGetDistributionTestAdapter() *saveAndGetDistributionTestAdapter {
 	return adapter
 }
 
-func newTestCreateDistributionCommand(title string) *inbound.CreateDistributionCommand {
-	distribution := &inbound.CreateDistributionCommand{
+func newTestCreateDistributionCommand(title string) *onCreateDistribution.CreateDistributionCommand {
+	distribution := &onCreateDistribution.CreateDistributionCommand{
 		ShowId: "test-show-id",
 		Title:  title,
 		Slug:   "Slug",

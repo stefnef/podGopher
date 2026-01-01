@@ -1,4 +1,4 @@
-package inbound
+package show
 
 type GetShowCommand struct {
 	Id string

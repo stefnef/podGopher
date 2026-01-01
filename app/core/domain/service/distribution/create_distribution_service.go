@@ -1,32 +1,33 @@
 package distribution
 
 import (
-	error2 "podGopher/core/domain/error"
+	domainError "podGopher/core/domain/error"
 	"podGopher/core/domain/model"
-	"podGopher/core/port/inbound"
-	"podGopher/core/port/outbound"
+	onCreateDistribution "podGopher/core/port/inbound/distribution"
+	forSaveDistribution "podGopher/core/port/outbound/distribution"
+	forGetShow "podGopher/core/port/outbound/show"
 
 	"github.com/google/uuid"
 )
 
 type CreateDistributionService struct {
-	getShowOutPort          outbound.GetShowPort
-	saveDistributionOutPort outbound.SaveDistributionPort
+	getShowOutPort          forGetShow.GetShowPort
+	saveDistributionOutPort forSaveDistribution.SaveDistributionPort
 }
 
-func NewCreateDistributionService(showRepository outbound.GetShowPort, distributionRepository outbound.SaveDistributionPort) *CreateDistributionService {
+func NewCreateDistributionService(showRepository forGetShow.GetShowPort, distributionRepository forSaveDistribution.SaveDistributionPort) *CreateDistributionService {
 	return &CreateDistributionService{
 		getShowOutPort:          showRepository,
 		saveDistributionOutPort: distributionRepository,
 	}
 }
 
-func (service CreateDistributionService) CreateDistribution(command *inbound.CreateDistributionCommand) (*inbound.CreateDistributionResponse, error) {
+func (service CreateDistributionService) CreateDistribution(command *onCreateDistribution.CreateDistributionCommand) (*onCreateDistribution.CreateDistributionResponse, error) {
 	if exists := service.saveDistributionOutPort.ExistsByTitleOrSlug(command.Title, command.Slug); exists == true {
-		return nil, error2.NewDistributionAlreadyExistsError(command.Title)
+		return nil, domainError.NewDistributionAlreadyExistsError(command.Title)
 	}
 	if show, _ := service.getShowOutPort.GetShowOrNil(command.ShowId); show == nil {
-		return nil, error2.NewShowNotFoundError(command.ShowId)
+		return nil, domainError.NewShowNotFoundError(command.ShowId)
 	}
 
 	id := uuid.NewString()
@@ -35,7 +36,7 @@ func (service CreateDistributionService) CreateDistribution(command *inbound.Cre
 	if err != nil {
 		return nil, err
 	}
-	return &inbound.CreateDistributionResponse{
+	return &onCreateDistribution.CreateDistributionResponse{
 		Id:     distribution.Id,
 		ShowId: distribution.ShowId,
 		Title:  distribution.Title,

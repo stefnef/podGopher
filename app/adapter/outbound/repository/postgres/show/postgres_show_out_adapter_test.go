@@ -5,7 +5,7 @@ import (
 	repositoryEpisode "podGopher/adapter/outbound/repository/postgres/episode"
 	"podGopher/adapter/outbound/repository/postgres/postgresTestSetup"
 	"podGopher/core/domain/model"
-	"podGopher/core/port/outbound"
+	forSaveShow "podGopher/core/port/outbound/show"
 	"testing"
 
 	"github.com/google/uuid"
@@ -16,7 +16,7 @@ func Test_should_implement_port(t *testing.T) {
 	repository := NewPostgresShowRepository(nil)
 
 	assert.NotNil(t, repository)
-	assert.Implements(t, (*outbound.SaveShowPort)(nil), repository)
+	assert.Implements(t, (*forSaveShow.SaveShowPort)(nil), repository)
 }
 
 func Test_should_save_a_show(t *testing.T) {
@@ -33,32 +33,32 @@ func Test_should_save_a_show(t *testing.T) {
 		Episodes: []string{},
 	}
 
-	t.Run("should return false if show with title or slug does not exist", func(t *testing.T) {
+	t.Run("should return false if forSaveShow with title or slug does not exist", func(t *testing.T) {
 		exists := repository.ExistsByTitleOrSlug(showTitle, showSlug)
 		assert.False(t, exists)
 	})
 
-	t.Run("should save a show", func(t *testing.T) {
+	t.Run("should save a forSaveShow", func(t *testing.T) {
 		err := repository.SaveShow(show)
 		assert.Nil(t, err)
 	})
 
-	t.Run("should return true if show with title exists", func(t *testing.T) {
+	t.Run("should return true if forSaveShow with title exists", func(t *testing.T) {
 		exists := repository.ExistsByTitleOrSlug(showTitle, "some-other-slug")
 		assert.True(t, exists)
 	})
 
-	t.Run("should return true if show with slug exists", func(t *testing.T) {
+	t.Run("should return true if forSaveShow with slug exists", func(t *testing.T) {
 		exists := repository.ExistsByTitleOrSlug("some-other-title", showSlug)
 		assert.True(t, exists)
 	})
 
-	t.Run("should return true if show with title and slug exists", func(t *testing.T) {
+	t.Run("should return true if forSaveShow with title and slug exists", func(t *testing.T) {
 		exists := repository.ExistsByTitleOrSlug(showTitle, showSlug)
 		assert.True(t, exists)
 	})
 
-	t.Run("should return false if show with title or slug does not exists", func(t *testing.T) {
+	t.Run("should return false if forSaveShow with title or slug does not exists", func(t *testing.T) {
 		exists := repository.ExistsByTitleOrSlug("some-other-title", "some-other-slug")
 		assert.False(t, exists)
 	})

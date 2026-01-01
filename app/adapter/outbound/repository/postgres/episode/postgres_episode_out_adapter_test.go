@@ -4,7 +4,7 @@ import (
 	"podGopher/adapter/outbound/repository/postgres/postgresTestSetup"
 	repositoryShow "podGopher/adapter/outbound/repository/postgres/show"
 	"podGopher/core/domain/model"
-	"podGopher/core/port/outbound"
+	forSaveEpisode "podGopher/core/port/outbound/episode"
 	"testing"
 
 	"github.com/google/uuid"
@@ -15,7 +15,7 @@ func Test_episode_repository_should_implement_port(t *testing.T) {
 	repository := NewPostgresEpisodeRepository(nil)
 
 	assert.NotNil(t, repository)
-	assert.Implements(t, (*outbound.SaveEpisodePort)(nil), repository)
+	assert.Implements(t, (*forSaveEpisode.SaveEpisodePort)(nil), repository)
 }
 
 func Test_should_not_save_episode_if_show_does_not_exist(t *testing.T) {

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"podGopher/core/port/inbound"
+	"podGopher/core/port/inbound/show"
 	"podGopher/integration/web/handler"
 	"podGopher/integration/web/handler/handlerTestSetup"
 	"testing"
@@ -16,8 +17,8 @@ import (
 
 type getShowTestService struct {
 	called           int
-	command          *inbound.GetShowCommand
-	returnsOnGetShow *inbound.GetShowResponse
+	command          *show.GetShowCommand
+	returnsOnGetShow *show.GetShowResponse
 	failsWith        error
 }
 
@@ -28,7 +29,7 @@ func (s *getShowTestService) init() {
 	s.failsWith = nil
 }
 
-func (s *getShowTestService) GetShow(command *inbound.GetShowCommand) (show *inbound.GetShowResponse, err error) {
+func (s *getShowTestService) GetShow(command *show.GetShowCommand) (show *show.GetShowResponse, err error) {
 	s.called++
 	s.command = command
 	return s.returnsOnGetShow, s.failsWith
@@ -95,18 +96,18 @@ func Test_should_call_service_on_get_show(t *testing.T) {
 
 	type testParameterStruct struct {
 		webParameterShowId  string
-		expectedPortCommand *inbound.GetShowCommand
-		mockedPortResponse  *inbound.GetShowResponse
+		expectedPortCommand *show.GetShowCommand
+		mockedPortResponse  *show.GetShowResponse
 		expectedWebResponse *showResponseDto
 	}
 
 	tests := []testParameterStruct{
 		{
 			`some-show-without-episodes-id`,
-			&inbound.GetShowCommand{
+			&show.GetShowCommand{
 				Id: "some-show-without-episodes-id",
 			},
-			&inbound.GetShowResponse{
+			&show.GetShowResponse{
 				Id:       "some-id",
 				Title:    "Mocked Title",
 				Slug:     "Mocked Slug",
@@ -121,10 +122,10 @@ func Test_should_call_service_on_get_show(t *testing.T) {
 		},
 		{
 			`some-show-null-episodes`,
-			&inbound.GetShowCommand{
+			&show.GetShowCommand{
 				Id: "some-show-null-episodes",
 			},
-			&inbound.GetShowResponse{
+			&show.GetShowResponse{
 				Id:       "some-id",
 				Title:    "Mocked Title",
 				Slug:     "Mocked Slug",
@@ -139,10 +140,10 @@ func Test_should_call_service_on_get_show(t *testing.T) {
 		},
 		{
 			`some-show-with-episodes-id`,
-			&inbound.GetShowCommand{
+			&show.GetShowCommand{
 				Id: "some-show-with-episodes-id",
 			},
-			&inbound.GetShowResponse{
+			&show.GetShowResponse{
 				Id:       "some-id",
 				Title:    "Mocked Title",
 				Slug:     "Mocked Slug",

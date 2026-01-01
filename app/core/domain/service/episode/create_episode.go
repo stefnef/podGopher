@@ -1,32 +1,33 @@
 package episode
 
 import (
-	error2 "podGopher/core/domain/error"
+	domainError "podGopher/core/domain/error"
 	"podGopher/core/domain/model"
-	"podGopher/core/port/inbound"
-	"podGopher/core/port/outbound"
+	onCreateEpisode "podGopher/core/port/inbound/episode"
+	forSaveEpisode "podGopher/core/port/outbound/episode"
+	forGetShow "podGopher/core/port/outbound/show"
 
 	"github.com/google/uuid"
 )
 
 type CreateEpisodeService struct {
-	getShowOutPort     outbound.GetShowPort
-	saveEpisodeOutPort outbound.SaveEpisodePort
+	getShowOutPort     forGetShow.GetShowPort
+	saveEpisodeOutPort forSaveEpisode.SaveEpisodePort
 }
 
-func NewCreateEpisodeService(showRepository outbound.GetShowPort, episodeRepository outbound.SaveEpisodePort) *CreateEpisodeService {
+func NewCreateEpisodeService(showRepository forGetShow.GetShowPort, episodeRepository forSaveEpisode.SaveEpisodePort) *CreateEpisodeService {
 	return &CreateEpisodeService{
 		getShowOutPort:     showRepository,
 		saveEpisodeOutPort: episodeRepository,
 	}
 }
 
-func (service CreateEpisodeService) CreateEpisode(command *inbound.CreateEpisodeCommand) (*inbound.CreateEpisodeResponse, error) {
+func (service CreateEpisodeService) CreateEpisode(command *onCreateEpisode.CreateEpisodeCommand) (*onCreateEpisode.CreateEpisodeResponse, error) {
 	if exists := service.saveEpisodeOutPort.ExistsByTitle(command.Title); exists != false {
-		return nil, error2.NewEpisodeAlreadyExistsError(command.Title)
+		return nil, domainError.NewEpisodeAlreadyExistsError(command.Title)
 	}
 	if show, _ := service.getShowOutPort.GetShowOrNil(command.ShowId); show == nil {
-		return nil, error2.NewShowNotFoundError(command.ShowId)
+		return nil, domainError.NewShowNotFoundError(command.ShowId)
 	}
 
 	id := uuid.NewString()
@@ -35,7 +36,7 @@ func (service CreateEpisodeService) CreateEpisode(command *inbound.CreateEpisode
 	if err != nil {
 		return nil, err
 	}
-	return &inbound.CreateEpisodeResponse{
+	return &onCreateEpisode.CreateEpisodeResponse{
 		Id:     episode.Id,
 		ShowId: episode.ShowId,
 		Title:  episode.Title,

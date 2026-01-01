@@ -1,4 +1,4 @@
-package outbound
+package distribution
 
 import "podGopher/core/domain/model"
 

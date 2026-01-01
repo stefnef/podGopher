@@ -2,9 +2,9 @@ package show
 
 import (
 	"errors"
-	error2 "podGopher/core/domain/error"
+	domainError "podGopher/core/domain/error"
 	"podGopher/core/domain/model"
-	"podGopher/core/port/inbound"
+	onCreateShow "podGopher/core/port/inbound/show"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,7 +14,7 @@ var createShowService = NewCreateShowService(mockSaveAndGetShowAdapter)
 
 func Test_should_implement_CreateShowInPort(t *testing.T) {
 	assert.NotNil(t, createShowService)
-	assert.Implements(t, (*inbound.CreateShowPort)(nil), createShowService)
+	assert.Implements(t, (*onCreateShow.CreateShowPort)(nil), createShowService)
 }
 
 func Test_should_save_a_new_show(t *testing.T) {
@@ -39,9 +39,9 @@ func Test_should_save_a_new_show(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotNil(t, result)
-	assert.IsType(t, (*inbound.CreateShowResponse)(nil), result)
+	assert.IsType(t, (*onCreateShow.CreateShowResponse)(nil), result)
 
-	expectedCreatedShow := &inbound.CreateShowResponse{Id: savedShow.Id, Title: "Test", Slug: "Test-Slug"}
+	expectedCreatedShow := &onCreateShow.CreateShowResponse{Id: savedShow.Id, Title: "Test", Slug: "Test-Slug"}
 	assert.Equal(t, expectedCreatedShow, result)
 }
 
@@ -55,7 +55,7 @@ func Test_should_throw_error_if_show_with_name_already_exists(t *testing.T) {
 
 	assert.Nil(t, result)
 	assert.NotNil(t, err)
-	assert.Equal(t, error2.NewShowAlreadyExistsError("Test"), err)
+	assert.Equal(t, domainError.NewShowAlreadyExistsError("Test"), err)
 	assert.Equal(t, 0, mockSaveAndGetShowAdapter.calledSave)
 }
 

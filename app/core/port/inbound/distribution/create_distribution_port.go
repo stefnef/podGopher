@@ -1,4 +1,4 @@
-package inbound
+package distribution
 
 type CreateDistributionCommand struct {
 	ShowId string

@@ -2,9 +2,9 @@ package episode
 
 import (
 	"errors"
-	error2 "podGopher/core/domain/error"
+	domainError "podGopher/core/domain/error"
 	"podGopher/core/domain/model"
-	"podGopher/core/port/inbound"
+	onCreateEpisode "podGopher/core/port/inbound/episode"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,7 +14,7 @@ var createEpisodeService = NewCreateEpisodeService(mockGetShowAdapter, mockSaveA
 
 func Test_should_implement_CreateEpisodeInPort(t *testing.T) {
 	assert.NotNil(t, createEpisodeService)
-	assert.Implements(t, (*inbound.CreateEpisodePort)(nil), createEpisodeService)
+	assert.Implements(t, (*onCreateEpisode.CreateEpisodePort)(nil), createEpisodeService)
 }
 
 func Test_should_throw_error_if_episode_with_name_already_exists(t *testing.T) {
@@ -27,7 +27,7 @@ func Test_should_throw_error_if_episode_with_name_already_exists(t *testing.T) {
 
 	assert.Nil(t, result)
 	assert.NotNil(t, err)
-	assert.Equal(t, error2.NewEpisodeAlreadyExistsError("Test"), err)
+	assert.Equal(t, domainError.NewEpisodeAlreadyExistsError("Test"), err)
 	assert.Equal(t, 0, mockSaveAndGetEpisodeAdapter.calledSave)
 }
 
@@ -58,7 +58,7 @@ func Test_should_throw_error_if_show_does_not_exist_on_save_episode(t *testing.T
 
 	assert.Nil(t, result)
 	assert.NotNil(t, err)
-	assert.Equal(t, error2.NewShowNotFoundError("test-show-id"), err)
+	assert.Equal(t, domainError.NewShowNotFoundError("test-show-id"), err)
 	assert.Equal(t, 0, mockSaveAndGetEpisodeAdapter.calledSave)
 }
 
@@ -85,8 +85,8 @@ func Test_should_save_a_new_episode(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotNil(t, result)
-	assert.IsType(t, (*inbound.CreateEpisodeResponse)(nil), result)
+	assert.IsType(t, (*onCreateEpisode.CreateEpisodeResponse)(nil), result)
 
-	expectedCreatedEpisode := &inbound.CreateEpisodeResponse{Id: savedEpisode.Id, ShowId: "test-show-id", Title: "Test"}
+	expectedCreatedEpisode := &onCreateEpisode.CreateEpisodeResponse{Id: savedEpisode.Id, ShowId: "test-show-id", Title: "Test"}
 	assert.Equal(t, expectedCreatedEpisode, result)
 }

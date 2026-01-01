@@ -1,4 +1,4 @@
-package inbound
+package episode
 
 type CreateEpisodeCommand struct {
 	ShowId string

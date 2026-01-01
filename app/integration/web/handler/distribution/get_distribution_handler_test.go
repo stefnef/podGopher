@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"podGopher/core/port/inbound"
+	"podGopher/core/port/inbound/distribution"
 	"podGopher/integration/web/handler"
 	"podGopher/integration/web/handler/handlerTestSetup"
 	"testing"
@@ -15,8 +16,8 @@ import (
 
 type getDistributionTestService struct {
 	called                   int
-	command                  *inbound.GetDistributionCommand
-	returnsOnGetDistribution *inbound.GetDistributionResponse
+	command                  *distribution.GetDistributionCommand
+	returnsOnGetDistribution *distribution.GetDistributionResponse
 	failsWith                error
 }
 
@@ -27,7 +28,7 @@ func (s *getDistributionTestService) init() {
 	s.failsWith = nil
 }
 
-func (s *getDistributionTestService) GetDistribution(command *inbound.GetDistributionCommand) (distribution *inbound.GetDistributionResponse, err error) {
+func (s *getDistributionTestService) GetDistribution(command *distribution.GetDistributionCommand) (distribution *distribution.GetDistributionResponse, err error) {
 	s.called++
 	s.command = command
 	return s.returnsOnGetDistribution, s.failsWith
@@ -71,8 +72,8 @@ func Test_should_call_service_on_get_distribution(t *testing.T) {
 	type testParamStruct struct {
 		showId               string
 		distributionId       string
-		expectedPortCommand  *inbound.GetDistributionCommand
-		expectedPortResponse *inbound.GetDistributionResponse
+		expectedPortCommand  *distribution.GetDistributionCommand
+		expectedPortResponse *distribution.GetDistributionResponse
 		expectedWebResponse  *distributionResponseDto
 	}
 
@@ -80,11 +81,11 @@ func Test_should_call_service_on_get_distribution(t *testing.T) {
 		{
 			"some-show-id",
 			"some-distribution-id",
-			&inbound.GetDistributionCommand{
+			&distribution.GetDistributionCommand{
 				ShowId:         "some-show-id",
 				DistributionId: "some-distribution-id",
 			},
-			&inbound.GetDistributionResponse{
+			&distribution.GetDistributionResponse{
 				Id:       "some-distribution-id",
 				ShowId:   "some-show-id",
 				Title:    "Mocked Title",
@@ -102,11 +103,11 @@ func Test_should_call_service_on_get_distribution(t *testing.T) {
 		{
 			"some-show-id",
 			"some-distribution-id-with-empty-episodes",
-			&inbound.GetDistributionCommand{
+			&distribution.GetDistributionCommand{
 				ShowId:         "some-show-id",
 				DistributionId: "some-distribution-id-with-empty-episodes",
 			},
-			&inbound.GetDistributionResponse{
+			&distribution.GetDistributionResponse{
 				Id:       "some-distribution-id-with-empty-episodes",
 				ShowId:   "some-show-id",
 				Title:    "Mocked Title",
@@ -124,11 +125,11 @@ func Test_should_call_service_on_get_distribution(t *testing.T) {
 		{
 			"some-show-id",
 			"some-distribution-id-with-nil-episodes",
-			&inbound.GetDistributionCommand{
+			&distribution.GetDistributionCommand{
 				ShowId:         "some-show-id",
 				DistributionId: "some-distribution-id-with-nil-episodes",
 			},
-			&inbound.GetDistributionResponse{
+			&distribution.GetDistributionResponse{
 				Id:       "some-distribution-id-with-nil-episodes",
 				ShowId:   "some-show-id",
 				Title:    "Mocked Title",

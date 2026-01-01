@@ -3,6 +3,7 @@ package distribution
 import (
 	"net/http"
 	"podGopher/core/port/inbound"
+	"podGopher/core/port/inbound/distribution"
 	"podGopher/integration/web/handler"
 
 	"github.com/gin-gonic/gin"
@@ -10,7 +11,7 @@ import (
 
 type GetDistributionHandler struct {
 	route *handler.Route
-	port  inbound.GetDistributionPort
+	port  distribution.GetDistributionPort
 }
 
 func (h *GetDistributionHandler) GetRoute() *handler.Route {
@@ -23,7 +24,7 @@ func NewGetDistributionHandler(portMap inbound.PortMap) *GetDistributionHandler 
 			Method: http.MethodGet,
 			Path:   "/show/:showId/distribution/:distributionId",
 		},
-		port: portMap[inbound.GetDistribution].(inbound.GetDistributionPort),
+		port: portMap[inbound.GetDistribution].(distribution.GetDistributionPort),
 	}
 }
 
@@ -40,7 +41,7 @@ func (h *GetDistributionHandler) Handle(context *gin.Context) {
 }
 
 func (h *GetDistributionHandler) handleGetDistribution(context *gin.Context, showId string, distributionId string) {
-	command := &inbound.GetDistributionCommand{
+	command := &distribution.GetDistributionCommand{
 		ShowId:         showId,
 		DistributionId: distributionId,
 	}
@@ -59,7 +60,7 @@ func (h *GetDistributionHandler) handleGetDistribution(context *gin.Context, sho
 	}
 }
 
-func episodesToDto(foundShow *inbound.GetDistributionResponse) []string {
+func episodesToDto(foundShow *distribution.GetDistributionResponse) []string {
 	var episodesDto []string
 	if episodesDto = foundShow.Episodes; episodesDto == nil {
 		episodesDto = []string{}

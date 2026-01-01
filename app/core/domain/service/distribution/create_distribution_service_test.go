@@ -2,9 +2,9 @@ package distribution
 
 import (
 	"errors"
-	error2 "podGopher/core/domain/error"
+	domainError "podGopher/core/domain/error"
 	"podGopher/core/domain/model"
-	"podGopher/core/port/inbound"
+	onCreateDistribution "podGopher/core/port/inbound/distribution"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,7 +14,7 @@ var createDistributionService = NewCreateDistributionService(mockGetShowAdapter,
 
 func Test_should_implement_CreateDistributionInPort(t *testing.T) {
 	assert.NotNil(t, createDistributionService)
-	assert.Implements(t, (*inbound.CreateDistributionPort)(nil), createDistributionService)
+	assert.Implements(t, (*onCreateDistribution.CreateDistributionPort)(nil), createDistributionService)
 }
 
 func Test_should_throw_error_if_distribution_with_name_already_exists(t *testing.T) {
@@ -27,7 +27,7 @@ func Test_should_throw_error_if_distribution_with_name_already_exists(t *testing
 
 	assert.Nil(t, result)
 	assert.NotNil(t, err)
-	assert.Equal(t, error2.NewDistributionAlreadyExistsError("Test"), err)
+	assert.Equal(t, domainError.NewDistributionAlreadyExistsError("Test"), err)
 	assert.Equal(t, 0, mockSaveAndGetDistributionAdapter.calledSave)
 }
 
@@ -58,7 +58,7 @@ func Test_should_throw_error_if_show_does_not_exist_on_save_distribution(t *test
 
 	assert.Nil(t, result)
 	assert.NotNil(t, err)
-	assert.Equal(t, error2.NewShowNotFoundError("test-show-id"), err)
+	assert.Equal(t, domainError.NewShowNotFoundError("test-show-id"), err)
 	assert.Equal(t, 0, mockSaveAndGetDistributionAdapter.calledSave)
 }
 
@@ -86,8 +86,8 @@ func Test_should_save_a_new_distribution(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotNil(t, result)
-	assert.IsType(t, (*inbound.CreateDistributionResponse)(nil), result)
+	assert.IsType(t, (*onCreateDistribution.CreateDistributionResponse)(nil), result)
 
-	expectedCreatedDistribution := &inbound.CreateDistributionResponse{Id: savedDistribution.Id, ShowId: "test-show-id", Title: "Test", Slug: "Slug"}
+	expectedCreatedDistribution := &onCreateDistribution.CreateDistributionResponse{Id: savedDistribution.Id, ShowId: "test-show-id", Title: "Test", Slug: "Slug"}
 	assert.Equal(t, expectedCreatedDistribution, result)
 }

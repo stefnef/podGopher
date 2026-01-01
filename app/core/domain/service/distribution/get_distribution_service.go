@@ -3,23 +3,24 @@ package distribution
 import (
 	error2 "podGopher/core/domain/error"
 	"podGopher/core/domain/model"
-	"podGopher/core/port/inbound"
-	"podGopher/core/port/outbound"
+	onGetDistribution "podGopher/core/port/inbound/distribution"
+	forGetDistribution "podGopher/core/port/outbound/distribution"
+	forGetShow "podGopher/core/port/outbound/show"
 )
 
 type GetDistributionService struct {
-	getShowOutPort         outbound.GetShowPort
-	getDistributionOutPort outbound.GetDistributionPort
+	getShowOutPort         forGetShow.GetShowPort
+	getDistributionOutPort forGetDistribution.GetDistributionPort
 }
 
-func NewGetDistributionService(showRepository outbound.GetShowPort, distributionRepository outbound.GetDistributionPort) *GetDistributionService {
+func NewGetDistributionService(showRepository forGetShow.GetShowPort, distributionRepository forGetDistribution.GetDistributionPort) *GetDistributionService {
 	return &GetDistributionService{
 		getShowOutPort:         showRepository,
 		getDistributionOutPort: distributionRepository,
 	}
 }
 
-func (service *GetDistributionService) GetDistribution(command *inbound.GetDistributionCommand) (distribution *inbound.GetDistributionResponse, err error) {
+func (service *GetDistributionService) GetDistribution(command *onGetDistribution.GetDistributionCommand) (distribution *onGetDistribution.GetDistributionResponse, err error) {
 	if show, _ := service.getShowOutPort.GetShowOrNil(command.ShowId); show == nil {
 		return nil, error2.NewShowNotFoundError(command.ShowId)
 	}
@@ -33,7 +34,7 @@ func (service *GetDistributionService) GetDistribution(command *inbound.GetDistr
 		return nil, error2.NewDistributionNotFoundError(command.DistributionId)
 	}
 
-	return &inbound.GetDistributionResponse{
+	return &onGetDistribution.GetDistributionResponse{
 		Id:     foundDistribution.Id,
 		ShowId: foundDistribution.ShowId,
 		Title:  foundDistribution.Title,

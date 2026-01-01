@@ -4,6 +4,7 @@ import (
 	"net/http"
 	error2 "podGopher/core/domain/error"
 	"podGopher/core/port/inbound"
+	"podGopher/core/port/inbound/episode"
 	"podGopher/integration/web/handler"
 
 	"github.com/gin-gonic/gin"
@@ -11,7 +12,7 @@ import (
 
 type GetEpisodeHandler struct {
 	route *handler.Route
-	port  inbound.GetEpisodePort
+	port  episode.GetEpisodePort
 }
 
 func (h GetEpisodeHandler) GetRoute() *handler.Route {
@@ -26,7 +27,7 @@ func (h GetEpisodeHandler) Handle(context *gin.Context) {
 		return
 	}
 
-	foundEpisode, err := h.port.GetEpisode(&inbound.GetEpisodeCommand{
+	foundEpisode, err := h.port.GetEpisode(&episode.GetEpisodeCommand{
 		EpisodeId: episodeId,
 		ShowId:    showId,
 	})
@@ -44,6 +45,6 @@ func NewGetEpisodeHandler(portMap inbound.PortMap) handler.Handler {
 			Method: http.MethodGet,
 			Path:   "/show/:showId/episode/:episodeId",
 		},
-		port: portMap[inbound.GetEpisode].(inbound.GetEpisodePort),
+		port: portMap[inbound.GetEpisode].(episode.GetEpisodePort),
 	}
 }

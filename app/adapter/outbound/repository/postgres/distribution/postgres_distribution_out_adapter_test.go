@@ -4,7 +4,7 @@ import (
 	"podGopher/adapter/outbound/repository/postgres/postgresTestSetup"
 	repositoryShow "podGopher/adapter/outbound/repository/postgres/show"
 	"podGopher/core/domain/model"
-	"podGopher/core/port/outbound"
+	forSaveDistribution "podGopher/core/port/outbound/distribution"
 	"testing"
 
 	"github.com/google/uuid"
@@ -15,7 +15,7 @@ func Test_distribution_repository_should_implement_port(t *testing.T) {
 	repository := NewPostgresDistributionRepository(nil)
 
 	assert.NotNil(t, repository)
-	assert.Implements(t, (*outbound.SaveDistributionPort)(nil), repository)
+	assert.Implements(t, (*forSaveDistribution.SaveDistributionPort)(nil), repository)
 }
 
 func Test_should_not_save_distribution_if_show_does_not_exist(t *testing.T) {
@@ -80,7 +80,7 @@ func Test_should_save_a_distribution(t *testing.T) {
 		assert.True(t, exists)
 	})
 
-	t.Run("should return false if distribtion with title or slug does not exists", func(t *testing.T) {
+	t.Run("should return false if distribution with title or slug does not exists", func(t *testing.T) {
 		exists := repository.ExistsByTitleOrSlug("some-other-title", "some-other-slug")
 		assert.False(t, exists)
 	})

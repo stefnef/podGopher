@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"podGopher/core/port/inbound"
+	"podGopher/core/port/inbound/distribution"
 	"podGopher/integration/web/handler"
 	"podGopher/integration/web/handler/handlerTestSetup"
 	"testing"
@@ -16,8 +17,8 @@ import (
 
 type createDistributionTestService struct {
 	called                      int
-	command                     *inbound.CreateDistributionCommand
-	returnsOnCreateDistribution *inbound.CreateDistributionResponse
+	command                     *distribution.CreateDistributionCommand
+	returnsOnCreateDistribution *distribution.CreateDistributionResponse
 	failsWith                   error
 }
 
@@ -28,7 +29,7 @@ func (s *createDistributionTestService) init() {
 	s.failsWith = nil
 }
 
-func (s *createDistributionTestService) CreateDistribution(command *inbound.CreateDistributionCommand) (distribution *inbound.CreateDistributionResponse, err error) {
+func (s *createDistributionTestService) CreateDistribution(command *distribution.CreateDistributionCommand) (distribution *distribution.CreateDistributionResponse, err error) {
 	s.called++
 	s.command = command
 	return s.returnsOnCreateDistribution, s.failsWith
@@ -73,18 +74,18 @@ func Test_should_call_service_on_create_distribution(t *testing.T) {
 	test := struct {
 		showId               string
 		webCommand           string
-		expectedPortCommand  *inbound.CreateDistributionCommand
-		expectedPortResponse *inbound.CreateDistributionResponse
+		expectedPortCommand  *distribution.CreateDistributionCommand
+		expectedPortResponse *distribution.CreateDistributionResponse
 		expectedWebResponse  *distributionResponseDto
 	}{
 		"some-show-id",
 		`{"title":"some title", "slug":"some slug"}`,
-		&inbound.CreateDistributionCommand{
+		&distribution.CreateDistributionCommand{
 			ShowId: "some-show-id",
 			Title:  "some title",
 			Slug:   "some slug",
 		},
-		&inbound.CreateDistributionResponse{
+		&distribution.CreateDistributionResponse{
 			Id:     "some-id",
 			ShowId: "some-show-id",
 			Title:  "Mocked Title",
