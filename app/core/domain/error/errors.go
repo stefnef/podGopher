@@ -10,10 +10,6 @@ const (
 	NotFound
 )
 
-type CustomError interface {
-	Category() Category
-}
-
 type ModelError struct {
 	ModelCategory Category
 	Context       string

@@ -53,7 +53,7 @@ func Test_is_an_error(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			assert.Implements(t, (*error)(nil), test.err)
 			assert.ErrorContains(t, test.err.(error), test.expectedErrorString)
-			assert.Equal(t, test.category, test.err.(CustomError).Category())
+			assert.Equal(t, test.category, test.err.(*ModelError).Category())
 		})
 	}
 
