@@ -132,17 +132,17 @@ func Test_should_handle_errors(t *testing.T) {
 		expectedMsg  string
 	}{
 		"already_exists": {
-			err:          &error2.ModelError{ModelCategory: error2.AlreadyExists, Context: "FAKE"},
+			err:          &error2.ModelError{Category: error2.AlreadyExists, Context: "FAKE"},
 			expectedCode: 400,
 			expectedMsg:  "FAKE",
 		},
 		"not_found": {
-			&error2.ModelError{ModelCategory: error2.NotFound, Context: "Not found FAKE"},
+			&error2.ModelError{Category: error2.NotFound, Context: "Not found FAKE"},
 			404,
 			"Not found FAKE",
 		},
 		"model_unknown": {
-			&error2.ModelError{ModelCategory: error2.Unknown, Context: "Unknown FAKE"},
+			&error2.ModelError{Category: error2.Unknown, Context: "Unknown FAKE"},
 			500,
 			"Unknown FAKE",
 		},

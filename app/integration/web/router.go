@@ -53,7 +53,7 @@ func handleError(context *gin.Context) {
 	for _, err := range context.Errors {
 		switch {
 		case errors.As(err.Err, &modelError):
-			switch err.Err.(*error2.ModelError).Category() {
+			switch err.Err.(*error2.ModelError).Category {
 			case error2.AlreadyExists:
 				context.AbortWithStatusJSON(http.StatusBadRequest, err.JSON())
 			case error2.NotFound:

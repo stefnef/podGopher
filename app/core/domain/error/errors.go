@@ -11,16 +11,12 @@ const (
 )
 
 type ModelError struct {
-	ModelCategory Category
-	Context       string
+	Category Category
+	Context  string
 }
 
 func (e ModelError) Error() string {
 	return e.Context
-}
-
-func (e ModelError) Category() Category {
-	return e.ModelCategory
 }
 
 func NewShowAlreadyExistsError(name string) *ModelError {
