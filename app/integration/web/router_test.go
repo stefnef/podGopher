@@ -5,10 +5,14 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
-	error2 "podGopher/core/domain/error"
+	domainError "podGopher/core/domain/error"
+	"podGopher/core/domain/service/distribution"
 	"podGopher/core/domain/service/episode"
 	"podGopher/core/domain/service/show"
 	"podGopher/core/port/inbound"
+	inboundDistribution "podGopher/core/port/inbound/distribution"
+	episode2 "podGopher/core/port/inbound/episode"
+	show2 "podGopher/core/port/inbound/show"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -20,40 +24,53 @@ type responseMock struct {
 }
 
 var exampleRequests = map[string]string{
-	"postShow":    `{"Title":"some title", "Slug":"some slug"}`,
-	"postEpisode": `{"Title":"some title"}`,
+	"postShow":         `{"Title":"some title", "Slug":"some slug"}`,
+	"postEpisode":      `{"Title":"some title"}`,
+	"postDistribution": `{"Title":"some title", "Slug":"some slug"}`,
 }
 
 var response responseMock
 
 type mockInboundPort struct{}
 
-func (port *mockInboundPort) CreateShow(*inbound.CreateShowCommand) (show *inbound.CreateShowResponse, err error) {
+func (port *mockInboundPort) CreateShow(*show2.CreateShowCommand) (show *show2.CreateShowResponse, err error) {
 	response.Text += "CreateShow"
-	return &inbound.CreateShowResponse{Title: "CreateShow"}, response.failsWith
+	return &show2.CreateShowResponse{Title: "CreateShow"}, response.failsWith
 }
 
-func (port *mockInboundPort) GetShow(*inbound.GetShowCommand) (show *inbound.GetShowResponse, err error) {
+func (port *mockInboundPort) GetShow(*show2.GetShowCommand) (show *show2.GetShowResponse, err error) {
 	response.Text += "GetShow"
-	return &inbound.GetShowResponse{}, response.failsWith
+	return &show2.GetShowResponse{}, response.failsWith
 }
 
-func (port *mockInboundPort) CreateEpisode(*inbound.CreateEpisodeCommand) (episode *inbound.CreateEpisodeResponse, err error) {
+func (port *mockInboundPort) CreateEpisode(*episode2.CreateEpisodeCommand) (episode *episode2.CreateEpisodeResponse, err error) {
 	response.Text += "PostEpisode"
-	return &inbound.CreateEpisodeResponse{}, response.failsWith
+	return &episode2.CreateEpisodeResponse{}, response.failsWith
 }
 
-func (port *mockInboundPort) GetEpisode(*inbound.GetEpisodeCommand) (episode *inbound.GetEpisodeResponse, err error) {
+func (port *mockInboundPort) GetEpisode(*episode2.GetEpisodeCommand) (episode *episode2.GetEpisodeResponse, err error) {
 	response.Text += "GetEpisode"
-	return &inbound.GetEpisodeResponse{}, response.failsWith
+	return &episode2.GetEpisodeResponse{}, response.failsWith
+}
+
+func (port *mockInboundPort) CreateDistribution(*inboundDistribution.CreateDistributionCommand) (distribution *inboundDistribution.CreateDistributionResponse, err error) {
+	response.Text += "PostDistribution"
+	return &inboundDistribution.CreateDistributionResponse{}, response.failsWith
+}
+
+func (port *mockInboundPort) GetDistribution(*inboundDistribution.GetDistributionCommand) (distribution *inboundDistribution.GetDistributionResponse, err error) {
+	response.Text += "GetDistribution"
+	return &inboundDistribution.GetDistributionResponse{}, response.failsWith
 }
 
 var mockPort = new(mockInboundPort)
 var router = NewRouter(inbound.PortMap{
-	inbound.CreateShow:    mockPort,
-	inbound.GetShow:       mockPort,
-	inbound.CreateEpisode: mockPort,
-	inbound.GetEpisode:    mockPort,
+	inbound.CreateShow:         mockPort,
+	inbound.GetShow:            mockPort,
+	inbound.CreateEpisode:      mockPort,
+	inbound.GetEpisode:         mockPort,
+	inbound.CreateDistribution: mockPort,
+	inbound.GetDistribution:    mockPort,
 })
 
 func setup() {
@@ -95,6 +112,20 @@ func Test_should_get_an_episode(t *testing.T) {
 	assert.Equal(t, "GetEpisode", response.Text)
 }
 
+func Test_should_post_a_distribution(t *testing.T) {
+	setup()
+	doRequest("POST", "/show/show-id/distribution", exampleRequests["postDistribution"])
+
+	assert.Equal(t, "PostDistribution", response.Text)
+}
+
+func Test_should_get_a_distribution(t *testing.T) {
+	setup()
+	doRequest("GET", "/show/some-show-id/distribution/some-distribution-id", "")
+
+	assert.Equal(t, "GetDistribution", response.Text)
+}
+
 func Test_should_handle_errors(t *testing.T) {
 	setup()
 
@@ -103,25 +134,20 @@ func Test_should_handle_errors(t *testing.T) {
 		expectedCode int
 		expectedMsg  string
 	}{
-		"show_already_exists": {
-			error2.NewShowAlreadyExistsError("FAKE"),
-			400,
-			"FAKE",
+		"already_exists": {
+			err:          &domainError.ModelError{Category: domainError.AlreadyExists, Context: "FAKE"},
+			expectedCode: 400,
+			expectedMsg:  "FAKE",
 		},
-		"Show_not_found_error": {
-			error2.NewShowNotFoundError("FAKE"),
+		"not_found": {
+			&domainError.ModelError{Category: domainError.NotFound, Context: "Not found FAKE"},
 			404,
-			"FAKE",
+			"Not found FAKE",
 		},
-		"Episode_already_exists": {
-			error2.NewEpisodeAlreadyExistsError("FAKE"),
-			400,
-			"FAKE",
-		},
-		"Episode_not_found": {
-			error2.NewEpisodeNotFoundError("FAKE"),
-			404,
-			"FAKE",
+		"model_unknown": {
+			&domainError.ModelError{Category: domainError.Unknown, Context: "Unknown FAKE"},
+			500,
+			"Unknown FAKE",
 		},
 		"unknown": {
 			errors.New("FAKE"),
@@ -144,10 +170,12 @@ func Test_should_handle_errors(t *testing.T) {
 
 func Test_should_create_handlers(t *testing.T) {
 	portMap := inbound.PortMap{
-		inbound.CreateShow:    show.NewCreateShowService(nil),
-		inbound.GetShow:       show.NewGetShowService(nil),
-		inbound.CreateEpisode: episode.NewCreateEpisodeService(nil, nil),
-		inbound.GetEpisode:    episode.NewGetEpisodeService(nil, nil),
+		inbound.CreateShow:         show.NewCreateShowService(nil),
+		inbound.GetShow:            show.NewGetShowService(nil),
+		inbound.CreateEpisode:      episode.NewCreateEpisodeService(nil, nil),
+		inbound.GetEpisode:         episode.NewGetEpisodeService(nil, nil),
+		inbound.CreateDistribution: distribution.NewCreateDistributionService(nil, nil),
+		inbound.GetDistribution:    distribution.NewGetDistributionService(nil, nil),
 	}
 
 	var handlers = CreateHandlers(portMap)

@@ -1,27 +1,27 @@
 package show
 
 import (
-	error2 "podGopher/core/domain/error"
+	domainError "podGopher/core/domain/error"
 	"podGopher/core/domain/model"
-	"podGopher/core/port/inbound"
-	"podGopher/core/port/outbound"
+	onCreateShow "podGopher/core/port/inbound/show"
+	forSaveShow "podGopher/core/port/outbound/show"
 
 	"github.com/google/uuid"
 )
 
 type CreateShowService struct {
-	saveShowPort outbound.SaveShowPort
+	saveShowPort forSaveShow.SaveShowPort
 }
 
-func NewCreateShowService(repository outbound.SaveShowPort) *CreateShowService {
+func NewCreateShowService(repository forSaveShow.SaveShowPort) *CreateShowService {
 	return &CreateShowService{
 		saveShowPort: repository,
 	}
 }
 
-func (service *CreateShowService) CreateShow(command *inbound.CreateShowCommand) (*inbound.CreateShowResponse, error) {
+func (service *CreateShowService) CreateShow(command *onCreateShow.CreateShowCommand) (*onCreateShow.CreateShowResponse, error) {
 	if exists := service.saveShowPort.ExistsByTitleOrSlug(command.Title, command.Slug); exists != false {
-		return nil, error2.NewShowAlreadyExistsError(command.Title)
+		return nil, domainError.NewShowAlreadyExistsError(command.Title)
 	}
 	id := uuid.NewString()
 	show := &model.Show{Id: id, Title: command.Title, Slug: command.Slug}
@@ -29,5 +29,5 @@ func (service *CreateShowService) CreateShow(command *inbound.CreateShowCommand)
 	if err != nil {
 		return nil, err
 	}
-	return &inbound.CreateShowResponse{Id: show.Id, Title: show.Title, Slug: show.Slug}, nil
+	return &onCreateShow.CreateShowResponse{Id: show.Id, Title: show.Title, Slug: show.Slug}, nil
 }

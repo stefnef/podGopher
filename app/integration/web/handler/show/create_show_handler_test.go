@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"podGopher/core/port/inbound"
+	"podGopher/core/port/inbound/show"
 	"podGopher/integration/web/handler"
 	"podGopher/integration/web/handler/handlerTestSetup"
 	"testing"
@@ -16,8 +17,8 @@ import (
 
 type createShowTestService struct {
 	called              int
-	command             *inbound.CreateShowCommand
-	returnsOnCreateShow *inbound.CreateShowResponse
+	command             *show.CreateShowCommand
+	returnsOnCreateShow *show.CreateShowResponse
 	failsWith           error
 }
 
@@ -28,7 +29,7 @@ func (s *createShowTestService) init() {
 	s.failsWith = nil
 }
 
-func (s *createShowTestService) CreateShow(command *inbound.CreateShowCommand) (show *inbound.CreateShowResponse, err error) {
+func (s *createShowTestService) CreateShow(command *show.CreateShowCommand) (show *show.CreateShowResponse, err error) {
 	s.called++
 	s.command = command
 	return s.returnsOnCreateShow, s.failsWith
@@ -72,16 +73,16 @@ func Test_should_call_service_on_create_show(t *testing.T) {
 
 	test := struct {
 		webCommand           string
-		expectedPortCommand  *inbound.CreateShowCommand
-		expectedPortResponse *inbound.CreateShowResponse
+		expectedPortCommand  *show.CreateShowCommand
+		expectedPortResponse *show.CreateShowResponse
 		expectedWebResponse  *showResponseDto
 	}{
 		`{"Title":"some title", "Slug":"some slug"}`,
-		&inbound.CreateShowCommand{
+		&show.CreateShowCommand{
 			Title: "some title",
 			Slug:  "some slug",
 		},
-		&inbound.CreateShowResponse{
+		&show.CreateShowResponse{
 			Id:    "some-id",
 			Title: "Mocked Title",
 			Slug:  "Mocked Slug",

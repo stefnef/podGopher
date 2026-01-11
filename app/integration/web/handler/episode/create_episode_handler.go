@@ -3,6 +3,7 @@ package episode
 import (
 	"net/http"
 	"podGopher/core/port/inbound"
+	"podGopher/core/port/inbound/episode"
 	"podGopher/integration/web/handler"
 
 	"github.com/gin-gonic/gin"
@@ -10,7 +11,7 @@ import (
 
 type CreateEpisodeHandler struct {
 	route *handler.Route
-	port  inbound.CreateEpisodePort
+	port  episode.CreateEpisodePort
 }
 
 type CreateEpisodeRequestDto struct {
@@ -33,7 +34,7 @@ func NewCreateEpisodeHandler(portMap inbound.PortMap) *CreateEpisodeHandler {
 			Method: http.MethodPost,
 			Path:   "/show/:showId/episode",
 		},
-		port: portMap[inbound.CreateEpisode].(inbound.CreateEpisodePort),
+		port: portMap[inbound.CreateEpisode].(episode.CreateEpisodePort),
 	}
 }
 
@@ -48,7 +49,7 @@ func (h *CreateEpisodeHandler) Handle(context *gin.Context) {
 }
 
 func (h *CreateEpisodeHandler) handleCreateEpisode(context *gin.Context, request *CreateEpisodeRequestDto) {
-	createEpisodeCommand := &inbound.CreateEpisodeCommand{ShowId: context.Param("showId"), Title: request.Title}
+	createEpisodeCommand := &episode.CreateEpisodeCommand{ShowId: context.Param("showId"), Title: request.Title}
 	if createdEpisode, err := h.port.CreateEpisode(createEpisodeCommand); err != nil {
 		_ = context.Error(err)
 	} else {

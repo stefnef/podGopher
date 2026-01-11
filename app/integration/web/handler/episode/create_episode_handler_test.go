@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"podGopher/core/port/inbound"
+	"podGopher/core/port/inbound/episode"
 	"podGopher/integration/web/handler"
 	"podGopher/integration/web/handler/handlerTestSetup"
 	"testing"
@@ -16,8 +17,8 @@ import (
 
 type createEpisodeTestService struct {
 	called                 int
-	command                *inbound.CreateEpisodeCommand
-	returnsOnCreateEpisode *inbound.CreateEpisodeResponse
+	command                *episode.CreateEpisodeCommand
+	returnsOnCreateEpisode *episode.CreateEpisodeResponse
 	failsWith              error
 }
 
@@ -28,7 +29,7 @@ func (s *createEpisodeTestService) init() {
 	s.failsWith = nil
 }
 
-func (s *createEpisodeTestService) CreateEpisode(command *inbound.CreateEpisodeCommand) (episode *inbound.CreateEpisodeResponse, err error) {
+func (s *createEpisodeTestService) CreateEpisode(command *episode.CreateEpisodeCommand) (episode *episode.CreateEpisodeResponse, err error) {
 	s.called++
 	s.command = command
 	return s.returnsOnCreateEpisode, s.failsWith
@@ -99,17 +100,17 @@ func Test_should_call_service_on_create_episode(t *testing.T) {
 	test := struct {
 		webParameterShowId   string
 		webRequestBody       string
-		expectedPortCommand  *inbound.CreateEpisodeCommand
-		expectedPortResponse *inbound.CreateEpisodeResponse
+		expectedPortCommand  *episode.CreateEpisodeCommand
+		expectedPortResponse *episode.CreateEpisodeResponse
 		expectedWebResponse  *episodeResponseDto
 	}{
 		`some-show-id`,
 		`{"Title":"some title"}`,
-		&inbound.CreateEpisodeCommand{
+		&episode.CreateEpisodeCommand{
 			ShowId: "some-show-id",
 			Title:  "some title",
 		},
-		&inbound.CreateEpisodeResponse{
+		&episode.CreateEpisodeResponse{
 			Id:     "some-id",
 			ShowId: "Mocked Show Id",
 			Title:  "Mocked Title",

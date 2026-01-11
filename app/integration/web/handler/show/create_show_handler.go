@@ -3,6 +3,7 @@ package show
 import (
 	"net/http"
 	"podGopher/core/port/inbound"
+	"podGopher/core/port/inbound/show"
 	"podGopher/integration/web/handler"
 
 	"github.com/gin-gonic/gin"
@@ -10,7 +11,7 @@ import (
 
 type CreateShowHandler struct {
 	route *handler.Route
-	port  inbound.CreateShowPort
+	port  show.CreateShowPort
 }
 
 type CreateShowRequestDto struct {
@@ -35,7 +36,7 @@ func NewCreateShowHandler(portMap inbound.PortMap) *CreateShowHandler {
 			Method: http.MethodPost,
 			Path:   "/show",
 		},
-		port: portMap[inbound.CreateShow].(inbound.CreateShowPort),
+		port: portMap[inbound.CreateShow].(show.CreateShowPort),
 	}
 }
 
@@ -50,7 +51,7 @@ func (h *CreateShowHandler) Handle(context *gin.Context) {
 }
 
 func (h *CreateShowHandler) handleCreateShow(context *gin.Context, request *CreateShowRequestDto) {
-	if createdShow, err := h.port.CreateShow(&inbound.CreateShowCommand{Title: request.Title, Slug: request.Slug}); err != nil {
+	if createdShow, err := h.port.CreateShow(&show.CreateShowCommand{Title: request.Title, Slug: request.Slug}); err != nil {
 		_ = context.Error(err)
 	} else {
 		responseDto := showResponseDto{Id: createdShow.Id, Title: createdShow.Title, Slug: createdShow.Slug}

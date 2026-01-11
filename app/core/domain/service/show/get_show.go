@@ -1,32 +1,32 @@
 package show
 
 import (
-	error2 "podGopher/core/domain/error"
+	domainError "podGopher/core/domain/error"
 	"podGopher/core/domain/model"
-	"podGopher/core/port/inbound"
-	"podGopher/core/port/outbound"
+	onGetShow "podGopher/core/port/inbound/show"
+	forGetShow "podGopher/core/port/outbound/show"
 )
 
 type GetShowService struct {
-	repository outbound.GetShowPort
+	repository forGetShow.GetShowPort
 }
 
-func NewGetShowService(repository outbound.GetShowPort) *GetShowService {
+func NewGetShowService(repository forGetShow.GetShowPort) *GetShowService {
 	return &GetShowService{
 		repository: repository,
 	}
 }
 
-func (s *GetShowService) GetShow(command *inbound.GetShowCommand) (showResponse *inbound.GetShowResponse, err error) {
+func (s *GetShowService) GetShow(command *onGetShow.GetShowCommand) (showResponse *onGetShow.GetShowResponse, err error) {
 	var show *model.Show
 	if show, err = s.repository.GetShowOrNil(command.Id); err != nil {
 		return nil, err
 	}
 
 	if show == nil {
-		return nil, error2.NewShowNotFoundError(command.Id)
+		return nil, domainError.NewShowNotFoundError(command.Id)
 	}
-	return &inbound.GetShowResponse{
+	return &onGetShow.GetShowResponse{
 		Id:       show.Id,
 		Title:    show.Title,
 		Slug:     show.Slug,

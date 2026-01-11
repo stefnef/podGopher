@@ -12,6 +12,7 @@ components:
                 id: "distribution-id"
                 title: "New Distribution"
                 slug: "new-distribution"
+                showId: "show-id"
                 episodes:
                   - id: "episode-id"
 
@@ -22,6 +23,7 @@ components:
         - id
         - title
         - slug
+        - showId
         - episodes
       properties:
         id:
@@ -30,6 +32,8 @@ components:
           $ref: "../model/distribution.yaml#/components/schemas/distributionTitle"
         slug:
           $ref: "../model/distribution.yaml#/components/schemas/distributionSlug"
+        showId:
+          $ref: "../model/show.yaml#/components/schemas/showId"
         episodes:
           type: array
           items:

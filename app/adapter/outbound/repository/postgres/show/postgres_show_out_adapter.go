@@ -39,45 +39,63 @@ func (adapter *PostgresShowOutAdapter) ExistsByTitleOrSlug(title string, slug st
 }
 
 func (adapter *PostgresShowOutAdapter) GetShowOrNil(id string) (show *model.Show, err error) {
-	query := "SELECT s.*, se.episode_id FROM show s LEFT JOIN show_episodes se ON se.show_id = s.id WHERE s.id = $1;"
+	query := `
+        SELECT s.id, s.title, s.slug, se.episode_id, sd.distribution_id 
+        FROM show s 
+        LEFT JOIN show_episodes se ON se.show_id = s.id 
+        LEFT JOIN show_distributions sd ON sd.show_id = s.id 
+        WHERE s.id = $1;
+    `
 	rows, _ := adapter.db.Query(query, id)
 	defer func(rows *sql.Rows) {
 		_ = rows.Close()
 	}(rows)
 
-	for rows.Next() {
-		show, err = parseNextShow(rows, show)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return show, nil
+	return parseShow(rows)
 }
 
-func parseNextShow(rows *sql.Rows, show *model.Show) (*model.Show, error) {
-	var (
-		showId string
-		title  string
-		slug   string
-		eId    sql.NullString
-	)
+func parseShow(rows *sql.Rows) (show *model.Show, err error) {
+	episodeSet := make(map[string]bool)
+	distributionSet := make(map[string]bool)
 
-	if err := rows.Scan(&showId, &title, &slug, &eId); err != nil {
-		return nil, err
-	}
+	for rows.Next() {
+		var (
+			showId string
+			title  string
+			slug   string
+			eId    sql.NullString
+			dId    sql.NullString
+		)
 
-	if show == nil {
-		show = &model.Show{
-			Id:    showId,
-			Title: title,
-			Slug:  slug,
+		if err = rows.Scan(&showId, &title, &slug, &eId, &dId); err != nil {
+			return nil, err
+		}
+
+		if show == nil {
+			show = &model.Show{
+				Id:    showId,
+				Title: title,
+				Slug:  slug,
+			}
+		}
+
+		if eId.Valid {
+			episodeSet[eId.String] = true
+		}
+		if dId.Valid {
+			distributionSet[dId.String] = true
 		}
 	}
 
-	if eId.Valid {
-		show.Episodes = append(show.Episodes, eId.String)
+	if show != nil {
+		for id := range episodeSet {
+			show.Episodes = append(show.Episodes, id)
+		}
+		for id := range distributionSet {
+			show.Distributions = append(show.Distributions, id)
+		}
 	}
+
 	return show, nil
 }
 

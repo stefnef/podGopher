@@ -6,6 +6,7 @@ import (
 	error2 "podGopher/core/domain/error"
 	"podGopher/core/port/inbound"
 	"podGopher/integration/web/handler"
+	"podGopher/integration/web/handler/distribution"
 	"podGopher/integration/web/handler/episode"
 	"podGopher/integration/web/handler/show"
 
@@ -27,6 +28,8 @@ func CreateHandlers(portMap inbound.PortMap) []handler.Handler {
 		show.NewGetShowHandler(portMap),
 		episode.NewCreateEpisodeHandler(portMap),
 		episode.NewGetEpisodeHandler(portMap),
+		distribution.NewCreateDistributionHandler(portMap),
+		distribution.NewGetDistributionHandler(portMap),
 	}
 }
 
@@ -45,21 +48,19 @@ func setHandlers(portMap inbound.PortMap, router *gin.Engine) {
 }
 
 func handleError(context *gin.Context) {
-	var showAlreadyExists *error2.ShowAlreadyExistsError
-	var episodeAlreadyExists *error2.EpisodeAlreadyExistsError
-	var episodeNotFound *error2.EpisodeNotFoundError
-	var showNotFound *error2.ShowNotFoundError
+	var modelError *error2.ModelError
 
 	for _, err := range context.Errors {
 		switch {
-		case errors.As(err.Err, &showAlreadyExists):
-			context.AbortWithStatusJSON(http.StatusBadRequest, err.JSON())
-		case errors.As(err.Err, &showNotFound):
-			context.AbortWithStatusJSON(http.StatusNotFound, err.JSON())
-		case errors.As(err.Err, &episodeAlreadyExists):
-			context.AbortWithStatusJSON(http.StatusBadRequest, err.JSON())
-		case errors.As(err.Err, &episodeNotFound):
-			context.AbortWithStatusJSON(http.StatusNotFound, err.JSON())
+		case errors.As(err.Err, &modelError):
+			switch err.Err.(*error2.ModelError).Category {
+			case error2.AlreadyExists:
+				context.AbortWithStatusJSON(http.StatusBadRequest, err.JSON())
+			case error2.NotFound:
+				context.AbortWithStatusJSON(http.StatusNotFound, err.JSON())
+			default:
+				context.AbortWithStatusJSON(http.StatusInternalServerError, err.JSON())
+			}
 		default:
 			context.AbortWithStatusJSON(http.StatusInternalServerError, map[string]string{"error": "Internal Server Error"})
 		}

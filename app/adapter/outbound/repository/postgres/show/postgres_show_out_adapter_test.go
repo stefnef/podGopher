@@ -1,10 +1,11 @@
 package show
 
 import (
+	repositoryDistribution "podGopher/adapter/outbound/repository/postgres/distribution"
 	repositoryEpisode "podGopher/adapter/outbound/repository/postgres/episode"
 	"podGopher/adapter/outbound/repository/postgres/postgresTestSetup"
 	"podGopher/core/domain/model"
-	"podGopher/core/port/outbound"
+	forSaveShow "podGopher/core/port/outbound/show"
 	"testing"
 
 	"github.com/google/uuid"
@@ -15,12 +16,11 @@ func Test_should_implement_port(t *testing.T) {
 	repository := NewPostgresShowRepository(nil)
 
 	assert.NotNil(t, repository)
-	assert.Implements(t, (*outbound.SaveShowPort)(nil), repository)
+	assert.Implements(t, (*forSaveShow.SaveShowPort)(nil), repository)
 }
 
 func Test_should_save_a_show(t *testing.T) {
 	db := postgresTestSetup.StartTestcontainersPostgres(t, "../postgresTestSetup/")
-
 	defer postgresTestSetup.Teardown(t, db)
 
 	repository := NewPostgresShowRepository(db)
@@ -33,32 +33,32 @@ func Test_should_save_a_show(t *testing.T) {
 		Episodes: []string{},
 	}
 
-	t.Run("should return false if show with title or slug does not exist", func(t *testing.T) {
+	t.Run("should return false if forSaveShow with title or slug does not exist", func(t *testing.T) {
 		exists := repository.ExistsByTitleOrSlug(showTitle, showSlug)
 		assert.False(t, exists)
 	})
 
-	t.Run("should save a show", func(t *testing.T) {
+	t.Run("should save a forSaveShow", func(t *testing.T) {
 		err := repository.SaveShow(show)
 		assert.Nil(t, err)
 	})
 
-	t.Run("should return true if show with title exists", func(t *testing.T) {
+	t.Run("should return true if forSaveShow with title exists", func(t *testing.T) {
 		exists := repository.ExistsByTitleOrSlug(showTitle, "some-other-slug")
 		assert.True(t, exists)
 	})
 
-	t.Run("should return true if show with slug exists", func(t *testing.T) {
+	t.Run("should return true if forSaveShow with slug exists", func(t *testing.T) {
 		exists := repository.ExistsByTitleOrSlug("some-other-title", showSlug)
 		assert.True(t, exists)
 	})
 
-	t.Run("should return true if show with title and slug exists", func(t *testing.T) {
+	t.Run("should return true if forSaveShow with title and slug exists", func(t *testing.T) {
 		exists := repository.ExistsByTitleOrSlug(showTitle, showSlug)
 		assert.True(t, exists)
 	})
 
-	t.Run("should return false if show with title or slug does not exists", func(t *testing.T) {
+	t.Run("should return false if forSaveShow with title or slug does not exists", func(t *testing.T) {
 		exists := repository.ExistsByTitleOrSlug("some-other-title", "some-other-slug")
 		assert.False(t, exists)
 	})
@@ -110,7 +110,7 @@ func Test_should_retrieve_a_show(t *testing.T) {
 
 }
 
-func Test_should_reference_episodes(t *testing.T) {
+func Test_should_reference_episodes_and_distributions(t *testing.T) {
 	db := postgresTestSetup.StartTestcontainersPostgres(t, "../postgresTestSetup/")
 
 	defer postgresTestSetup.Teardown(t, db)
@@ -118,50 +118,68 @@ func Test_should_reference_episodes(t *testing.T) {
 	showRepository := NewPostgresShowRepository(db)
 
 	episodeRepository := repositoryEpisode.NewPostgresEpisodeRepository(db)
-	showWithEpisodes := &model.Show{
+	distributionRepository := repositoryDistribution.NewPostgresDistributionRepository(db)
+
+	showWithEpisodesAndDistributions := &model.Show{
 		Id:    uuid.NewString(),
 		Title: "first show",
 		Slug:  "first-show-Slug",
 	}
-	showWithoutEpisodes := &model.Show{
+	showWithoutEpisodesNorDistributions := &model.Show{
 		Id:    uuid.NewString(),
 		Title: "show",
 		Slug:  "show-Slug",
 	}
 
-	err := showRepository.SaveShow(showWithEpisodes)
+	err := showRepository.SaveShow(showWithEpisodesAndDistributions)
 	assert.Nil(t, err)
 
-	err = showRepository.SaveShow(showWithoutEpisodes)
+	err = showRepository.SaveShow(showWithoutEpisodesNorDistributions)
 	assert.Nil(t, err)
 
 	err = episodeRepository.SaveEpisode(&model.Episode{
 		Id:     uuid.NewString(),
-		ShowId: showWithEpisodes.Id,
+		ShowId: showWithEpisodesAndDistributions.Id,
 		Title:  "first episode",
 	})
 	assert.Nil(t, err)
 
 	err = episodeRepository.SaveEpisode(&model.Episode{
 		Id:     uuid.NewString(),
-		ShowId: showWithEpisodes.Id,
-		Title:  "first episode",
+		ShowId: showWithEpisodesAndDistributions.Id,
+		Title:  "second episode",
 	})
 	assert.Nil(t, err)
 
-	t.Run("should retrieve a show with episodes", func(t *testing.T) {
-		foundShow, err := showRepository.GetShowOrNil(showWithEpisodes.Id)
+	err = distributionRepository.SaveDistribution(&model.Distribution{
+		Id:     uuid.NewString(),
+		ShowId: showWithEpisodesAndDistributions.Id,
+		Title:  "1st distribution",
+	})
+	assert.Nil(t, err)
+
+	err = distributionRepository.SaveDistribution(&model.Distribution{
+		Id:     uuid.NewString(),
+		ShowId: showWithEpisodesAndDistributions.Id,
+		Title:  "2nd distribution",
+	})
+	assert.Nil(t, err)
+
+	t.Run("should retrieve a show with episodes and distributions", func(t *testing.T) {
+		foundShow, err := showRepository.GetShowOrNil(showWithEpisodesAndDistributions.Id)
 
 		assert.Nil(t, err)
 		assert.NotNil(t, foundShow)
 		assert.Len(t, foundShow.Episodes, 2)
+		assert.Len(t, foundShow.Distributions, 2)
 	})
 
-	t.Run("should not retrieve non-referenced episodes", func(t *testing.T) {
-		foundShow, err := showRepository.GetShowOrNil(showWithoutEpisodes.Id)
+	t.Run("should not retrieve non-referenced episodes nor distributions", func(t *testing.T) {
+		foundShow, err := showRepository.GetShowOrNil(showWithoutEpisodesNorDistributions.Id)
 
 		assert.Nil(t, err)
 		assert.NotNil(t, foundShow)
 		assert.Len(t, foundShow.Episodes, 0)
+		assert.Len(t, foundShow.Distributions, 0)
 	})
 }

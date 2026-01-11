@@ -2,7 +2,7 @@ package episode
 
 import (
 	"podGopher/core/domain/model"
-	"podGopher/core/port/inbound"
+	onCreateEpisode "podGopher/core/port/inbound/episode"
 )
 
 type saveAndGetEpisodeTestAdapter struct {
@@ -26,8 +26,8 @@ func newSaveAndGetEpisodeTestAdapter() *saveAndGetEpisodeTestAdapter {
 	return adapter
 }
 
-func newTestCreateEpisodeCommand(title string) *inbound.CreateEpisodeCommand {
-	episode := &inbound.CreateEpisodeCommand{
+func newTestCreateEpisodeCommand(title string) *onCreateEpisode.CreateEpisodeCommand {
+	episode := &onCreateEpisode.CreateEpisodeCommand{
 		ShowId: "test-show-id",
 		Title:  title,
 	}
