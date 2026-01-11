@@ -102,3 +102,7 @@ func parseShow(rows *sql.Rows) (show *model.Show, err error) {
 func NewPostgresShowRepository(db *sql.DB) *PostgresShowOutAdapter {
 	return &PostgresShowOutAdapter{db: db}
 }
+
+func (adapter *PostgresShowOutAdapter) GetAllShows() ([]*model.Show, error) {
+	return nil, nil
+}
