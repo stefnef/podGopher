@@ -9,6 +9,14 @@ show:
       201:
         $ref: "../response/show.yaml#/components/responses/showResponse"
 
+  get:
+    tags:
+      - show
+    description: Retrieve a list of all shows
+    responses:
+      200:
+        $ref: "../response/show.yaml#/components/responses/allShowResponse"
+
 showId:
   get:
     tags:
