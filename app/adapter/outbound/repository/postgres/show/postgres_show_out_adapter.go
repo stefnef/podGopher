@@ -107,7 +107,7 @@ func (adapter *PostgresShowOutAdapter) GetAllShows() ([]*model.Show, error) {
 	shows := []*model.Show{}
 
 	query := `
-        SELECT s.id, s.title
+        SELECT s.id, s.title, s.slug
         FROM show s 
         ;
     `
@@ -120,15 +120,17 @@ func (adapter *PostgresShowOutAdapter) GetAllShows() ([]*model.Show, error) {
 		var (
 			showId string
 			title  string
+			slug   string
 		)
 
-		if err := rows.Scan(&showId, &title); err != nil {
+		if err := rows.Scan(&showId, &title, &slug); err != nil {
 			return nil, err
 		}
 
 		show := &model.Show{
 			Id:    showId,
 			Title: title,
+			Slug:  slug,
 		}
 
 		shows = append(shows, show)
