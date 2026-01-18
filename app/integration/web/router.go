@@ -30,6 +30,7 @@ func CreateHandlers(portMap inbound.PortMap) []handler.Handler {
 		episode.NewGetEpisodeHandler(portMap),
 		distribution.NewCreateDistributionHandler(portMap),
 		distribution.NewGetDistributionHandler(portMap),
+		distribution.NewUpdateDistributionHandler(portMap),
 	}
 }
 
@@ -43,6 +44,8 @@ func setHandlers(portMap inbound.PortMap, router *gin.Engine) {
 			router.POST(route.Path, handlerImpl.Handle, handleError)
 		case http.MethodGet:
 			router.GET(route.Path, handlerImpl.Handle, handleError)
+		case http.MethodPatch:
+			router.PATCH(route.Path, handlerImpl.Handle, handleError)
 		}
 	}
 }

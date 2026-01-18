@@ -22,3 +22,16 @@ distributionId:
     responses:
       200:
         $ref: "../response/distribution.yaml#/components/responses/distributionResponse"
+
+  patch:
+    tags:
+      - distribution
+    description: Update a show's distribution with given id
+    parameters:
+      - $ref: "../parameter/show.yaml#/components/parameters/showId"
+      - $ref: "../parameter/distribution.yaml#/components/parameters/distributionId"
+    requestBody:
+      $ref: "../request/distribution.yaml#/components/requestBodies/distributionUpdateBody"
+    responses:
+      204:
+        description: Distribution updated successfully

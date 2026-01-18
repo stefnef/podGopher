@@ -12,4 +12,5 @@ const (
 	GetEpisode
 	CreateDistribution
 	GetDistribution
+	UpdateDistribution
 )
