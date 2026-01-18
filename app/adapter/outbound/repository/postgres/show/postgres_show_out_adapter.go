@@ -104,7 +104,7 @@ func NewPostgresShowRepository(db *sql.DB) *PostgresShowOutAdapter {
 }
 
 func (adapter *PostgresShowOutAdapter) GetAllShows() ([]*model.Show, error) {
-	shows := []*model.Show{}
+	var shows []*model.Show
 
 	query := `
         SELECT s.id, s.title, s.slug
@@ -117,24 +117,32 @@ func (adapter *PostgresShowOutAdapter) GetAllShows() ([]*model.Show, error) {
 	}(rows)
 
 	for rows.Next() {
-		var (
-			showId string
-			title  string
-			slug   string
-		)
-
-		if err := rows.Scan(&showId, &title, &slug); err != nil {
+		show, err := parseShowInformation(rows)
+		if err != nil {
 			return nil, err
 		}
-
-		show := &model.Show{
-			Id:    showId,
-			Title: title,
-			Slug:  slug,
-		}
-
 		shows = append(shows, show)
 	}
 
 	return shows, nil
+}
+
+func parseShowInformation(rows *sql.Rows) (*model.Show, error) {
+	var (
+		showId string
+		title  string
+		slug   string
+	)
+
+	if err := rows.Scan(&showId, &title, &slug); err != nil {
+		return nil, err
+	}
+
+	show := &model.Show{
+		Id:    showId,
+		Title: title,
+		Slug:  slug,
+	}
+
+	return show, nil
 }
