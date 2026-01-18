@@ -134,10 +134,12 @@ func Test_should_retrieve_a_list_of_shows(t *testing.T) {
 	err = repository.SaveShow(otherShow)
 	assert.Nil(t, err)
 
+	expectedShows := []*model.Show{show, otherShow}
+
 	foundShows, err := repository.GetAllShows()
 	assert.Nil(t, err)
-	assert.Nil(t, foundShows)
-	// TODO: Hier weiter foundShows muss show und other show enthalten
+	assert.Len(t, foundShows, 2)
+	assert.Equal(t, expectedShows, foundShows)
 }
 
 func Test_should_reference_episodes_and_distributions(t *testing.T) {
