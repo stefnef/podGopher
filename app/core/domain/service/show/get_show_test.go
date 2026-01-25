@@ -72,3 +72,8 @@ func Test_retrieve_show_from_repository_on_get(t *testing.T) {
 	assert.Equal(t, expectedShowResponse, foundShow)
 	assert.Equal(t, 1, mockGetShowAdapter.called)
 }
+
+func Test_should_implement_GetAllShowInPort(t *testing.T) {
+	assert.NotNil(t, getShowService)
+	assert.Implements(t, (*onGetShow.GetAllShowPort)(nil), getShowService)
+}
