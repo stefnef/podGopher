@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var getShowService = NewGetShowService(mockGetShowAdapter)
+var getShowService = NewGetShowService(mockGetShowAdapter, mockGetShowAdapter)
 
 func Test_should_implement_GetShowInPort(t *testing.T) {
 	assert.NotNil(t, getShowService)

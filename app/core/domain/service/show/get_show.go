@@ -8,12 +8,14 @@ import (
 )
 
 type GetShowService struct {
-	repository forGetShow.GetShowPort
+	repository         forGetShow.GetShowPort
+	repositoryAllShows forGetShow.GetAllShowsPort
 }
 
-func NewGetShowService(repository forGetShow.GetShowPort) *GetShowService {
+func NewGetShowService(repository forGetShow.GetShowPort, repositoryAllShows forGetShow.GetAllShowsPort) *GetShowService {
 	return &GetShowService{
-		repository: repository,
+		repository:         repository,
+		repositoryAllShows: repositoryAllShows,
 	}
 }
 
@@ -35,5 +37,9 @@ func (s *GetShowService) GetShow(command *onGetShow.GetShowCommand) (showRespons
 }
 
 func (s *GetShowService) GetAllShows() (shows *onGetShow.GetAllShowsResponse, err error) {
-	return nil, nil
+	allShows, err := s.repositoryAllShows.GetAllShows()
+
+	return &onGetShow.GetAllShowsResponse{
+		Shows: allShows,
+	}, err
 }
