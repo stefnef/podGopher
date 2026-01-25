@@ -5,7 +5,7 @@ import (
 	repositoryEpisode "podGopher/adapter/outbound/repository/postgres/episode"
 	"podGopher/adapter/outbound/repository/postgres/postgresTestSetup"
 	"podGopher/core/domain/model"
-	forSaveShow "podGopher/core/port/outbound/show"
+	forSaveShow "podGopher/core/port/outbound/show" // TODO rename package alias
 	"testing"
 
 	"github.com/google/uuid"
@@ -108,6 +108,13 @@ func Test_should_retrieve_a_show(t *testing.T) {
 		assert.Empty(t, foundShow.Episodes)
 	})
 
+}
+
+func Test_should_implement_getAllShowsOutPort(t *testing.T) {
+	repository := NewPostgresShowRepository(nil)
+
+	assert.NotNil(t, repository)
+	assert.Implements(t, (*forSaveShow.GetAllShowsPort)(nil), repository)
 }
 
 func Test_should_retrieve_a_list_of_shows(t *testing.T) {
