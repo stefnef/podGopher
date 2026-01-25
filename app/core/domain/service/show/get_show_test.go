@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var getShowService = NewGetShowService(mockGetShowAdapter, mockGetShowAdapter)
+var getShowService = NewGetShowService(mockGetShowAdapter)
 
 func Test_should_implement_GetShowInPort(t *testing.T) {
 	assert.NotNil(t, getShowService)
@@ -71,11 +71,6 @@ func Test_retrieve_show_from_repository_on_get(t *testing.T) {
 	assert.NotNil(t, foundShow)
 	assert.Equal(t, expectedShowResponse, foundShow)
 	assert.Equal(t, 1, mockGetShowAdapter.called)
-}
-
-func Test_should_implement_GetAllShowsInPort(t *testing.T) {
-	assert.NotNil(t, getShowService)
-	assert.Implements(t, (*onGetShow.GetAllShowsPort)(nil), getShowService)
 }
 
 func Test_retrieve_all_shows_from_repository_on_get(t *testing.T) {

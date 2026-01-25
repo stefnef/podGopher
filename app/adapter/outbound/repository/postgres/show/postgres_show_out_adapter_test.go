@@ -107,14 +107,6 @@ func Test_should_retrieve_a_show(t *testing.T) {
 		assert.Equal(t, show.Id, foundShow.Id)
 		assert.Empty(t, foundShow.Episodes)
 	})
-
-}
-
-func Test_should_implement_getAllShowsOutPort(t *testing.T) {
-	repository := NewPostgresShowRepository(nil)
-
-	assert.NotNil(t, repository)
-	assert.Implements(t, (*forSaveShow.GetAllShowsPort)(nil), repository)
 }
 
 func Test_should_retrieve_a_list_of_shows(t *testing.T) {
