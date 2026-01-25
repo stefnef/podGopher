@@ -20,6 +20,10 @@ type getShowTestAdapter struct {
 	returnsOnGetOrNilShow map[string]*model.Show
 }
 
+func (a *getShowTestAdapter) GetAllShows() ([]*model.Show, error) {
+	panic("Don't use me")
+}
+
 func newSaveAndGetEpisodeTestAdapter() *saveAndGetEpisodeTestAdapter {
 	adapter := &saveAndGetEpisodeTestAdapter{}
 	adapter.init()
