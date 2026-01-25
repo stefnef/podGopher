@@ -73,7 +73,37 @@ func Test_retrieve_show_from_repository_on_get(t *testing.T) {
 	assert.Equal(t, 1, mockGetShowAdapter.called)
 }
 
-func Test_should_implement_GetAllShowInPort(t *testing.T) {
+func Test_should_implement_GetAllShowsInPort(t *testing.T) {
 	assert.NotNil(t, getShowService)
-	assert.Implements(t, (*onGetShow.GetAllShowPort)(nil), getShowService)
+	assert.Implements(t, (*onGetShow.GetAllShowsPort)(nil), getShowService)
+}
+
+func Test_retrieve_all_shows_from_repository_on_get(t *testing.T) {
+	defer initAdapter()
+
+	expectedShows := []*model.Show{{
+		Id:       "some-id",
+		Title:    "some title",
+		Slug:     "some-slug",
+		Episodes: []string{"some-episode-id"},
+	},
+		{
+			Id:       "other-id",
+			Title:    "other title",
+			Slug:     "other-slug",
+			Episodes: []string{},
+		},
+	}
+	expectedShowsResponse := &onGetShow.GetAllShowsResponse{
+		Shows: expectedShows,
+	}
+	mockGetShowAdapter.withErrorOnGetALlShows = nil
+	mockGetShowAdapter.returnsOnGetAllShows = expectedShows
+
+	foundShows, err := getShowService.GetAllShows()
+
+	assert.Nil(t, err)
+	assert.NotNil(t, foundShows)
+	assert.EqualValues(t, expectedShowsResponse, foundShows)
+	assert.Equal(t, 1, mockGetShowAdapter.called)
 }
