@@ -35,8 +35,10 @@ func (s *GetShowService) GetShow(command *onGetShow.GetShowCommand) (showRespons
 }
 
 func (s *GetShowService) GetAllShows() (shows *onGetShow.GetAllShowsResponse, err error) {
-	allShows, _ := s.repository.GetAllShows()
-
+	allShows, err := s.repository.GetAllShows()
+	if err != nil {
+		return nil, err
+	}
 	return &onGetShow.GetAllShowsResponse{
 		Shows: allShows,
 	}, nil

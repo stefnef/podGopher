@@ -102,3 +102,17 @@ func Test_retrieve_all_shows_from_repository_on_get(t *testing.T) {
 	assert.EqualValues(t, expectedShowsResponse, foundShows)
 	assert.Equal(t, 1, mockGetShowAdapter.called)
 }
+
+func Test_should_propagate_errors_from_adapter_on_get_for_all_shows(t *testing.T) {
+	defer initAdapter()
+
+	expectedError := errors.New("some error")
+	mockGetShowAdapter.withErrorOnGetALlShows = expectedError
+
+	foundShows, err := getShowService.GetAllShows()
+
+	assert.Nil(t, foundShows)
+	assert.NotNil(t, err)
+	assert.Equal(t, expectedError, err)
+	assert.Equal(t, 1, mockGetShowAdapter.called)
+}
