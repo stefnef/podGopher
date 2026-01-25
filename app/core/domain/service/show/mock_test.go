@@ -59,15 +59,25 @@ func (adapter *saveAndGetShowTestAdapter) ExistsByTitleOrSlug(title string, slug
 }
 
 type getShowTestAdapter struct {
-	called                  int
+	called int
+
 	returnsOnGetOrNilShow   map[string]*model.Show
 	withErrorOnGetOrNilShow error
+
+	returnsOnGetAllShows   []*model.Show
+	withErrorOnGetALlShows error
 }
 
 func (a *getShowTestAdapter) GetShowOrNil(id string) (*model.Show, error) {
 	a.called++
 	show := a.returnsOnGetOrNilShow[id]
 	return show, a.withErrorOnGetOrNilShow
+}
+
+func (a *getShowTestAdapter) GetAllShows() ([]*model.Show, error) {
+	a.called++
+	show := a.returnsOnGetAllShows
+	return show, a.withErrorOnGetALlShows
 }
 
 func initAdapter() {
