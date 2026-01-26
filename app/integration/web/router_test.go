@@ -202,7 +202,7 @@ func Test_should_create_handlers(t *testing.T) {
 		inbound.GetEpisode:         episode.NewGetEpisodeService(nil, nil),
 		inbound.CreateDistribution: distribution.NewCreateDistributionService(nil, nil),
 		inbound.GetDistribution:    distribution.NewGetDistributionService(nil, nil),
-		inbound.UpdateDistribution: distribution.NewUpdateDistributionService(),
+		inbound.UpdateDistribution: distribution.NewUpdateDistributionService(nil, nil),
 	}
 
 	var handlers = CreateHandlers(portMap)

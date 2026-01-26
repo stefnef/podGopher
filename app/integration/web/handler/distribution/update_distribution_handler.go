@@ -17,8 +17,9 @@ type UpdateDistributionHandler struct {
 }
 
 type UpdateDistributionRequestDto struct {
-	Title *string `json:"title"`
-	Slug  *string `json:"slug"`
+	Title    *string   `json:"title"`
+	Slug     *string   `json:"slug"`
+	Episodes *[]string `json:"episodes"`
 }
 
 func (h *UpdateDistributionHandler) GetRoute() *handler.Route {
@@ -42,24 +43,32 @@ func (h *UpdateDistributionHandler) Handle(context *gin.Context) {
 		return
 	}
 
+	distributionId := context.Param("distributionId")
+	if distributionId == "" {
+		_ = context.Error(domainError.NewDistributionNotFoundError(""))
+		return
+	}
+
 	var request *UpdateDistributionRequestDto
 	if err := context.BindJSON(&request); err != nil {
 		context.Abort()
 		return
 	}
-	if request.Title == nil && request.Slug == nil {
+	if request.Title == nil && request.Slug == nil && request.Episodes == nil {
 		_ = context.AbortWithError(http.StatusBadRequest, errors.New("invalid request"))
 		return
 	}
 
-	h.handleUpdateDistribution(context, showId, request)
+	h.handleUpdateDistribution(context, showId, distributionId, request)
 }
 
-func (h *UpdateDistributionHandler) handleUpdateDistribution(context *gin.Context, showId string, request *UpdateDistributionRequestDto) {
+func (h *UpdateDistributionHandler) handleUpdateDistribution(context *gin.Context, showId string, distributionId string, request *UpdateDistributionRequestDto) {
 	command := &distribution.UpdateDistributionCommand{
-		ShowId: showId,
-		Title:  request.Title,
-		Slug:   request.Slug,
+		ShowId:         showId,
+		DistributionId: distributionId,
+		Title:          request.Title,
+		Slug:           request.Slug,
+		Episodes:       request.Episodes,
 	}
 
 	if _, err := h.port.UpdateDistribution(command); err != nil {

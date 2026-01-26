@@ -77,24 +77,34 @@ func Test_should_call_service_on_update_distribution(t *testing.T) {
 	distributionId := "some-distribution-id"
 
 	tests := map[string]struct {
-		webCommand               string
-		expectedPortCommandTitle *string
-		expectedPortCommandSlug  *string
+		webCommand                  string
+		expectedPortCommandTitle    *string
+		expectedPortCommandSlug     *string
+		expectedPortCommandEpisodes *[]string
 	}{
 		"all fields are set": {
-			`{"title":"some title", "slug":"some slug"}`,
+			`{"title":"some title", "slug":"some slug", "episodes":["episode-1", "episode-2"]}`,
 			ptrString("some title"),
 			ptrString("some slug"),
+			&[]string{"episode-1", "episode-2"},
 		},
 		"title is set": {
 			`{"title":"some title"}`,
 			ptrString("some title"),
+			nil,
 			nil,
 		},
 		"slug is set": {
 			`{"slug":"some slug"}`,
 			nil,
 			ptrString("some slug"),
+			nil,
+		},
+		"episode is set": {
+			`{"episodes":["episode-1", "episode-2"]}`,
+			nil,
+			nil,
+			&[]string{"episode-1", "episode-2"},
 		},
 	}
 
@@ -112,6 +122,9 @@ func Test_should_call_service_on_update_distribution(t *testing.T) {
 			assert.Equal(t, 1, mockUpdateDistributionService.called)
 			assert.Equal(t, test.expectedPortCommandTitle, mockUpdateDistributionService.command.Title)
 			assert.Equal(t, test.expectedPortCommandSlug, mockUpdateDistributionService.command.Slug)
+			assert.Equal(t, test.expectedPortCommandEpisodes, mockUpdateDistributionService.command.Episodes)
+			assert.Equal(t, "some-show-id", mockUpdateDistributionService.command.ShowId)
+			assert.Equal(t, "some-distribution-id", mockUpdateDistributionService.command.DistributionId)
 			assert.Nil(t, recorder.Body.Bytes())
 			assert.Empty(t, context.Errors)
 			assert.Equal(t, http.StatusNoContent, recorder.Code)
@@ -180,5 +193,20 @@ func Test_abort_if_showId_is_missing_on_update_distribution(t *testing.T) {
 
 	assert.NotEmpty(t, context.Errors)
 	assert.Equal(t, domainError.NewShowNotFoundError(""), (*context.Errors[0]).Err)
+
+}
+
+func Test_abort_if_distributionId_is_missing_on_update_distribution(t *testing.T) {
+	defer mockUpdateDistributionService.init()
+
+	var context, _ = handlerTestSetup.GetTestGinContext(t)
+
+	context.Request = httptest.NewRequest("PATCH", "/show/show-id/distribution/", bytes.NewBuffer([]byte((`{"title":"some"}`))))
+	context.AddParam("showId", "some-value")
+
+	updateDistributionHandler.Handle(context)
+
+	assert.NotEmpty(t, context.Errors)
+	assert.Equal(t, domainError.NewDistributionNotFoundError(""), (*context.Errors[0]).Err)
 
 }

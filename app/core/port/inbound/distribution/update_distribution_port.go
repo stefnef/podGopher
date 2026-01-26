@@ -1,9 +1,11 @@
 package distribution
 
 type UpdateDistributionCommand struct {
-	ShowId string
-	Title  *string
-	Slug   *string
+	ShowId         string
+	DistributionId string
+	Title          *string
+	Slug           *string
+	Episodes       *[]string
 }
 
 type UpdateDistributionResponse struct {
