@@ -1,6 +1,7 @@
 package distribution
 
 import (
+	repositoryEpisode "podGopher/adapter/outbound/repository/postgres/episode"
 	"podGopher/adapter/outbound/repository/postgres/postgresTestSetup"
 	repositoryShow "podGopher/adapter/outbound/repository/postgres/show"
 	"podGopher/core/domain/model"
@@ -143,5 +144,77 @@ func Test_should_retrieve_a_distribution(t *testing.T) {
 		assert.Equal(t, distribution.Id, foundDistribution.Id)
 		assert.Equal(t, distribution.Title, foundDistribution.Title)
 		assert.Equal(t, distribution.Slug, foundDistribution.Slug)
+	})
+}
+
+func Test_should_update_a_distribution(t *testing.T) {
+	db := postgresTestSetup.StartTestcontainersPostgres(t, "../postgresTestSetup/")
+	defer postgresTestSetup.Teardown(t, db)
+
+	firstShowUuid := uuid.NewString()
+	secondShowUuid := uuid.NewString()
+	firstEpisodeUuid := uuid.NewString()
+	secondEpisodeUuid := uuid.NewString()
+
+	showRepository := repositoryShow.NewPostgresShowRepository(db)
+	episodeRepository := repositoryEpisode.NewPostgresEpisodeRepository(db)
+	repository := NewPostgresDistributionRepository(db)
+
+	distributionTitle := "old title"
+	distributionSlug := distributionTitle + "-Slug"
+	distribution := &model.Distribution{
+		Id:     uuid.NewString(),
+		ShowId: firstShowUuid,
+		Slug:   distributionSlug,
+		Title:  distributionTitle,
+	}
+
+	distributionUpdate := &model.Distribution{
+		Id:       distribution.Id,
+		ShowId:   secondShowUuid,
+		Title:    "new title",
+		Slug:     "new slug",
+		Episodes: []string{firstEpisodeUuid, secondEpisodeUuid},
+	}
+
+	if err := showRepository.SaveShow(&model.Show{Id: firstShowUuid, Title: "first-show", Slug: "first-slug"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := showRepository.SaveShow(&model.Show{Id: secondShowUuid, Title: "second-show", Slug: "second-slug"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := episodeRepository.SaveEpisode(&model.Episode{Id: firstEpisodeUuid, ShowId: firstShowUuid, Title: "first-episode"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := episodeRepository.SaveEpisode(&model.Episode{Id: secondEpisodeUuid, ShowId: firstShowUuid, Title: "second-episode"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := repository.SaveDistribution(distribution); err != nil {
+		t.Fatal(err)
+	}
+
+	t.Run("should update all fields", func(t *testing.T) {
+		err := repository.UpdateDistribution(distributionUpdate)
+		assert.Nil(t, err)
+	})
+
+	t.Run("should query updated distribution", func(t *testing.T) {
+		if fetchedDistribution, err := repository.GetDistributionOrNil(distribution.Id); err != nil {
+			t.Fatal(err)
+		} else {
+			assert.Equal(t, distributionUpdate, fetchedDistribution)
+		}
+	})
+
+	t.Run("should remove episodes", func(t *testing.T) {
+		distributionUpdate.Episodes = []string{}
+		err := repository.UpdateDistribution(distributionUpdate)
+		assert.Nil(t, err)
+
+		if fetchedDistribution, err := repository.GetDistributionOrNil(distribution.Id); err != nil {
+			t.Fatal(err)
+		} else {
+			assert.Empty(t, fetchedDistribution.Episodes)
+		}
 	})
 }

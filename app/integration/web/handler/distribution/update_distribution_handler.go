@@ -71,7 +71,7 @@ func (h *UpdateDistributionHandler) handleUpdateDistribution(context *gin.Contex
 		Episodes:       request.Episodes,
 	}
 
-	if _, err := h.port.UpdateDistribution(command); err != nil {
+	if err := h.port.UpdateDistribution(command); err != nil {
 		_ = context.Error(err)
 	} else {
 		context.Status(http.StatusNoContent)

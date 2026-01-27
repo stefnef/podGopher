@@ -8,6 +8,7 @@ const (
 	Unknown Category = iota
 	AlreadyExists
 	NotFound
+	DataConflict
 )
 
 type ModelError struct {
@@ -47,4 +48,9 @@ func NewDistributionAlreadyExistsError(name string) *ModelError {
 func NewDistributionNotFoundError(id string) *ModelError {
 	context := fmt.Sprintf("distribution with id '%v' does not exist", id)
 	return &ModelError{NotFound, context}
+}
+
+func NewUpdateError(reason string) error {
+	context := fmt.Sprintf("update not possible, reason: %v", reason)
+	return &ModelError{DataConflict, context}
 }

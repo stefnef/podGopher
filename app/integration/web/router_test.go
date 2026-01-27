@@ -64,9 +64,9 @@ func (port *mockInboundPort) GetDistribution(*inboundDistribution.GetDistributio
 	return &inboundDistribution.GetDistributionResponse{}, response.failsWith
 }
 
-func (port *mockInboundPort) UpdateDistribution(*inboundDistribution.UpdateDistributionCommand) (distribution *inboundDistribution.UpdateDistributionResponse, err error) {
+func (port *mockInboundPort) UpdateDistribution(*inboundDistribution.UpdateDistributionCommand) error {
 	response.Text += "UpdateDistribution"
-	return &inboundDistribution.UpdateDistributionResponse{}, response.failsWith
+	return response.failsWith
 }
 
 var mockPort = new(mockInboundPort)
@@ -175,6 +175,10 @@ func Test_should_handle_errors(t *testing.T) {
 			500,
 			"Unknown FAKE",
 		},
+		"data conflict": {&domainError.ModelError{Category: domainError.DataConflict, Context: "Some data conflict"},
+			400,
+			"Some data conflict",
+		},
 		"unknown": {
 			errors.New("FAKE"),
 			500,
@@ -202,7 +206,7 @@ func Test_should_create_handlers(t *testing.T) {
 		inbound.GetEpisode:         episode.NewGetEpisodeService(nil, nil),
 		inbound.CreateDistribution: distribution.NewCreateDistributionService(nil, nil),
 		inbound.GetDistribution:    distribution.NewGetDistributionService(nil, nil),
-		inbound.UpdateDistribution: distribution.NewUpdateDistributionService(nil, nil),
+		inbound.UpdateDistribution: distribution.NewUpdateDistributionService(nil, nil, nil, nil),
 	}
 
 	var handlers = CreateHandlers(portMap)

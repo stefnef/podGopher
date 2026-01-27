@@ -16,23 +16,21 @@ import (
 )
 
 type updateDistributionTestService struct {
-	called                      int
-	command                     *distribution.UpdateDistributionCommand
-	returnsOnUpdateDistribution *distribution.UpdateDistributionResponse
-	failsWith                   error
+	called    int
+	command   *distribution.UpdateDistributionCommand
+	failsWith error
 }
 
 func (s *updateDistributionTestService) init() {
 	s.called = 0
 	s.command = nil
-	s.returnsOnUpdateDistribution = nil
 	s.failsWith = nil
 }
 
-func (s *updateDistributionTestService) UpdateDistribution(command *distribution.UpdateDistributionCommand) (distribution *distribution.UpdateDistributionResponse, err error) {
+func (s *updateDistributionTestService) UpdateDistribution(command *distribution.UpdateDistributionCommand) error {
 	s.called++
 	s.command = command
-	return s.returnsOnUpdateDistribution, s.failsWith
+	return s.failsWith
 }
 
 var mockUpdateDistributionService = new(updateDistributionTestService)

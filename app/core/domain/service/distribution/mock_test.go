@@ -8,6 +8,8 @@ import (
 type saveAndGetDistributionTestAdapter struct {
 	calledGet                       int
 	calledSave                      int
+	calledUpdate                    int
+	calledUpdateWith                *model.Distribution
 	onSaveCalledWith                *model.Distribution
 	returnsOnExistsByTitleOrSlug    map[string]bool
 	withErrorOnSaveDistribution     error
@@ -18,6 +20,11 @@ type saveAndGetDistributionTestAdapter struct {
 type getShowTestAdapter struct {
 	called                int
 	returnsOnGetOrNilShow map[string]*model.Show
+}
+
+type getEpisodeTestAdapter struct {
+	called                   int
+	returnsOnGetEpisodeOrNil map[string]*model.Episode
 }
 
 func newSaveAndGetDistributionTestAdapter() *saveAndGetDistributionTestAdapter {
@@ -41,6 +48,12 @@ func (adapter *saveAndGetDistributionTestAdapter) SaveDistribution(distribution 
 	return adapter.withErrorOnSaveDistribution
 }
 
+func (adapter *saveAndGetDistributionTestAdapter) UpdateDistribution(distribution *model.Distribution) error {
+	adapter.calledUpdate++
+	adapter.calledUpdateWith = distribution
+	return nil
+}
+
 func (a *getShowTestAdapter) GetShowOrNil(id string) (*model.Show, error) {
 	a.called++
 	show := a.returnsOnGetOrNilShow[id]
@@ -50,6 +63,8 @@ func (a *getShowTestAdapter) GetShowOrNil(id string) (*model.Show, error) {
 func (adapter *saveAndGetDistributionTestAdapter) init() {
 	adapter.calledGet = 0
 	adapter.calledSave = 0
+	adapter.calledUpdate = 0
+	adapter.calledUpdateWith = nil
 	adapter.onSaveCalledWith = nil
 	adapter.returnsOnExistsByTitleOrSlug = make(map[string]bool)
 	adapter.returnsOnGetDistributionOrNil = make(map[string]*model.Distribution)
@@ -81,10 +96,32 @@ func newGetShowTestAdapter() *getShowTestAdapter {
 	return adapter
 }
 
+func newGetEpisodeTestAdapter() *getEpisodeTestAdapter {
+	adapter := &getEpisodeTestAdapter{}
+	adapter.init()
+	return adapter
+}
+
+func (a *getEpisodeTestAdapter) GetEpisodeOrNil(id string) (*model.Episode, error) {
+	a.called++
+	return mockGetEpisodeAdapter.returnsOnGetEpisodeOrNil[id], nil
+}
+
+func (a *getEpisodeTestAdapter) init() {
+	a.called = 0
+	a.returnsOnGetEpisodeOrNil = make(map[string]*model.Episode)
+}
+
 func initAdapter() {
 	mockGetShowAdapter.init()
+	mockGetEpisodeAdapter.init()
 	mockSaveAndGetDistributionAdapter.init()
 }
 
 var mockSaveAndGetDistributionAdapter = newSaveAndGetDistributionTestAdapter()
 var mockGetShowAdapter = newGetShowTestAdapter()
+var mockGetEpisodeAdapter = newGetEpisodeTestAdapter()
+
+func ptrOfString(value string) *string {
+	return &value
+}

@@ -1,0 +1,87 @@
+# Create a new show
+POST {{host}}/show
+Content-Type: application/json
+
+{
+  "Title": "some-title",
+  "Slug": "some-title-slug"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+
+    client.global.set("showId", response.body.id)
+%}
+
+### create episodes
+# Create a new episode
+POST {{host}}/show/{{showId}}/episode
+Content-Type: application/json
+
+{
+  "Title": "some-episode-title"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+
+    client.global.set("firstEpisodeId", response.body.id)
+%}
+
+### Create a second episode
+POST {{host}}/show/{{showId}}/episode
+Content-Type: application/json
+
+{
+  "Title": "second-episode"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+
+    client.global.set("secondEpisodeId", response.body.id)
+%}
+
+### Create a new distribution
+POST {{host}}/show/{{showId}}/distribution
+Content-Type: application/json
+
+{
+  "Title": "some-distribution-title",
+  "Slug": "some-distribution-slug"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+
+    client.global.set("distributionId", response.body.id)
+%}
+
+### Update and set episodes
+PATCH {{host}}/show/{{showId}}/distribution/{{distributionId}}
+Content-Type: application/json
+
+{
+  "Title": "distribution-title",
+  "Slug": "distribution-slug",
+  "Episodes": ["{{firstEpisodeId}}","{{secondEpisodeId}}"]
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 204, "Response status is not 204");
+    });
+
+%}
+
+### Get a distribution
+GET {{host}}/show/{{showId}}/distribution/{{distributionId}}
+Content-Type: application/json

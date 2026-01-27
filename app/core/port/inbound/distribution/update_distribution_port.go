@@ -8,13 +8,6 @@ type UpdateDistributionCommand struct {
 	Episodes       *[]string
 }
 
-type UpdateDistributionResponse struct {
-	Id     string
-	ShowId string
-	Title  string
-	Slug   string
-}
-
 type UpdateDistributionPort interface {
-	UpdateDistribution(command *UpdateDistributionCommand) (distribution *UpdateDistributionResponse, err error)
+	UpdateDistribution(command *UpdateDistributionCommand) error
 }

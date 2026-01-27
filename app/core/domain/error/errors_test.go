@@ -47,6 +47,12 @@ func Test_is_an_error(t *testing.T) {
 			"distribution with id 'some-id' does not exist",
 			NotFound,
 		},
+
+		"UpdateError": {
+			NewUpdateError("some test"),
+			"update not possible, reason: some test",
+			DataConflict,
+		},
 	}
 
 	for name, test := range tests {

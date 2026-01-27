@@ -3,7 +3,7 @@ package web
 import (
 	"errors"
 	"net/http"
-	error2 "podGopher/core/domain/error"
+	domainError "podGopher/core/domain/error"
 	"podGopher/core/port/inbound"
 	"podGopher/integration/web/handler"
 	"podGopher/integration/web/handler/distribution"
@@ -51,16 +51,18 @@ func setHandlers(portMap inbound.PortMap, router *gin.Engine) {
 }
 
 func handleError(context *gin.Context) {
-	var modelError *error2.ModelError
+	var modelError *domainError.ModelError
 
 	for _, err := range context.Errors {
 		switch {
 		case errors.As(err.Err, &modelError):
-			switch err.Err.(*error2.ModelError).Category {
-			case error2.AlreadyExists:
+			switch err.Err.(*domainError.ModelError).Category {
+			case domainError.AlreadyExists:
 				context.AbortWithStatusJSON(http.StatusBadRequest, err.JSON())
-			case error2.NotFound:
+			case domainError.NotFound:
 				context.AbortWithStatusJSON(http.StatusNotFound, err.JSON())
+			case domainError.DataConflict:
+				context.AbortWithStatusJSON(http.StatusBadRequest, err.JSON())
 			default:
 				context.AbortWithStatusJSON(http.StatusInternalServerError, err.JSON())
 			}

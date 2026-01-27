@@ -1,7 +1,7 @@
 package distribution
 
 import (
-	error2 "podGopher/core/domain/error"
+	domainError "podGopher/core/domain/error"
 	"podGopher/core/domain/model"
 	onGetDistribution "podGopher/core/port/inbound/distribution"
 	forGetDistribution "podGopher/core/port/outbound/distribution"
@@ -22,7 +22,7 @@ func NewGetDistributionService(showRepository forGetShow.GetShowPort, distributi
 
 func (service *GetDistributionService) GetDistribution(command *onGetDistribution.GetDistributionCommand) (distribution *onGetDistribution.GetDistributionResponse, err error) {
 	if show, _ := service.getShowOutPort.GetShowOrNil(command.ShowId); show == nil {
-		return nil, error2.NewShowNotFoundError(command.ShowId)
+		return nil, domainError.NewShowNotFoundError(command.ShowId)
 	}
 
 	var foundDistribution *model.Distribution
@@ -31,13 +31,18 @@ func (service *GetDistributionService) GetDistribution(command *onGetDistributio
 	}
 
 	if foundDistribution == nil {
-		return nil, error2.NewDistributionNotFoundError(command.DistributionId)
+		return nil, domainError.NewDistributionNotFoundError(command.DistributionId)
+	}
+
+	if foundDistribution.ShowId != command.ShowId {
+		return nil, domainError.NewDistributionNotFoundError(command.DistributionId)
 	}
 
 	return &onGetDistribution.GetDistributionResponse{
-		Id:     foundDistribution.Id,
-		ShowId: foundDistribution.ShowId,
-		Title:  foundDistribution.Title,
-		Slug:   foundDistribution.Slug,
+		Id:       foundDistribution.Id,
+		ShowId:   foundDistribution.ShowId,
+		Title:    foundDistribution.Title,
+		Slug:     foundDistribution.Slug,
+		Episodes: foundDistribution.Episodes,
 	}, nil
 }
