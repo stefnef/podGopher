@@ -64,6 +64,21 @@ func Test_should_return_not_found_if_episode_was_not_found_on_get(t *testing.T) 
 	assert.Equal(t, 1, mockSaveAndGetEpisodeAdapter.calledGet)
 }
 
+func Test_should_return_not_found_if_show_does_not_belong_to_episode_on_get(t *testing.T) {
+	defer initAdapter()
+
+	expectedShow := &model.Show{Id: "mocked-show-id"}
+	mockGetShowAdapter.returnsOnGetOrNilShow["some-show-id"] = expectedShow
+	mockSaveAndGetEpisodeAdapter.returnsOnGetEpisodeOrNil["episode-id"] = &model.Episode{ShowId: "other-show-id"}
+
+	foundShow, err := getEpisodeService.GetEpisode(&onGetEpisode.GetEpisodeCommand{EpisodeId: "episode-id", ShowId: "some-show-id"})
+
+	assert.Nil(t, foundShow)
+	assert.NotNil(t, err)
+	assert.Equal(t, domainError.NewEpisodeNotFoundError("episode-id"), err)
+	assert.Equal(t, 1, mockSaveAndGetEpisodeAdapter.calledGet)
+}
+
 func Test_retrieve_episode_from_repository_on_get(t *testing.T) {
 	defer initAdapter()
 

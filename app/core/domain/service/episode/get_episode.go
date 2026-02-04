@@ -30,7 +30,7 @@ func (service *GetEpisodeService) GetEpisode(command *onGetEpisode.GetEpisodeCom
 		return nil, err
 	}
 
-	if foundEpisode == nil {
+	if foundEpisode == nil || foundEpisode.ShowId != command.ShowId {
 		return nil, domainError.NewEpisodeNotFoundError(command.EpisodeId)
 	}
 

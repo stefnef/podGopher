@@ -64,20 +64,37 @@ func Test_should_return_not_found_if_distribution_was_not_found_on_get(t *testin
 	assert.Equal(t, 1, mockSaveAndGetDistributionAdapter.calledGet)
 }
 
+func Test_should_return_not_found_if_show_does_not_belong_to_distribution_on_get(t *testing.T) {
+	defer initAdapter()
+
+	expectedShow := &model.Show{Id: "mocked-show-id"}
+	mockGetShowAdapter.returnsOnGetOrNilShow["some-show-id"] = expectedShow
+	mockSaveAndGetDistributionAdapter.returnsOnGetDistributionOrNil["some-id"] = &model.Distribution{ShowId: "other-show-id"}
+
+	foundShow, err := getDistributionService.GetDistribution(&onGetDistribution.GetDistributionCommand{DistributionId: "some-id", ShowId: "some-show-id"})
+
+	assert.Nil(t, foundShow)
+	assert.NotNil(t, err)
+	assert.Equal(t, domainError.NewDistributionNotFoundError("some-id"), err)
+	assert.Equal(t, 1, mockSaveAndGetDistributionAdapter.calledGet)
+}
+
 func Test_retrieve_distribution_from_repository_on_get(t *testing.T) {
 	defer initAdapter()
 
 	expectedDistribution := &model.Distribution{
-		Id:     "some-id",
-		ShowId: "some-show-id",
-		Title:  "some title",
-		Slug:   "some-slug",
+		Id:       "some-id",
+		ShowId:   "some-show-id",
+		Title:    "some title",
+		Slug:     "some-slug",
+		Episodes: []string{"episode1", "episode2"},
 	}
 	expectedDistributionResponse := &onGetDistribution.GetDistributionResponse{
-		Id:     "some-id",
-		ShowId: "some-show-id",
-		Title:  "some title",
-		Slug:   "some-slug",
+		Id:       "some-id",
+		ShowId:   "some-show-id",
+		Title:    "some title",
+		Slug:     "some-slug",
+		Episodes: []string{"episode1", "episode2"},
 	}
 	expectedShow := &model.Show{Id: "mocked-show-id"}
 	mockGetShowAdapter.returnsOnGetOrNilShow["some-show-id"] = expectedShow

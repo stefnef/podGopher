@@ -16,3 +16,11 @@ CREATE TABLE IF NOT EXISTS show_distributions
 );
 
 CREATE INDEX idx_show_distributions_show_id on show_distributions (show_id);
+
+CREATE TABLE IF NOT EXISTS episodes_distributions
+(
+    episode_id      uuid not null references episode (id),
+    distribution_id uuid not null references distribution (id),
+
+    constraint episode_distribution_unique unique (episode_id, distribution_id)
+);

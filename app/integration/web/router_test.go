@@ -11,8 +11,8 @@ import (
 	"podGopher/core/domain/service/show"
 	"podGopher/core/port/inbound"
 	inboundDistribution "podGopher/core/port/inbound/distribution"
-	episode2 "podGopher/core/port/inbound/episode"
-	show2 "podGopher/core/port/inbound/show"
+	inboundEpisode "podGopher/core/port/inbound/episode"
+	inboundShow "podGopher/core/port/inbound/show"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -24,33 +24,34 @@ type responseMock struct {
 }
 
 var exampleRequests = map[string]string{
-	"postShow":         `{"Title":"some title", "Slug":"some slug"}`,
-	"postEpisode":      `{"Title":"some title"}`,
-	"postDistribution": `{"Title":"some title", "Slug":"some slug"}`,
+	"postShow":          `{"Title":"some title", "Slug":"some slug"}`,
+	"postEpisode":       `{"Title":"some title"}`,
+	"postDistribution":  `{"Title":"some title", "Slug":"some slug"}`,
+	"patchDistribution": `{"Title":"some title", "Slug":"some slug", "Episodes":["episode-id"]}`,
 }
 
 var response responseMock
 
 type mockInboundPort struct{}
 
-func (port *mockInboundPort) CreateShow(*show2.CreateShowCommand) (show *show2.CreateShowResponse, err error) {
+func (port *mockInboundPort) CreateShow(*inboundShow.CreateShowCommand) (show *inboundShow.CreateShowResponse, err error) {
 	response.Text += "CreateShow"
-	return &show2.CreateShowResponse{Title: "CreateShow"}, response.failsWith
+	return &inboundShow.CreateShowResponse{Title: "CreateShow"}, response.failsWith
 }
 
-func (port *mockInboundPort) GetShow(*show2.GetShowCommand) (show *show2.GetShowResponse, err error) {
+func (port *mockInboundPort) GetShow(*inboundShow.GetShowCommand) (show *inboundShow.GetShowResponse, err error) {
 	response.Text += "GetShow"
-	return &show2.GetShowResponse{}, response.failsWith
+	return &inboundShow.GetShowResponse{}, response.failsWith
 }
 
-func (port *mockInboundPort) CreateEpisode(*episode2.CreateEpisodeCommand) (episode *episode2.CreateEpisodeResponse, err error) {
+func (port *mockInboundPort) CreateEpisode(*inboundEpisode.CreateEpisodeCommand) (episode *inboundEpisode.CreateEpisodeResponse, err error) {
 	response.Text += "PostEpisode"
-	return &episode2.CreateEpisodeResponse{}, response.failsWith
+	return &inboundEpisode.CreateEpisodeResponse{}, response.failsWith
 }
 
-func (port *mockInboundPort) GetEpisode(*episode2.GetEpisodeCommand) (episode *episode2.GetEpisodeResponse, err error) {
+func (port *mockInboundPort) GetEpisode(*inboundEpisode.GetEpisodeCommand) (episode *inboundEpisode.GetEpisodeResponse, err error) {
 	response.Text += "GetEpisode"
-	return &episode2.GetEpisodeResponse{}, response.failsWith
+	return &inboundEpisode.GetEpisodeResponse{}, response.failsWith
 }
 
 func (port *mockInboundPort) CreateDistribution(*inboundDistribution.CreateDistributionCommand) (distribution *inboundDistribution.CreateDistributionResponse, err error) {
@@ -63,6 +64,11 @@ func (port *mockInboundPort) GetDistribution(*inboundDistribution.GetDistributio
 	return &inboundDistribution.GetDistributionResponse{}, response.failsWith
 }
 
+func (port *mockInboundPort) UpdateDistribution(*inboundDistribution.UpdateDistributionCommand) error {
+	response.Text += "UpdateDistribution"
+	return response.failsWith
+}
+
 var mockPort = new(mockInboundPort)
 var router = NewRouter(inbound.PortMap{
 	inbound.CreateShow:         mockPort,
@@ -71,6 +77,7 @@ var router = NewRouter(inbound.PortMap{
 	inbound.GetEpisode:         mockPort,
 	inbound.CreateDistribution: mockPort,
 	inbound.GetDistribution:    mockPort,
+	inbound.UpdateDistribution: mockPort,
 })
 
 func setup() {
@@ -84,46 +91,65 @@ func Test_should_return_NotFound_on_wrong_path(t *testing.T) {
 	assert.Equal(t, http.StatusNotFound, recorder.Code)
 }
 
-func Test_should_post_a_show(t *testing.T) {
-	setup()
-	doRequest("POST", "/show", exampleRequests["postShow"])
+func Test_should_serve_routes(t *testing.T) {
+	tests := map[string]struct {
+		method                  string
+		path                    string
+		requestBody             string
+		expectedMockHandlerCall string
+	}{
+		"Post Show": {
+			"POST",
+			"/show",
+			exampleRequests["postShow"],
+			"CreateShow",
+		},
+		"Get Show": {
+			"GET",
+			"/show/some-show-id",
+			"",
+			"GetShow",
+		},
+		"Post Episode": {
+			"POST",
+			"/show/show-id/episode",
+			exampleRequests["postEpisode"],
+			"PostEpisode",
+		},
+		"Get Episode": {
+			"GET",
+			"/show/show-id/episode/episode-id",
+			"",
+			"GetEpisode",
+		},
+		"Post Distribution": {
+			"POST",
+			"/show/show-id/distribution",
+			exampleRequests["postDistribution"],
+			"PostDistribution",
+		},
+		"Get Distribution": {
+			"GET",
+			"/show/show-id/distribution/some-distribution-id",
+			"",
+			"GetDistribution",
+		},
+		"Patch Distribution": {
+			"PATCH",
+			"/show/show-id/distribution/some-distribution-id",
+			exampleRequests["patchDistribution"],
+			"UpdateDistribution",
+		},
+	}
 
-	assert.Equal(t, "CreateShow", response.Text)
-}
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			setup()
+			doRequest(test.method, test.path, test.requestBody)
 
-func Test_should_get_a_show(t *testing.T) {
-	setup()
-	doRequest("GET", "/show/some-show-id", "")
-
-	assert.Equal(t, "GetShow", response.Text)
-}
-
-func Test_should_post_an_episode(t *testing.T) {
-	setup()
-	doRequest("POST", "/show/show-id/episode", exampleRequests["postEpisode"])
-
-	assert.Equal(t, "PostEpisode", response.Text)
-}
-
-func Test_should_get_an_episode(t *testing.T) {
-	setup()
-	doRequest("GET", "/show/some-show-id/episode/some-episode-id", "")
-
-	assert.Equal(t, "GetEpisode", response.Text)
-}
-
-func Test_should_post_a_distribution(t *testing.T) {
-	setup()
-	doRequest("POST", "/show/show-id/distribution", exampleRequests["postDistribution"])
-
-	assert.Equal(t, "PostDistribution", response.Text)
-}
-
-func Test_should_get_a_distribution(t *testing.T) {
-	setup()
-	doRequest("GET", "/show/some-show-id/distribution/some-distribution-id", "")
-
-	assert.Equal(t, "GetDistribution", response.Text)
+			assert.Equal(t, test.expectedMockHandlerCall, response.Text)
+		})
+	}
 }
 
 func Test_should_handle_errors(t *testing.T) {
@@ -148,6 +174,10 @@ func Test_should_handle_errors(t *testing.T) {
 			&domainError.ModelError{Category: domainError.Unknown, Context: "Unknown FAKE"},
 			500,
 			"Unknown FAKE",
+		},
+		"data conflict": {&domainError.ModelError{Category: domainError.DataConflict, Context: "Some data conflict"},
+			400,
+			"Some data conflict",
 		},
 		"unknown": {
 			errors.New("FAKE"),
@@ -176,6 +206,7 @@ func Test_should_create_handlers(t *testing.T) {
 		inbound.GetEpisode:         episode.NewGetEpisodeService(nil, nil),
 		inbound.CreateDistribution: distribution.NewCreateDistributionService(nil, nil),
 		inbound.GetDistribution:    distribution.NewGetDistributionService(nil, nil),
+		inbound.UpdateDistribution: distribution.NewUpdateDistributionService(nil, nil, nil, nil),
 	}
 
 	var handlers = CreateHandlers(portMap)

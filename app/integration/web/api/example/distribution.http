@@ -16,6 +16,6 @@ Content-Type: application/json
 %}
 
 ###
-# Get an distribution
+# Get a distribution
 GET {{host}}/show/{{showId}}/distribution/{{distributionId}}
 Content-Type: application/json

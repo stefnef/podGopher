@@ -64,7 +64,7 @@ func (app *App) Start() {
 }
 
 func (app *App) Stop() {
-	app.db.Close()
+	_ = app.db.Close()
 	app.ctx.Done()
 }
 
@@ -79,6 +79,7 @@ func (app *App) createPortMap() inbound.PortMap {
 	var getEpisodePort = episode.NewGetEpisodeService(showRepository, episodeRepository)
 	var createDistributionPort = distribution.NewCreateDistributionService(showRepository, distributionRepository)
 	var getDistributionPort = distribution.NewGetDistributionService(showRepository, distributionRepository)
+	var updateDistributionPort = distribution.NewUpdateDistributionService(showRepository, episodeRepository, distributionRepository, distributionRepository)
 
 	return inbound.PortMap{
 		inbound.CreateShow:         createShowPort,
@@ -87,6 +88,7 @@ func (app *App) createPortMap() inbound.PortMap {
 		inbound.GetEpisode:         getEpisodePort,
 		inbound.CreateDistribution: createDistributionPort,
 		inbound.GetDistribution:    getDistributionPort,
+		inbound.UpdateDistribution: updateDistributionPort,
 	}
 }
 
