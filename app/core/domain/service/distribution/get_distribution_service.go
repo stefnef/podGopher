@@ -30,11 +30,7 @@ func (service *GetDistributionService) GetDistribution(command *onGetDistributio
 		return nil, err
 	}
 
-	if foundDistribution == nil {
-		return nil, domainError.NewDistributionNotFoundError(command.DistributionId)
-	}
-
-	if foundDistribution.ShowId != command.ShowId {
+	if foundDistribution == nil || foundDistribution.ShowId != command.ShowId {
 		return nil, domainError.NewDistributionNotFoundError(command.DistributionId)
 	}
 

@@ -64,7 +64,7 @@ func (app *App) Start() {
 }
 
 func (app *App) Stop() {
-	app.db.Close()
+	_ = app.db.Close()
 	app.ctx.Done()
 }
 
