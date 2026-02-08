@@ -2,7 +2,7 @@ package episode
 
 import (
 	"net/http"
-	error2 "podGopher/core/domain/error"
+	domainError "podGopher/core/domain/error"
 	"podGopher/core/port/inbound"
 	"podGopher/core/port/inbound/episode"
 	"podGopher/integration/web/handler"
@@ -23,7 +23,7 @@ func (h GetEpisodeHandler) Handle(context *gin.Context) {
 	showId := context.Param("showId")
 	episodeId := context.Param("episodeId")
 	if showId == "" {
-		_ = context.Error(error2.NewShowNotFoundError(""))
+		_ = context.Error(domainError.NewShowNotFoundError(""))
 		return
 	}
 

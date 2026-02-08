@@ -85,3 +85,7 @@ Content-Type: application/json
 ### Get a distribution
 GET {{host}}/show/{{showId}}/distribution/{{distributionId}}
 Content-Type: application/json
+
+### Get a feed
+GET {{host}}/rss/some-title-slug/distribution-slug
+Content-Type: application/xml

@@ -50,6 +50,11 @@ func NewDistributionNotFoundError(id string) *ModelError {
 	return &ModelError{NotFound, context}
 }
 
+func NewRSSFeedNotFoundError(id string) *ModelError {
+	context := fmt.Sprintf("rss feed '%v' does not exist", id)
+	return &ModelError{NotFound, context}
+}
+
 func NewUpdateError(reason string) error {
 	context := fmt.Sprintf("update not possible, reason: %v", reason)
 	return &ModelError{DataConflict, context}

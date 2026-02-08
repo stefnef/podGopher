@@ -8,10 +8,12 @@ import (
 	domainError "podGopher/core/domain/error"
 	"podGopher/core/domain/service/distribution"
 	"podGopher/core/domain/service/episode"
+	"podGopher/core/domain/service/rss"
 	"podGopher/core/domain/service/show"
 	"podGopher/core/port/inbound"
 	inboundDistribution "podGopher/core/port/inbound/distribution"
 	inboundEpisode "podGopher/core/port/inbound/episode"
+	inboundRSS "podGopher/core/port/inbound/rss"
 	inboundShow "podGopher/core/port/inbound/show"
 	"testing"
 
@@ -69,6 +71,11 @@ func (port *mockInboundPort) UpdateDistribution(*inboundDistribution.UpdateDistr
 	return response.failsWith
 }
 
+func (port *mockInboundPort) GetRSS(*inboundRSS.GetRSSCommand) (rssResponse *inboundRSS.GetRSSResponse, err error) {
+	response.Text += "GetRSS"
+	return &inboundRSS.GetRSSResponse{}, response.failsWith
+}
+
 var mockPort = new(mockInboundPort)
 var router = NewRouter(inbound.PortMap{
 	inbound.CreateShow:         mockPort,
@@ -78,6 +85,7 @@ var router = NewRouter(inbound.PortMap{
 	inbound.CreateDistribution: mockPort,
 	inbound.GetDistribution:    mockPort,
 	inbound.UpdateDistribution: mockPort,
+	inbound.GetRSS:             mockPort,
 })
 
 func setup() {
@@ -139,6 +147,12 @@ func Test_should_serve_routes(t *testing.T) {
 			"/show/show-id/distribution/some-distribution-id",
 			exampleRequests["patchDistribution"],
 			"UpdateDistribution",
+		},
+		"Get RSS": {
+			"GET",
+			"/rss/show-slug/distribution-slug",
+			"",
+			"GetRSS",
 		},
 	}
 
@@ -207,6 +221,7 @@ func Test_should_create_handlers(t *testing.T) {
 		inbound.CreateDistribution: distribution.NewCreateDistributionService(nil, nil),
 		inbound.GetDistribution:    distribution.NewGetDistributionService(nil, nil),
 		inbound.UpdateDistribution: distribution.NewUpdateDistributionService(nil, nil, nil, nil),
+		inbound.GetRSS:             rss.NewGetRSSService(nil),
 	}
 
 	var handlers = CreateHandlers(portMap)

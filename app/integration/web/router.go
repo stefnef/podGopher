@@ -8,6 +8,7 @@ import (
 	"podGopher/integration/web/handler"
 	"podGopher/integration/web/handler/distribution"
 	"podGopher/integration/web/handler/episode"
+	"podGopher/integration/web/handler/rss"
 	"podGopher/integration/web/handler/show"
 
 	"github.com/gin-gonic/gin"
@@ -31,6 +32,7 @@ func CreateHandlers(portMap inbound.PortMap) []handler.Handler {
 		distribution.NewCreateDistributionHandler(portMap),
 		distribution.NewGetDistributionHandler(portMap),
 		distribution.NewUpdateDistributionHandler(portMap),
+		rss.NewGetRSSHandler(portMap),
 	}
 }
 

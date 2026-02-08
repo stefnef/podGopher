@@ -13,4 +13,5 @@ const (
 	CreateDistribution
 	GetDistribution
 	UpdateDistribution
+	GetRSS
 )
