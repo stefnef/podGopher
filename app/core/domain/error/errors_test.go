@@ -53,6 +53,12 @@ func Test_is_an_error(t *testing.T) {
 			"update not possible, reason: some test",
 			DataConflict,
 		},
+
+		"RSSFeedNotFoundError": {
+			NewRSSFeedNotFoundError("RSS"),
+			"rss feed 'RSS' does not exist",
+			NotFound,
+		},
 	}
 
 	for name, test := range tests {

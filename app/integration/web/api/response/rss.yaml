@@ -9,17 +9,17 @@ components:
           examples:
             success:
               value:
-                id: "distribution-slug"
-                title: "New distribution"
+                showTitle: "show title"
+                distributionTitle: "distribution title"
                 episodes:
-                  - id: "episode-id"
+                  - title: "episode title"
 
   schemas:
     rssResponseDto:
       type: object
       required:
-        - id
-        - title
+        - showTitle
+        - distributionTitle
         - episodes
       properties:
         id:
@@ -29,4 +29,12 @@ components:
         episodes:
           type: array
           items:
-            $ref: "../model/episode.yaml#/components/schemas/episodeId"
+            $ref: "#/components/schemas/rssEpisodeDto"
+
+    rssEpisodeDto:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string

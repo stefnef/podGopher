@@ -1,8 +1,8 @@
-distributionSlug:
+rssFeed:
   get:
     tags:
       - rss
-    description: Retrieve a show's rss of given slug
+    description: Retrieve a show's rss feed
     parameters:
       - $ref: "../parameter/show.yaml#/components/parameters/showSlug"
       - $ref: "../parameter/distribution.yaml#/components/parameters/distributionSlug"

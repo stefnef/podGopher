@@ -7,9 +7,11 @@ import (
 	repositoryDistribution "podGopher/adapter/outbound/repository/postgres/distribution"
 	repositoryEpisode "podGopher/adapter/outbound/repository/postgres/episode"
 	"podGopher/adapter/outbound/repository/postgres/migration"
+	repositoryRSS "podGopher/adapter/outbound/repository/postgres/rss"
 	repositoryShow "podGopher/adapter/outbound/repository/postgres/show"
 	"podGopher/core/domain/service/distribution"
 	"podGopher/core/domain/service/episode"
+	"podGopher/core/domain/service/rss"
 	"podGopher/core/domain/service/show"
 	"podGopher/core/port/inbound"
 	"podGopher/env"
@@ -72,6 +74,7 @@ func (app *App) createPortMap() inbound.PortMap {
 	var showRepository = repositoryShow.NewPostgresShowRepository(app.db)
 	var episodeRepository = repositoryEpisode.NewPostgresEpisodeRepository(app.db)
 	var distributionRepository = repositoryDistribution.NewPostgresDistributionRepository(app.db)
+	var rssRepository = repositoryRSS.NewPostgresRSSRepository(app.db)
 
 	var createShowPort = show.NewCreateShowService(showRepository)
 	var getShowPort = show.NewGetShowService(showRepository)
@@ -80,6 +83,7 @@ func (app *App) createPortMap() inbound.PortMap {
 	var createDistributionPort = distribution.NewCreateDistributionService(showRepository, distributionRepository)
 	var getDistributionPort = distribution.NewGetDistributionService(showRepository, distributionRepository)
 	var updateDistributionPort = distribution.NewUpdateDistributionService(showRepository, episodeRepository, distributionRepository, distributionRepository)
+	var getRSSPort = rss.NewGetRSSService(rssRepository)
 
 	return inbound.PortMap{
 		inbound.CreateShow:         createShowPort,
@@ -89,6 +93,7 @@ func (app *App) createPortMap() inbound.PortMap {
 		inbound.CreateDistribution: createDistributionPort,
 		inbound.GetDistribution:    getDistributionPort,
 		inbound.UpdateDistribution: updateDistributionPort,
+		inbound.GetRSS:             getRSSPort,
 	}
 }
 
