@@ -46,6 +46,11 @@ func (port *mockInboundPort) GetShow(*inboundShow.GetShowCommand) (show *inbound
 	return &inboundShow.GetShowResponse{}, response.failsWith
 }
 
+func (port *mockInboundPort) GetAllShows() (shows *inboundShow.GetAllShowsResponse, err error) {
+	response.Text += "GetAllShows"
+	return &inboundShow.GetAllShowsResponse{}, response.failsWith
+}
+
 func (port *mockInboundPort) CreateEpisode(*inboundEpisode.CreateEpisodeCommand) (episode *inboundEpisode.CreateEpisodeResponse, err error) {
 	response.Text += "PostEpisode"
 	return &inboundEpisode.CreateEpisodeResponse{}, response.failsWith
