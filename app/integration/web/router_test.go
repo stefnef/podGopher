@@ -111,43 +111,49 @@ func Test_should_serve_routes(t *testing.T) {
 		requestBody             string
 		expectedMockHandlerCall string
 	}{
-		"Post Show": {
+		"Post show": {
 			"POST",
 			"/show",
 			exampleRequests["postShow"],
 			"CreateShow",
 		},
-		"Get Show": {
+		"Get single show": {
 			"GET",
 			"/show/some-show-id",
 			"",
 			"GetShow",
 		},
-		"Post Episode": {
+		"Get all shows": {
+			"GET",
+			"/show",
+			"",
+			"GetAllShows",
+		},
+		"Post episode": {
 			"POST",
 			"/show/show-id/episode",
 			exampleRequests["postEpisode"],
 			"PostEpisode",
 		},
-		"Get Episode": {
+		"Get episode": {
 			"GET",
 			"/show/show-id/episode/episode-id",
 			"",
 			"GetEpisode",
 		},
-		"Post Distribution": {
+		"Post distribution": {
 			"POST",
 			"/show/show-id/distribution",
 			exampleRequests["postDistribution"],
 			"PostDistribution",
 		},
-		"Get Distribution": {
+		"Get distribution": {
 			"GET",
 			"/show/show-id/distribution/some-distribution-id",
 			"",
 			"GetDistribution",
 		},
-		"Patch Distribution": {
+		"Patch distribution": {
 			"PATCH",
 			"/show/show-id/distribution/some-distribution-id",
 			exampleRequests["patchDistribution"],
