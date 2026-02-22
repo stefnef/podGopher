@@ -27,6 +27,7 @@ func CreateHandlers(portMap inbound.PortMap) []handler.Handler {
 	return []handler.Handler{
 		show.NewCreateShowHandler(portMap),
 		show.NewGetShowHandler(portMap),
+		show.NewGetAllShowsHandler(portMap),
 		episode.NewCreateEpisodeHandler(portMap),
 		episode.NewGetEpisodeHandler(portMap),
 		distribution.NewCreateDistributionHandler(portMap),

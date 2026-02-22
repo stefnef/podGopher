@@ -91,6 +91,7 @@ var router = NewRouter(inbound.PortMap{
 	inbound.GetDistribution:    mockPort,
 	inbound.UpdateDistribution: mockPort,
 	inbound.GetRSS:             mockPort,
+	inbound.GetAllShows:        mockPort,
 })
 
 func setup() {
@@ -227,6 +228,7 @@ func Test_should_create_handlers(t *testing.T) {
 	portMap := inbound.PortMap{
 		inbound.CreateShow:         show.NewCreateShowService(nil),
 		inbound.GetShow:            show.NewGetShowService(nil),
+		inbound.GetAllShows:        show.NewGetShowService(nil),
 		inbound.CreateEpisode:      episode.NewCreateEpisodeService(nil, nil),
 		inbound.GetEpisode:         episode.NewGetEpisodeService(nil, nil),
 		inbound.CreateDistribution: distribution.NewCreateDistributionService(nil, nil),

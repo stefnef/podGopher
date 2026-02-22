@@ -54,6 +54,6 @@ func NewGetAllShowsHandler(portMap inbound.PortMap) *GetAllShowsHandler {
 			Method: http.MethodGet,
 			Path:   "/show",
 		},
-		port: portMap[inbound.GetShow].(show.GetShowPort),
+		port: portMap[inbound.GetAllShows].(show.GetShowPort),
 	}
 }

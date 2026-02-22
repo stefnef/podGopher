@@ -17,7 +17,7 @@ import (
 )
 
 var getAllShowsHandler = NewGetAllShowsHandler(inbound.PortMap{
-	inbound.GetShow: mockGetShowService,
+	inbound.GetAllShows: mockGetShowService,
 })
 
 func Test_should_implement_handler_for_get_all_show(t *testing.T) {
