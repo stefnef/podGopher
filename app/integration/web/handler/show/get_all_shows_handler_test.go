@@ -1,15 +1,22 @@
 package show
 
-// TODO analog zu get_show_handler_test.go: Hier einen get_all_shows_handler erstellen und testen
-//var getShowHandler = NewGetAllShowsHandler(inbound.PortMap{
-//	inbound.GetShow: mockGetShowService,
-//})
-//
-//func Test_should_implement_handler_for_get_all_show(t *testing.T) {
-//	assert.NotNil(t, getShowHandler)
-//	assert.Implements(t, (*handler.Handler)(nil), getShowHandler)
-//}
-//
+import (
+	"podGopher/core/port/inbound"
+	"podGopher/integration/web/handler"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+var getAllShowsHandler = NewGetAllShowsHandler(inbound.PortMap{
+	inbound.GetShow: mockGetShowService,
+})
+
+func Test_should_implement_handler_for_get_all_show(t *testing.T) {
+	assert.NotNil(t, getAllShowsHandler)
+	assert.Implements(t, (*handler.Handler)(nil), getAllShowsHandler)
+}
+
 //func Test_should_panic_if_no_port_was_found_on_get_all_shows_handler(t *testing.T) {
 //	invalidPortMap := inbound.PortMap{
 //		inbound.PortInvalid: mockCreateShowService,
