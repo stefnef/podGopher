@@ -17,27 +17,27 @@ func Test_should_implement_handler_for_get_all_show(t *testing.T) {
 	assert.Implements(t, (*handler.Handler)(nil), getAllShowsHandler)
 }
 
-//func Test_should_panic_if_no_port_was_found_on_get_all_shows_handler(t *testing.T) {
-//	invalidPortMap := inbound.PortMap{
-//		inbound.PortInvalid: mockCreateShowService,
-//	}
-//
-//	assert.Panics(t, func() {
-//		NewGetShowHandler(invalidPortMap)
-//	})
-//}
-//
-//func Test_should_return_route_on_get_all_shows(t *testing.T) {
-//	var route = getShowHandler.GetRoute()
-//
-//	var expectedRoute = &handler.Route{
-//		Method: "GET",
-//		Path:   "/show",
-//	}
-//
-//	assert.Equal(t, expectedRoute, route)
-//}
-//
+func Test_should_panic_if_no_port_was_found_on_get_all_shows_handler(t *testing.T) {
+	invalidPortMap := inbound.PortMap{
+		inbound.PortInvalid: mockCreateShowService,
+	}
+
+	assert.Panics(t, func() {
+		NewGetAllShowsHandler(invalidPortMap)
+	})
+}
+
+func Test_should_return_route_on_get_all_shows(t *testing.T) {
+	var route = getAllShowsHandler.GetRoute()
+
+	var expectedRoute = &handler.Route{
+		Method: "GET",
+		Path:   "/show",
+	}
+
+	assert.Equal(t, expectedRoute, route)
+}
+
 //func Test_should_propagate_error_on_get_all_shows(t *testing.T) {
 //	defer mockGetShowService.init()
 //	var context, _ = handlerTestSetup.GetTestGinContext(t)
