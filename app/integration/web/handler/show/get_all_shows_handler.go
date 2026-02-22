@@ -19,6 +19,10 @@ func (h *GetAllShowsHandler) GetRoute() *handler.Route {
 }
 
 func (h *GetAllShowsHandler) Handle(context *gin.Context) {
+	_, err := h.port.GetAllShows()
+	if err != nil {
+		_ = context.Error(err)
+	}
 	return
 }
 

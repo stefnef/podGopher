@@ -1,8 +1,12 @@
 package show
 
 import (
+	"bytes"
+	"errors"
+	"net/http/httptest"
 	"podGopher/core/port/inbound"
 	"podGopher/integration/web/handler"
+	"podGopher/integration/web/handler/handlerTestSetup"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -38,21 +42,21 @@ func Test_should_return_route_on_get_all_shows(t *testing.T) {
 	assert.Equal(t, expectedRoute, route)
 }
 
-//func Test_should_propagate_error_on_get_all_shows(t *testing.T) {
-//	defer mockGetShowService.init()
-//	var context, _ = handlerTestSetup.GetTestGinContext(t)
-//	expectedError := errors.New("some error")
-//
-//	mockGetShowService.failsWith = expectedError
-//
-//	context.Request = httptest.NewRequest("GET", "/show", bytes.NewBuffer([]byte("")))
-//
-//	getShowHandler.Handle(context)
-//
-//	assert.NotEmpty(t, context.Errors)
-//	assert.Equal(t, expectedError, (*context.Errors[0]).Err)
-//}
-//
+func Test_should_propagate_error_on_get_all_shows(t *testing.T) {
+	defer mockGetShowService.init()
+	var context, _ = handlerTestSetup.GetTestGinContext(t)
+	expectedError := errors.New("some error")
+
+	mockGetShowService.failsWith = expectedError
+
+	context.Request = httptest.NewRequest("GET", "/show", bytes.NewBuffer([]byte("")))
+
+	getAllShowsHandler.Handle(context)
+
+	assert.NotEmpty(t, context.Errors)
+	assert.Equal(t, expectedError, (*context.Errors[0]).Err)
+}
+
 //func Test_should_call_service_on_get_all_shows(t *testing.T) {
 //	defer mockGetShowService.init()
 //	var getShowDto *allShowsResponseDto
