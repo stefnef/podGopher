@@ -46,6 +46,11 @@ func (port *mockInboundPort) GetShow(*inboundShow.GetShowCommand) (show *inbound
 	return &inboundShow.GetShowResponse{}, response.failsWith
 }
 
+func (port *mockInboundPort) GetAllShows() (shows *inboundShow.GetAllShowsResponse, err error) {
+	response.Text += "GetAllShows"
+	return &inboundShow.GetAllShowsResponse{}, response.failsWith
+}
+
 func (port *mockInboundPort) CreateEpisode(*inboundEpisode.CreateEpisodeCommand) (episode *inboundEpisode.CreateEpisodeResponse, err error) {
 	response.Text += "PostEpisode"
 	return &inboundEpisode.CreateEpisodeResponse{}, response.failsWith
@@ -86,6 +91,7 @@ var router = NewRouter(inbound.PortMap{
 	inbound.GetDistribution:    mockPort,
 	inbound.UpdateDistribution: mockPort,
 	inbound.GetRSS:             mockPort,
+	inbound.GetAllShows:        mockPort,
 })
 
 func setup() {
@@ -106,43 +112,49 @@ func Test_should_serve_routes(t *testing.T) {
 		requestBody             string
 		expectedMockHandlerCall string
 	}{
-		"Post Show": {
+		"Post show": {
 			"POST",
 			"/show",
 			exampleRequests["postShow"],
 			"CreateShow",
 		},
-		"Get Show": {
+		"Get single show": {
 			"GET",
 			"/show/some-show-id",
 			"",
 			"GetShow",
 		},
-		"Post Episode": {
+		"Get all shows": {
+			"GET",
+			"/show",
+			"",
+			"GetAllShows",
+		},
+		"Post episode": {
 			"POST",
 			"/show/show-id/episode",
 			exampleRequests["postEpisode"],
 			"PostEpisode",
 		},
-		"Get Episode": {
+		"Get episode": {
 			"GET",
 			"/show/show-id/episode/episode-id",
 			"",
 			"GetEpisode",
 		},
-		"Post Distribution": {
+		"Post distribution": {
 			"POST",
 			"/show/show-id/distribution",
 			exampleRequests["postDistribution"],
 			"PostDistribution",
 		},
-		"Get Distribution": {
+		"Get distribution": {
 			"GET",
 			"/show/show-id/distribution/some-distribution-id",
 			"",
 			"GetDistribution",
 		},
-		"Patch Distribution": {
+		"Patch distribution": {
 			"PATCH",
 			"/show/show-id/distribution/some-distribution-id",
 			exampleRequests["patchDistribution"],
@@ -216,6 +228,7 @@ func Test_should_create_handlers(t *testing.T) {
 	portMap := inbound.PortMap{
 		inbound.CreateShow:         show.NewCreateShowService(nil),
 		inbound.GetShow:            show.NewGetShowService(nil),
+		inbound.GetAllShows:        show.NewGetShowService(nil),
 		inbound.CreateEpisode:      episode.NewCreateEpisodeService(nil, nil),
 		inbound.GetEpisode:         episode.NewGetEpisodeService(nil, nil),
 		inbound.CreateDistribution: distribution.NewCreateDistributionService(nil, nil),

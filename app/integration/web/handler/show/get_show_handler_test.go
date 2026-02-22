@@ -15,28 +15,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type getShowTestService struct {
-	called           int
-	command          *show.GetShowCommand
-	returnsOnGetShow *show.GetShowResponse
-	failsWith        error
-}
-
-func (s *getShowTestService) init() {
-	s.called = 0
-	s.command = nil
-	s.returnsOnGetShow = nil
-	s.failsWith = nil
-}
-
-func (s *getShowTestService) GetShow(command *show.GetShowCommand) (show *show.GetShowResponse, err error) {
-	s.called++
-	s.command = command
-	return s.returnsOnGetShow, s.failsWith
-}
-
-var mockGetShowService = new(getShowTestService)
-
 var getShowHandler = NewGetShowHandler(inbound.PortMap{
 	inbound.GetShow: mockGetShowService,
 })

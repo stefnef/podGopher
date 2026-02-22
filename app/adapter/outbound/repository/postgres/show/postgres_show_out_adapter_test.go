@@ -107,7 +107,38 @@ func Test_should_retrieve_a_show(t *testing.T) {
 		assert.Equal(t, show.Id, foundShow.Id)
 		assert.Empty(t, foundShow.Episodes)
 	})
+}
 
+func Test_should_retrieve_a_list_of_shows(t *testing.T) {
+	db := postgresTestSetup.StartTestcontainersPostgres(t, "../postgresTestSetup/")
+
+	defer postgresTestSetup.Teardown(t, db)
+
+	repository := NewPostgresShowRepository(db)
+	show := &model.Show{
+		Id:    uuid.NewString(),
+		Title: "Some title",
+		Slug:  ("Some title") + "-Slug",
+	}
+
+	otherShow := &model.Show{
+		Id:    uuid.NewString(),
+		Title: "Other title",
+		Slug:  ("Other title") + "-Slug",
+	}
+
+	err := repository.SaveShow(show)
+	assert.Nil(t, err)
+
+	err = repository.SaveShow(otherShow)
+	assert.Nil(t, err)
+
+	expectedShows := []*model.Show{show, otherShow}
+
+	foundShows, err := repository.GetAllShows()
+	assert.Nil(t, err)
+	assert.Len(t, foundShows, 2)
+	assert.EqualValues(t, expectedShows, foundShows)
 }
 
 func Test_should_reference_episodes_and_distributions(t *testing.T) {

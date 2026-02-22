@@ -33,3 +33,13 @@ func (s *GetShowService) GetShow(command *onGetShow.GetShowCommand) (showRespons
 		Episodes: show.Episodes,
 	}, nil
 }
+
+func (s *GetShowService) GetAllShows() (shows *onGetShow.GetAllShowsResponse, err error) {
+	allShows, err := s.repository.GetAllShows()
+	if err != nil {
+		return nil, err
+	}
+	return &onGetShow.GetAllShowsResponse{
+		Shows: allShows,
+	}, nil
+}

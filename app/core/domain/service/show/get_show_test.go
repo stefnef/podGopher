@@ -72,3 +72,47 @@ func Test_retrieve_show_from_repository_on_get(t *testing.T) {
 	assert.Equal(t, expectedShowResponse, foundShow)
 	assert.Equal(t, 1, mockGetShowAdapter.called)
 }
+
+func Test_retrieve_all_shows_from_repository_on_get(t *testing.T) {
+	defer initAdapter()
+
+	expectedShows := []*model.Show{{
+		Id:       "some-id",
+		Title:    "some title",
+		Slug:     "some-slug",
+		Episodes: []string{"some-episode-id"},
+	},
+		{
+			Id:       "other-id",
+			Title:    "other title",
+			Slug:     "other-slug",
+			Episodes: []string{},
+		},
+	}
+	expectedShowsResponse := &onGetShow.GetAllShowsResponse{
+		Shows: expectedShows,
+	}
+	mockGetShowAdapter.withErrorOnGetALlShows = nil
+	mockGetShowAdapter.returnsOnGetAllShows = expectedShows
+
+	foundShows, err := getShowService.GetAllShows()
+
+	assert.Nil(t, err)
+	assert.NotNil(t, foundShows)
+	assert.EqualValues(t, expectedShowsResponse, foundShows)
+	assert.Equal(t, 1, mockGetShowAdapter.called)
+}
+
+func Test_should_propagate_errors_from_adapter_on_get_for_all_shows(t *testing.T) {
+	defer initAdapter()
+
+	expectedError := errors.New("some error")
+	mockGetShowAdapter.withErrorOnGetALlShows = expectedError
+
+	foundShows, err := getShowService.GetAllShows()
+
+	assert.Nil(t, foundShows)
+	assert.NotNil(t, err)
+	assert.Equal(t, expectedError, err)
+	assert.Equal(t, 1, mockGetShowAdapter.called)
+}

@@ -88,6 +88,7 @@ func (app *App) createPortMap() inbound.PortMap {
 	return inbound.PortMap{
 		inbound.CreateShow:         createShowPort,
 		inbound.GetShow:            getShowPort,
+		inbound.GetAllShows:        getShowPort,
 		inbound.CreateEpisode:      createEpisodePort,
 		inbound.GetEpisode:         getEpisodePort,
 		inbound.CreateDistribution: createDistributionPort,

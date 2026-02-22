@@ -15,6 +15,26 @@ components:
                 episodes:
                   - id: "episode-id"
 
+    allShowResponse:
+      description: "A list of all shows"
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - shows
+            properties:
+              shows:
+                type: array
+                items:
+                  $ref: "#/components/schemas/allShowItemResponseDto"
+          examples:
+            success:
+              value:
+                shows:
+                  - id: "show-id"
+                    title: "show-title"
+
   schemas:
     showResponseDto:
       type: object
@@ -39,3 +59,14 @@ components:
           type: array
           items:
             $ref: "../model/distribution.yaml#/components/schemas/distributionId"
+
+    allShowItemResponseDto:
+      type: object
+      required:
+        - id
+        - title
+      properties:
+        id:
+          $ref: "../model/show.yaml#/components/schemas/showId"
+        title:
+          $ref: "../model/show.yaml#/components/schemas/showTitle"

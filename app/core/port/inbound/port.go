@@ -8,6 +8,7 @@ const (
 	PortInvalid PORT = iota
 	CreateShow
 	GetShow
+	GetAllShows
 	CreateEpisode
 	GetEpisode
 	CreateDistribution

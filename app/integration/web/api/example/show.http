@@ -18,4 +18,7 @@ Content-Type: application/json
 ###
 # Get a show
 GET {{host}}/show/{{showId}}
-Content-Type: application/json
+
+###
+# Get all shows
+GET {{host}}/show

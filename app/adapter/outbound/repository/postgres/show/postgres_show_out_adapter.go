@@ -102,3 +102,47 @@ func parseShow(rows *sql.Rows) (show *model.Show, err error) {
 func NewPostgresShowRepository(db *sql.DB) *PostgresShowOutAdapter {
 	return &PostgresShowOutAdapter{db: db}
 }
+
+func (adapter *PostgresShowOutAdapter) GetAllShows() ([]*model.Show, error) {
+	var shows []*model.Show
+
+	query := `
+        SELECT s.id, s.title, s.slug
+        FROM show s 
+        ;
+    `
+	rows, _ := adapter.db.Query(query)
+	defer func(rows *sql.Rows) {
+		_ = rows.Close()
+	}(rows)
+
+	for rows.Next() {
+		show, err := parseShowInformation(rows)
+		if err != nil {
+			return nil, err
+		}
+		shows = append(shows, show)
+	}
+
+	return shows, nil
+}
+
+func parseShowInformation(rows *sql.Rows) (*model.Show, error) {
+	var (
+		showId string
+		title  string
+		slug   string
+	)
+
+	if err := rows.Scan(&showId, &title, &slug); err != nil {
+		return nil, err
+	}
+
+	show := &model.Show{
+		Id:    showId,
+		Title: title,
+		Slug:  slug,
+	}
+
+	return show, nil
+}
