@@ -5,7 +5,7 @@ import (
 	repositoryEpisode "podGopher/adapter/outbound/repository/postgres/episode"
 	"podGopher/adapter/outbound/repository/postgres/postgresTestSetup"
 	"podGopher/core/domain/model"
-	forSaveShow "podGopher/core/port/outbound/show" // TODO rename package alias
+	forSaveShow "podGopher/core/port/outbound/show"
 	"testing"
 
 	"github.com/google/uuid"
