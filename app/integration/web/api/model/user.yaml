@@ -1,0 +1,14 @@
+components:
+  schemas:
+    username:
+      type: string
+      minLength: 1
+      maxLength: 256
+      example: "producer@example.com"
+
+    userId:
+      description: "unique user id"
+      type: string
+      minLength: 16
+      maxLength: 256
+      example: "producer-user-id"

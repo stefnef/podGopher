@@ -55,7 +55,12 @@ func NewRSSFeedNotFoundError(id string) *ModelError {
 	return &ModelError{NotFound, context}
 }
 
-func NewUpdateError(reason string) error {
+func NewUpdateError(reason string) *ModelError {
 	context := fmt.Sprintf("update not possible, reason: %v", reason)
 	return &ModelError{DataConflict, context}
+}
+
+func NewUserAlreadyExistsError(showId string, username string) *ModelError {
+	context := fmt.Sprintf("user with username '%v' already exists for show '%v'", username, showId)
+	return &ModelError{AlreadyExists, context}
 }

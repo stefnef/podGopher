@@ -1,0 +1,26 @@
+components:
+  requestBodies:
+    userPostBody:
+      required: true
+      description: "Values of a newly created user"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/userPostDto"
+          examples:
+            success:
+              value:
+                role: "producer"
+                username: "producer@example.com"
+
+  schemas:
+    userPostDto:
+      type: object
+      required:
+        - role
+        - username
+      properties:
+        role:
+          $ref: "../model/role.yaml#/components/schemas/role"
+        username:
+          $ref: "../model/user.yaml#/components/schemas/username"

@@ -1,0 +1,20 @@
+components:
+  schemas:
+    role:
+      type: string
+      enum:
+        - producer
+        - editor
+      minLength: 1
+      maxLength: 256
+
+    showRole:
+      type: object
+      required:
+        - showId
+        - role
+      properties:
+        showId:
+          $ref: "./show.yaml#/components/schemas/showId"
+        role:
+          $ref: "#/components/schemas/role"

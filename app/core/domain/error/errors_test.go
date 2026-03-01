@@ -59,6 +59,12 @@ func Test_is_an_error(t *testing.T) {
 			"rss feed 'RSS' does not exist",
 			NotFound,
 		},
+
+		"UserAlreadyExistsError": {
+			NewUserAlreadyExistsError("some-show", "any-user"),
+			"user with username 'any-user' already exists for show 'some-show'",
+			AlreadyExists,
+		},
 	}
 
 	for name, test := range tests {

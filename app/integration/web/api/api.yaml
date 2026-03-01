@@ -16,6 +16,8 @@ tags:
     description: Configuration of podcast rss feeds.
   - name: rss
     description: Available rss feeds
+  - name: user
+    description: podcast user
 
 paths:
   /show:
@@ -35,3 +37,6 @@ paths:
 
   /rss/{showSlug}/{distributionSlug}:
     $ref: "./path/rss.yaml#/rssFeed"
+
+  /admin/show/{showId}/user:
+    $ref: "./path/user.yaml#/user"

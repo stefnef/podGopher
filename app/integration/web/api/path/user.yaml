@@ -1,0 +1,13 @@
+user:
+  post:
+    tags:
+      - user
+    description: Create a new user
+    parameters:
+      - $ref: "../parameter/show.yaml#/components/parameters/showId"
+    requestBody:
+      $ref: "../request/user.yaml#/components/requestBodies/userPostBody"
+    responses:
+      201:
+        $ref: "../response/user.yaml#/components/responses/userResponse"
+

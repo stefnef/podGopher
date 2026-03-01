@@ -24,6 +24,24 @@ func (a *getShowTestAdapter) GetAllShows() ([]*model.Show, error) {
 	panic("Don't use me")
 }
 
+// TODO replace with GetShowTestAdapter in adapter/mock package
+func (a *getShowTestAdapter) GetShowOrNil(id string) (*model.Show, error) {
+	a.called++
+	show := a.returnsOnGetOrNilShow[id]
+	return show, nil
+}
+
+func (a *getShowTestAdapter) init() {
+	a.called = 0
+	a.returnsOnGetOrNilShow = make(map[string]*model.Show)
+}
+
+func newGetShowTestAdapter() *getShowTestAdapter {
+	adapter := &getShowTestAdapter{}
+	adapter.init()
+	return adapter
+}
+
 func newSaveAndGetEpisodeTestAdapter() *saveAndGetEpisodeTestAdapter {
 	adapter := &saveAndGetEpisodeTestAdapter{}
 	adapter.init()
@@ -42,12 +60,6 @@ func (adapter *saveAndGetEpisodeTestAdapter) SaveEpisode(episode *model.Episode)
 	adapter.calledSave++
 	adapter.onSaveCalledWith = episode
 	return adapter.withErrorOnSaveEpisode
-}
-
-func (a *getShowTestAdapter) GetShowOrNil(id string) (*model.Show, error) {
-	a.called++
-	show := a.returnsOnGetOrNilShow[id]
-	return show, nil
 }
 
 func (adapter *saveAndGetEpisodeTestAdapter) init() {
@@ -71,17 +83,6 @@ func (adapter *saveAndGetEpisodeTestAdapter) ExistsByTitle(title string) bool {
 func (adapter *saveAndGetEpisodeTestAdapter) GetEpisodeOrNil(id string) (*model.Episode, error) {
 	adapter.calledGet++
 	return adapter.returnsOnGetEpisodeOrNil[id], adapter.withErrorOnGetEpisodeOrNil
-}
-
-func (a *getShowTestAdapter) init() {
-	a.called = 0
-	a.returnsOnGetOrNilShow = make(map[string]*model.Show)
-}
-
-func newGetShowTestAdapter() *getShowTestAdapter {
-	adapter := &getShowTestAdapter{}
-	adapter.init()
-	return adapter
 }
 
 func initAdapter() {

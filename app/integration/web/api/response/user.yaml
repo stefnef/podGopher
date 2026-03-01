@@ -1,0 +1,35 @@
+components:
+  responses:
+    userResponse:
+      description: "A user"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/userResponseDto"
+          examples:
+            success:
+              value:
+                id: "producer-user-id"
+                username: "producer@example.com"
+                showRoles:
+                  - showId: "show-id"
+                    role: "producer"
+                  - showId: "other-show-id"
+                    role: "editor"
+
+  schemas:
+    userResponseDto:
+      type: object
+      required:
+        - id
+        - username
+        - showRoles
+      properties:
+        id:
+          $ref: "../model/user.yaml#/components/schemas/userId"
+        username:
+          $ref: "../model/user.yaml#/components/schemas/username"
+        showRoles:
+          type: array
+          items:
+            $ref: "../model/role.yaml#/components/schemas/showRole"
