@@ -14,6 +14,10 @@ type CreateEpisodeHandler struct {
 	port  episode.CreateEpisodePort
 }
 
+func (h *CreateEpisodeHandler) Authorize(*gin.Context) {
+	//TODO implement me
+}
+
 type CreateEpisodeRequestDto struct {
 	Title string `json:"title" binding:"required"`
 }

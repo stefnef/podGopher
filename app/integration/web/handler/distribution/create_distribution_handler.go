@@ -14,6 +14,10 @@ type CreateDistributionHandler struct {
 	port  distribution.CreateDistributionPort
 }
 
+func (h *CreateDistributionHandler) Authorize(*gin.Context) {
+	//TODO implement me
+}
+
 type CreateDistributionRequestDto struct {
 	Title string `json:"title" binding:"required"`
 	Slug  string `json:"slug" binding:"required"`

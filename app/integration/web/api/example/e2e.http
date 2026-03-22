@@ -15,6 +15,22 @@ Content-Type: application/json
     client.global.set("showId", response.body.id)
 %}
 
+### Create a new user
+POST {{host}} /admin/show/{{showId}}/user
+Content-Type: application/json
+
+{
+  "Username": "the producer",
+  "Role": "PRODUCER"
+}
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+
+    client.global.set("userId", response.body.id)
+%}
+
 ### create episodes
 # Create a new episode
 POST {{host}}/show/{{showId}}/episode

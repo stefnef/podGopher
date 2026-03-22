@@ -15,6 +15,10 @@ type GetEpisodeHandler struct {
 	port  episode.GetEpisodePort
 }
 
+func (h GetEpisodeHandler) Authorize(*gin.Context) {
+	//TODO implement me
+}
+
 func (h GetEpisodeHandler) GetRoute() *handler.Route {
 	return h.route
 }

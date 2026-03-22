@@ -87,8 +87,8 @@ func Test_should_retrieve_rss(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotNil(t, foundRss)
 
-		assert.Equal(t, show, foundRss.Show)
-		assert.Equal(t, distribution, foundRss.Distribution)
+		assert.EqualValues(t, *show, *foundRss.Show)
+		assert.EqualValues(t, distribution, foundRss.Distribution)
 		assert.ElementsMatch(t, []*model.Episode{firstEpisode, secondEpisode}, foundRss.Episodes)
 	})
 }

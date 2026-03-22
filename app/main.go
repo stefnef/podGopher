@@ -9,13 +9,16 @@ import (
 	"podGopher/adapter/outbound/repository/postgres/migration"
 	repositoryRSS "podGopher/adapter/outbound/repository/postgres/rss"
 	repositoryShow "podGopher/adapter/outbound/repository/postgres/show"
+	repositoryUser "podGopher/adapter/outbound/repository/postgres/user"
 	"podGopher/core/domain/service/distribution"
 	"podGopher/core/domain/service/episode"
 	"podGopher/core/domain/service/rss"
 	"podGopher/core/domain/service/show"
+	"podGopher/core/domain/service/user"
 	"podGopher/core/port/inbound"
 	"podGopher/env"
 	"podGopher/integration/web"
+	"podGopher/integration/web/auth"
 
 	"github.com/gin-gonic/gin"
 	postgresClient "gocloud.dev/postgres"
@@ -58,7 +61,12 @@ func NewApp(environmentFilePath string) *App {
 
 func (app *App) createWebRouter() {
 	var portMap = app.createPortMap()
-	app.router = web.NewRouter(portMap)
+	var adminAuth = app.createAuth()
+	app.router = web.NewRouter(portMap, adminAuth)
+}
+
+func (app *App) createAuth() auth.AdminAuth {
+	return auth.NewAdminAuth(env.AdminUser.GetValue(), env.AdminPassword.GetValue())
 }
 
 func (app *App) Start() {
@@ -75,6 +83,7 @@ func (app *App) createPortMap() inbound.PortMap {
 	var episodeRepository = repositoryEpisode.NewPostgresEpisodeRepository(app.db)
 	var distributionRepository = repositoryDistribution.NewPostgresDistributionRepository(app.db)
 	var rssRepository = repositoryRSS.NewPostgresRSSRepository(app.db)
+	var userRepository = repositoryUser.NewPostgresUserRepository(app.db)
 
 	var createShowPort = show.NewCreateShowService(showRepository)
 	var getShowPort = show.NewGetShowService(showRepository)
@@ -84,6 +93,7 @@ func (app *App) createPortMap() inbound.PortMap {
 	var getDistributionPort = distribution.NewGetDistributionService(showRepository, distributionRepository)
 	var updateDistributionPort = distribution.NewUpdateDistributionService(showRepository, episodeRepository, distributionRepository, distributionRepository)
 	var getRSSPort = rss.NewGetRSSService(rssRepository)
+	var createUserPort = user.NewCreateUserService(showRepository, userRepository)
 
 	return inbound.PortMap{
 		inbound.CreateShow:         createShowPort,
@@ -95,6 +105,7 @@ func (app *App) createPortMap() inbound.PortMap {
 		inbound.GetDistribution:    getDistributionPort,
 		inbound.UpdateDistribution: updateDistributionPort,
 		inbound.GetRSS:             getRSSPort,
+		inbound.CreateUser:         createUserPort,
 	}
 }
 

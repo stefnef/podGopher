@@ -12,4 +12,5 @@ type Route struct {
 type Handler interface {
 	GetRoute() *Route
 	Handle(context *gin.Context)
+	Authorize(context *gin.Context)
 }

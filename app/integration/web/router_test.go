@@ -10,11 +10,14 @@ import (
 	"podGopher/core/domain/service/episode"
 	"podGopher/core/domain/service/rss"
 	"podGopher/core/domain/service/show"
+	"podGopher/core/domain/service/user"
 	"podGopher/core/port/inbound"
 	inboundDistribution "podGopher/core/port/inbound/distribution"
 	inboundEpisode "podGopher/core/port/inbound/episode"
 	inboundRSS "podGopher/core/port/inbound/rss"
 	inboundShow "podGopher/core/port/inbound/show"
+	inboundUser "podGopher/core/port/inbound/user"
+	"podGopher/integration/web/auth"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -81,6 +84,11 @@ func (port *mockInboundPort) GetRSS(*inboundRSS.GetRSSCommand) (rssResponse *inb
 	return &inboundRSS.GetRSSResponse{}, response.failsWith
 }
 
+func (port *mockInboundPort) CreateUser(*inboundUser.CreateUserCommand) (*inboundUser.CreateUserResponse, error) {
+	response.Text += "PostUser"
+	return &inboundUser.CreateUserResponse{}, response.failsWith
+}
+
 var mockPort = new(mockInboundPort)
 var router = NewRouter(inbound.PortMap{
 	inbound.CreateShow:         mockPort,
@@ -92,7 +100,8 @@ var router = NewRouter(inbound.PortMap{
 	inbound.UpdateDistribution: mockPort,
 	inbound.GetRSS:             mockPort,
 	inbound.GetAllShows:        mockPort,
-})
+	inbound.CreateUser:         mockPort,
+}, auth.NewAdminAuth("user", "password"))
 
 func setup() {
 	response = responseMock{Text: "", failsWith: nil}
@@ -178,6 +187,40 @@ func Test_should_serve_routes(t *testing.T) {
 	}
 }
 
+func Test_should_serve_routes_with_basic_auth(t *testing.T) {
+	tests := map[string]struct {
+		method                  string
+		path                    string
+		requestBody             string
+		authHeader              string
+		expectedMockHandlerCall string
+	}{
+		"POST user": {
+			"POST",
+			"/admin/show/some-show-id/user",
+			`{"username":"some-username", "role":"Producer"}`,
+			"Basic dXNlcjpwYXNzd29yZA==",
+			"PostUser",
+		},
+		"POST user without auth": {
+			"POST",
+			"/admin/show/some-show-id/user",
+			`{"username":"some-username", "role":"Producer"}`,
+			"",
+			"",
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			setup()
+			doRequestWithBasicAuth(test.method, test.path, test.requestBody, test.authHeader)
+
+			assert.Equal(t, test.expectedMockHandlerCall, response.Text)
+		})
+	}
+}
+
 func Test_should_handle_errors(t *testing.T) {
 	setup()
 
@@ -204,6 +247,11 @@ func Test_should_handle_errors(t *testing.T) {
 		"data conflict": {&domainError.ModelError{Category: domainError.DataConflict, Context: "Some data conflict"},
 			400,
 			"Some data conflict",
+		},
+		"authorization": {
+			&domainError.ModelError{Category: domainError.Authorization, Context: "unauthorized"},
+			403,
+			"unauthorized",
 		},
 		"unknown": {
 			errors.New("FAKE"),
@@ -235,9 +283,10 @@ func Test_should_create_handlers(t *testing.T) {
 		inbound.GetDistribution:    distribution.NewGetDistributionService(nil, nil),
 		inbound.UpdateDistribution: distribution.NewUpdateDistributionService(nil, nil, nil, nil),
 		inbound.GetRSS:             rss.NewGetRSSService(nil),
+		inbound.CreateUser:         user.NewCreateUserService(nil, nil),
 	}
 
-	var handlers = CreateHandlers(portMap)
+	var handlers = CreateHandlers(portMap, auth.NewAdminAuth("user", "password"))
 
 	assert.NotEmpty(t, handlers)
 	assert.Len(t, handlers, len(portMap))
@@ -246,6 +295,14 @@ func Test_should_create_handlers(t *testing.T) {
 func doRequest(method string, url string, requestBody string) *httptest.ResponseRecorder {
 	recorder := httptest.NewRecorder()
 	req, _ := http.NewRequest(method, url, bytes.NewBuffer([]byte(requestBody)))
+	router.ServeHTTP(recorder, req)
+	return recorder
+}
+
+func doRequestWithBasicAuth(method string, url string, requestBody string, authHeader string) *httptest.ResponseRecorder {
+	recorder := httptest.NewRecorder()
+	req, _ := http.NewRequest(method, url, bytes.NewBuffer([]byte(requestBody)))
+	req.Header.Set("Authorization", authHeader)
 	router.ServeHTTP(recorder, req)
 	return recorder
 }

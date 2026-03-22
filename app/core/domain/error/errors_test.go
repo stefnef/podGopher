@@ -65,6 +65,12 @@ func Test_is_an_error(t *testing.T) {
 			"user with username 'any-user' already exists for show 'some-show'",
 			AlreadyExists,
 		},
+
+		"AuthorizationError": {
+			NewAuthorizationError(),
+			"forbidden: unauthorized",
+			Authorization,
+		},
 	}
 
 	for name, test := range tests {

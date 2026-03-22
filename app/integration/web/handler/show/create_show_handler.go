@@ -14,6 +14,10 @@ type CreateShowHandler struct {
 	port  show.CreateShowPort
 }
 
+func (h *CreateShowHandler) Authorize(*gin.Context) {
+	//TODO implement me
+}
+
 type CreateShowRequestDto struct {
 	Title string `json:"title" binding:"required"`
 	Slug  string `json:"slug" binding:"required"`

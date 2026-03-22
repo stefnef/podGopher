@@ -4,3 +4,5 @@ DBPassword:secret
 DBHost:localhost
 DBPort:5432
 MigrationDir:adapter/outbound/repository/postgres/migration/files
+AdminUser:admin
+AdminPassword:password

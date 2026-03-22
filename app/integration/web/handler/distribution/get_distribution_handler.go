@@ -14,6 +14,10 @@ type GetDistributionHandler struct {
 	port  distribution.GetDistributionPort
 }
 
+func (h *GetDistributionHandler) Authorize(*gin.Context) {
+	//TODO implement me
+}
+
 func (h *GetDistributionHandler) GetRoute() *handler.Route {
 	return h.route
 }

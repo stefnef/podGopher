@@ -9,6 +9,7 @@ const (
 	AlreadyExists
 	NotFound
 	DataConflict
+	Authorization
 )
 
 type ModelError struct {
@@ -63,4 +64,8 @@ func NewUpdateError(reason string) *ModelError {
 func NewUserAlreadyExistsError(showId string, username string) *ModelError {
 	context := fmt.Sprintf("user with username '%v' already exists for show '%v'", username, showId)
 	return &ModelError{AlreadyExists, context}
+}
+
+func NewAuthorizationError() *ModelError {
+	return &ModelError{Authorization, "forbidden: unauthorized"}
 }

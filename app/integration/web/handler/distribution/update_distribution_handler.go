@@ -16,6 +16,10 @@ type UpdateDistributionHandler struct {
 	port  distribution.UpdateDistributionPort
 }
 
+func (h *UpdateDistributionHandler) Authorize(*gin.Context) {
+	//TODO implement me
+}
+
 type UpdateDistributionRequestDto struct {
 	Title    *string   `json:"title"`
 	Slug     *string   `json:"slug"`

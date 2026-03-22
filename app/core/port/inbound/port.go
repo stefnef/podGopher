@@ -15,4 +15,5 @@ const (
 	GetDistribution
 	UpdateDistribution
 	GetRSS
+	CreateUser
 )

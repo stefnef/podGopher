@@ -1,3 +1,5 @@
 DBName:podcasts
 DBUser:user
 DBPassword:password
+AdminUser:admin
+AdminPassword:password

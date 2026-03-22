@@ -14,6 +14,10 @@ type GetShowHandler struct {
 	port  show.GetShowPort
 }
 
+func (h *GetShowHandler) Authorize(*gin.Context) {
+	//TODO implement me
+}
+
 func NewGetShowHandler(portMap inbound.PortMap) *GetShowHandler {
 	return &GetShowHandler{
 		route: &handler.Route{

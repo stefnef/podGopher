@@ -14,6 +14,10 @@ type GetAllShowsHandler struct {
 	port  show.GetShowPort
 }
 
+func (h *GetAllShowsHandler) Authorize(*gin.Context) {
+	//TODO implement me
+}
+
 type allShowsResponseDto struct {
 	Shows []allShowsItemResponseDto `json:"shows" binding:"required"`
 }

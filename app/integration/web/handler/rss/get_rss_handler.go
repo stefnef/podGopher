@@ -25,6 +25,10 @@ type GetRSSHandler struct {
 	port  rss.GetRSSPort
 }
 
+func (h GetRSSHandler) Authorize(*gin.Context) {
+	//TODO implement me
+}
+
 func NewGetRSSHandler(portMap inbound.PortMap) handler.Handler {
 	return &GetRSSHandler{
 		route: &handler.Route{
