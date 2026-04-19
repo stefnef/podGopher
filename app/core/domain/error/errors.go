@@ -61,11 +61,21 @@ func NewUpdateError(reason string) *ModelError {
 	return &ModelError{DataConflict, context}
 }
 
-func NewUserAlreadyExistsError(showId string, username string) *ModelError {
+func NewUserAlreadyAssignedError(showId string, username string) *ModelError {
 	context := fmt.Sprintf("user with username '%v' already exists for show '%v'", username, showId)
+	return &ModelError{AlreadyExists, context}
+}
+
+func NewUserAlreadyExistsError(username string) *ModelError {
+	context := fmt.Sprintf("user with username '%v' already exists", username)
 	return &ModelError{AlreadyExists, context}
 }
 
 func NewAuthorizationError() *ModelError {
 	return &ModelError{Authorization, "forbidden: unauthorized"}
+}
+
+func NewUserNotFoundError(username string) *ModelError {
+	context := fmt.Sprintf("user with id '%v' does not exist", username)
+	return &ModelError{NotFound, context}
 }

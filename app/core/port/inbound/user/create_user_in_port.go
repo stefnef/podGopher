@@ -1,17 +1,20 @@
 package user
 
-import "podGopher/core/domain/model"
+import (
+	"podGopher/core/domain/role"
+)
 
 type CreateUserCommand struct {
 	Username string
-	ShowId   string
-	Role     string
+	Email    string
+	Password string
+	IsAdmin  bool
 }
 
 type CreateUserResponse struct {
 	Id        string
 	Username  string
-	ShowRoles []model.ShowRole
+	ShowRoles []domainRole.ShowRole
 }
 
 type CreateUserPort interface {

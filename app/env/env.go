@@ -14,12 +14,16 @@ func Load(filename string) error {
 }
 
 const (
-	DBName        Name = "DBName"
-	DBUser        Name = "DBUser"
-	DBPassword    Name = "DBPassword"
-	DBHost        Name = "DBHost"
-	DBPort        Name = "DBPort"
-	MigrationDir  Name = "MigrationDir"
-	AdminUser     Name = "AdminUser"
-	AdminPassword Name = "AdminPassword"
+	DBName             Name = "DBName"
+	DBUser             Name = "DBUser"
+	DBPassword         Name = "DBPassword"
+	DBHost             Name = "DBHost"
+	DBPort             Name = "DBPort"
+	MigrationDir       Name = "MigrationDir"
+	AdminUser          Name = "AdminUser"
+	AdminPassword      Name = "AdminPassword"
+	OAuth2Domain       Name = "OAuth2Domain"
+	OAuth2ClientId     Name = "OAuth2ClientId"
+	OAuth2ClientSecret Name = "OAuth2ClientSecret"
+	OAuth2Database     Name = "OAuth2Database"
 )

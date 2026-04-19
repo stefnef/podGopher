@@ -1,4 +1,23 @@
-# Create a new show
+### Create a new user
+POST {{host}} /admin/user
+Content-Type: application/json
+Authorization: Basic admin password
+
+{
+  "Username": "the_producer",
+  "Role": "PRODUCER",
+  "Password": "secret-password"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+
+    client.global.set("userId", response.body.id)
+%}
+
+### Create a new show
 POST {{host}}/show
 Content-Type: application/json
 
@@ -15,13 +34,13 @@ Content-Type: application/json
     client.global.set("showId", response.body.id)
 %}
 
-### Create a new producer
+### Assign the user to the show as producer
 POST {{host}} /admin/show/{{showId}}/user
 Content-Type: application/json
-Authorization: Basic admin password
+Authorization: Basic admin password #TODO this is not basic auth
 
 {
-  "Username": "the producer",
+  "Username": "the_producer",
   "Role": "PRODUCER"
 }
 
@@ -29,7 +48,5 @@ Authorization: Basic admin password
     client.test("Request executed successfully", function() {
         client.assert(response.status === 201, "Response status is not 201");
     });
-
-    client.global.set("userId", response.body.id)
 %}
 

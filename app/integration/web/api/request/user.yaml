@@ -1,6 +1,6 @@
 components:
   requestBodies:
-    userPostBody:
+    showRolePostBody:
       required: true
       description: "Values of a newly created user"
       content:
@@ -11,16 +11,44 @@ components:
             success:
               value:
                 role: "producer"
+                showId: "show-id"
+
+    createUserPostBody:
+      required: true
+      description: "Values for a new user"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/createUserPostDto"
+          examples:
+            success:
+              value:
                 username: "producer@example.com"
+                password: "some-password"
+                isAdmin: false
 
   schemas:
     userPostDto:
       type: object
       required:
         - role
-        - username
+        - showId
       properties:
         role:
           $ref: "../model/role.yaml#/components/schemas/role"
+        showId:
+          $ref: "../model/show.yaml#/components/schemas/showId"
+
+    createUserPostDto:
+      type: object
+      required:
+        - username
+        - password
+        - isAdmin
+      properties:
         username:
           $ref: "../model/user.yaml#/components/schemas/username"
+        password:
+          $ref: "../model/user.yaml#/components/schemas/password"
+        isAdmin:
+          $ref: "../model/user.yaml#/components/schemas/isAdmin"

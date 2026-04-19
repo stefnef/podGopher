@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS podcast_user
 (
     id       uuid primary key not null,
-    username varchar(255)     not null
-
+    username varchar(255)     not null,
+    is_admin boolean          not null default false
 );
 
 CREATE TABLE IF NOT EXISTS show_users

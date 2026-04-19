@@ -3,41 +3,40 @@ package user
 import (
 	domainError "podGopher/core/domain/error"
 	"podGopher/core/domain/model"
+	"podGopher/core/domain/role"
 	onCreateUser "podGopher/core/port/inbound/user"
-	forGetShow "podGopher/core/port/outbound/show"
 	forGetSaveUser "podGopher/core/port/outbound/user"
 
 	"github.com/google/uuid"
 )
 
 type CreateUserService struct {
-	getShowOutPort  forGetShow.GetShowPort
-	getSaveUserPort forGetSaveUser.SaveUserPort
+	getSaveUserPort           forGetSaveUser.SaveUserPort
+	createUserCredentialsPort forGetSaveUser.CreateUserCredentialsPort
 }
 
-func NewCreateUserService(showRepository forGetShow.GetShowPort, userRepository forGetSaveUser.SaveUserPort) *CreateUserService {
+func NewCreateUserService(userRepository forGetSaveUser.SaveUserPort, userCredentialService forGetSaveUser.CreateUserCredentialsPort) *CreateUserService {
 	return &CreateUserService{
-		getShowOutPort:  showRepository,
-		getSaveUserPort: userRepository,
+		getSaveUserPort:           userRepository,
+		createUserCredentialsPort: userCredentialService,
 	}
 }
 
 func (service CreateUserService) CreateUser(command *onCreateUser.CreateUserCommand) (*onCreateUser.CreateUserResponse, error) {
-	if exists := service.getSaveUserPort.ExistsByUsername(command.ShowId, command.Username); exists != false {
-		return nil, domainError.NewUserAlreadyExistsError(command.ShowId, command.Username)
-	}
-
-	if show, _ := service.getShowOutPort.GetShowOrNil(command.ShowId); show == nil {
-		return nil, domainError.NewShowNotFoundError(command.ShowId)
+	if exists := service.getSaveUserPort.ExistsByUsername(command.Username); exists != false {
+		return nil, domainError.NewUserAlreadyExistsError(command.Username)
 	}
 
 	id := uuid.NewString()
 	user := &model.User{
-		Id:       id,
-		Username: command.Username,
-		ShowRoles: []model.ShowRole{
-			{ShowId: command.ShowId, Role: model.PRODUCER},
-		},
+		Id:        id,
+		Username:  command.Username,
+		IsAdmin:   command.IsAdmin,
+		ShowRoles: []domainRole.ShowRole{},
+	}
+
+	if err := service.createUserCredentialsPort.CreateUserCredentials(user, command.Email, command.Password); err != nil {
+		return nil, err
 	}
 
 	if err := service.getSaveUserPort.SaveUser(user); err != nil {

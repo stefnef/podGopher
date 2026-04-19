@@ -38,5 +38,9 @@ paths:
   /rss/{showSlug}/{distributionSlug}:
     $ref: "./path/rss.yaml#/rssFeed"
 
-  /admin/show/{showId}/user:
-    $ref: "./path/user.yaml#/user"
+
+  /user:
+    $ref: "./path/user.yaml#/createUser"
+
+  /user/{userId}/role:
+    $ref: "./path/user.yaml#/showRole"

@@ -60,10 +60,22 @@ func Test_is_an_error(t *testing.T) {
 			NotFound,
 		},
 
-		"UserAlreadyExistsError": {
-			NewUserAlreadyExistsError("some-show", "any-user"),
+		"UserAlreadyAssignedError": {
+			NewUserAlreadyAssignedError("some-show", "any-user"),
 			"user with username 'any-user' already exists for show 'some-show'",
 			AlreadyExists,
+		},
+
+		"UserAlreadyExistsError": {
+			NewUserAlreadyExistsError("any-user"),
+			"user with username 'any-user' already exists",
+			AlreadyExists,
+		},
+
+		"UserNotFoundError": {
+			NewUserNotFoundError("any-user"),
+			"user with id 'any-user' does not exist",
+			NotFound,
 		},
 
 		"AuthorizationError": {

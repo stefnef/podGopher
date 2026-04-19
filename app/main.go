@@ -93,7 +93,8 @@ func (app *App) createPortMap() inbound.PortMap {
 	var getDistributionPort = distribution.NewGetDistributionService(showRepository, distributionRepository)
 	var updateDistributionPort = distribution.NewUpdateDistributionService(showRepository, episodeRepository, distributionRepository, distributionRepository)
 	var getRSSPort = rss.NewGetRSSService(rssRepository)
-	var createUserPort = user.NewCreateUserService(showRepository, userRepository)
+	var createUserPort = user.NewCreateUserService(userRepository, nil) //TODO use adapter
+	var assignUserPort = user.NewAssignUserService(showRepository, userRepository, userRepository)
 
 	return inbound.PortMap{
 		inbound.CreateShow:         createShowPort,
@@ -106,6 +107,7 @@ func (app *App) createPortMap() inbound.PortMap {
 		inbound.UpdateDistribution: updateDistributionPort,
 		inbound.GetRSS:             getRSSPort,
 		inbound.CreateUser:         createUserPort,
+		inbound.AssignUser:         assignUserPort,
 	}
 }
 

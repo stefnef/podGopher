@@ -4,6 +4,7 @@ import (
 	"podGopher/adapter/outbound/repository/postgres/postgresTestSetup"
 	repositoryShow "podGopher/adapter/outbound/repository/postgres/show"
 	"podGopher/core/domain/model"
+	"podGopher/core/domain/role"
 	forSaveUser "podGopher/core/port/outbound/user"
 	"sort"
 	"testing"
@@ -19,7 +20,7 @@ func Test_user_repository_should_implement_port(t *testing.T) {
 	assert.Implements(t, (*forSaveUser.SaveUserPort)(nil), repository)
 }
 
-func Test_should_not_save_user_if_show_does_not_exist(t *testing.T) {
+func Test_should_not_assign_user_if_show_does_not_exist(t *testing.T) {
 	db := postgresTestSetup.StartTestcontainersPostgres(t, "../postgresTestSetup/")
 	defer postgresTestSetup.Teardown(t, db)
 
@@ -29,10 +30,10 @@ func Test_should_not_save_user_if_show_does_not_exist(t *testing.T) {
 	user := &model.User{
 		Id:       uuid.NewString(),
 		Username: "some-username",
-		ShowRoles: []model.ShowRole{
+		ShowRoles: []domainRole.ShowRole{
 			{
 				ShowId: nonExistingShowId,
-				Role:   model.EDITOR,
+				Role:   domainRole.EDITOR,
 			},
 		},
 	}
@@ -40,7 +41,67 @@ func Test_should_not_save_user_if_show_does_not_exist(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-func Test_should_save_a_user(t *testing.T) {
+func Test_should_save_a_new_user(t *testing.T) {
+	db := postgresTestSetup.StartTestcontainersPostgres(t, "../postgresTestSetup/")
+	defer postgresTestSetup.Teardown(t, db)
+
+	repository := NewPostgresUserRepository(db)
+	username := "Some username"
+	user := &model.User{
+		Id:        uuid.NewString(),
+		Username:  username,
+		ShowRoles: []domainRole.ShowRole{},
+	}
+
+	t.Run("should return false if user with username does not exist", func(t *testing.T) {
+		exists := repository.ExistsByUsername(username)
+		assert.False(t, exists)
+	})
+
+	t.Run("should save a user", func(t *testing.T) {
+		err := repository.SaveUser(user)
+		assert.Nil(t, err)
+	})
+
+	t.Run("should return true if user with username exists", func(t *testing.T) {
+		exists := repository.ExistsByUsername(username)
+		assert.True(t, exists)
+	})
+
+	t.Run("should return false if user with username does not exists", func(t *testing.T) {
+		exists := repository.ExistsByUsername("some-other-user")
+		assert.False(t, exists)
+	})
+
+	t.Run("should query a user", func(t *testing.T) {
+		var id, username string
+		var isAdmin bool
+		err := db.QueryRow("SELECT * FROM podcast_user WHERE id = $1", user.Id).
+			Scan(&id, &username, &isAdmin)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		assert.Equal(t, user.Id, id)
+		assert.Equal(t, user.Username, username)
+		assert.False(t, isAdmin)
+	})
+
+	t.Run("should save an admin user", func(t *testing.T) {
+		err := repository.SaveUser(&model.User{
+			Id:       uuid.NewString(),
+			Username: "admin-user",
+			IsAdmin:  true,
+		})
+		assert.Nil(t, err)
+		var adminUser *model.User
+		adminUser, err = repository.GetUserByUsernameOrNil("admin-user")
+		assert.Nil(t, err)
+		assert.True(t, adminUser.IsAdmin)
+	})
+}
+
+func Test_should_assign_a_user(t *testing.T) {
 	db := postgresTestSetup.StartTestcontainersPostgres(t, "../postgresTestSetup/")
 	defer postgresTestSetup.Teardown(t, db)
 
@@ -51,12 +112,9 @@ func Test_should_save_a_user(t *testing.T) {
 	repository := NewPostgresUserRepository(db)
 	username := "Some username"
 	user := &model.User{
-		Id:       uuid.NewString(),
-		Username: username,
-		ShowRoles: []model.ShowRole{
-			{ShowId: producerShowUuid, Role: model.PRODUCER},
-			{ShowId: editorShowUuid, Role: model.EDITOR},
-		},
+		Id:        uuid.NewString(),
+		Username:  username,
+		ShowRoles: nil,
 	}
 
 	if err := showRepository.SaveShow(&model.Show{Id: editorShowUuid, Title: "editor-show", Slug: "editor-slug"}); err != nil {
@@ -66,45 +124,41 @@ func Test_should_save_a_user(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	if err := repository.SaveUser(user); err != nil {
+		t.Fatal(err)
+	}
+
 	t.Run("should return false if user with username does not exist", func(t *testing.T) {
-		exists := repository.ExistsByUsername(producerShowUuid, username)
+		exists := repository.ExistsByShowIdAndByUserId(producerShowUuid, user.Id)
 		assert.False(t, exists)
 
-		exists = repository.ExistsByUsername(editorShowUuid, username)
+		exists = repository.ExistsByShowIdAndByUserId(editorShowUuid, user.Id)
 		assert.False(t, exists)
 	})
 
-	t.Run("should save a user", func(t *testing.T) {
-		err := repository.SaveUser(user)
+	t.Run("should assign a user", func(t *testing.T) {
+		user.ShowRoles = []domainRole.ShowRole{
+			{ShowId: producerShowUuid, Role: domainRole.PRODUCER},
+			{ShowId: editorShowUuid, Role: domainRole.EDITOR},
+		}
+		err := repository.UpdateUser(user)
 		assert.Nil(t, err)
 	})
 
-	t.Run("should return true if user with username exists", func(t *testing.T) {
-		exists := repository.ExistsByUsername(producerShowUuid, username)
+	t.Run("should return true if user with id exists", func(t *testing.T) {
+		exists := repository.ExistsByShowIdAndByUserId(producerShowUuid, user.Id)
 		assert.True(t, exists)
 
-		exists = repository.ExistsByUsername(editorShowUuid, username)
+		exists = repository.ExistsByShowIdAndByUserId(editorShowUuid, user.Id)
 		assert.True(t, exists)
 	})
 
-	t.Run("should return false if user with username does not exists", func(t *testing.T) {
-		exists := repository.ExistsByUsername(editorShowUuid, "some-other-user")
+	t.Run("should return false if user with user id does not exists", func(t *testing.T) {
+		exists := repository.ExistsByShowIdAndByUserId(editorShowUuid, "some-other-user")
 		assert.False(t, exists)
 
-		exists = repository.ExistsByUsername("i-do-not-exist", username)
+		exists = repository.ExistsByShowIdAndByUserId("i-do-not-exist", user.Id)
 		assert.False(t, exists)
-	})
-
-	t.Run("should query a user", func(t *testing.T) {
-		var id, username string
-		err := db.QueryRow("SELECT * FROM podcast_user WHERE id = $1", user.Id).
-			Scan(&id, &username)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		assert.Equal(t, user.Id, id)
-		assert.Equal(t, user.Username, username)
 	})
 
 	t.Run("should query show roles", func(t *testing.T) {
@@ -112,12 +166,12 @@ func Test_should_save_a_user(t *testing.T) {
 		err := db.QueryRow("SELECT role FROM user_roles WHERE user_id = $1 and show_id = $2", user.Id, editorShowUuid).
 			Scan(&role)
 		assert.Nil(t, err)
-		assert.Equal(t, model.EDITOR.Name(), role)
+		assert.Equal(t, domainRole.EDITOR.Name(), role)
 
 		err = db.QueryRow("SELECT role FROM user_roles WHERE user_id = $1 and show_id = $2", user.Id, producerShowUuid).
 			Scan(&role)
 		assert.Nil(t, err)
-		assert.Equal(t, model.PRODUCER.Name(), role)
+		assert.Equal(t, domainRole.PRODUCER.Name(), role)
 	})
 }
 
@@ -135,9 +189,10 @@ func Test_should_retrieve_a_user(t *testing.T) {
 	user := &model.User{
 		Id:       uuid.NewString(),
 		Username: username,
-		ShowRoles: []model.ShowRole{
-			{ShowId: editorShowUuid, Role: model.EDITOR},
-			{ShowId: producerShowUuid, Role: model.PRODUCER},
+		IsAdmin:  false,
+		ShowRoles: []domainRole.ShowRole{
+			{ShowId: editorShowUuid, Role: domainRole.EDITOR},
+			{ShowId: producerShowUuid, Role: domainRole.PRODUCER},
 		},
 	}
 
@@ -151,24 +206,38 @@ func Test_should_retrieve_a_user(t *testing.T) {
 	assert.Nil(t, err)
 
 	t.Run("should return nil if user does not exist", func(t *testing.T) {
-		foundUser, err := repository.GetUserOrNil(uuid.NewString())
+		foundUser, err := repository.GetUserByIdOrNil(uuid.NewString())
+		assert.Nil(t, err)
+		assert.Nil(t, foundUser)
+	})
+
+	t.Run("should return nil if user does not exist on getByUsername", func(t *testing.T) {
+		foundUser, err := repository.GetUserByUsernameOrNil(uuid.NewString())
 		assert.Nil(t, err)
 		assert.Nil(t, foundUser)
 	})
 
 	t.Run("should retrieve a user", func(t *testing.T) {
-		foundUser, err := repository.GetUserOrNil(user.Id)
+		foundUser, err := repository.GetUserByIdOrNil(user.Id)
 		assert.Nil(t, err)
 		assert.NotNil(t, foundUser)
 		assert.Equal(t, user.Id, foundUser.Id)
 		assert.Equal(t, user.Username, foundUser.Username)
-		sort.Sort(model.ByRole(user.ShowRoles))
-		sort.Sort(model.ByRole(foundUser.ShowRoles))
+		assert.False(t, foundUser.IsAdmin)
+		sort.Sort(domainRole.ByRole(user.ShowRoles))
+		sort.Sort(domainRole.ByRole(foundUser.ShowRoles))
 		assert.EqualValues(t, user.ShowRoles, foundUser.ShowRoles)
+	})
+
+	t.Run("should retrieve a user by username", func(t *testing.T) {
+		foundUser, err := repository.GetUserByUsernameOrNil(user.Username)
+		assert.Nil(t, err)
+		assert.NotNil(t, foundUser)
+		assert.Equal(t, user.Id, foundUser.Id)
 	})
 }
 
-func Test_should_update_a_user(t *testing.T) {
+func Test_should_update_a_user_assignment(t *testing.T) {
 	db := postgresTestSetup.StartTestcontainersPostgres(t, "../postgresTestSetup/")
 	defer postgresTestSetup.Teardown(t, db)
 
@@ -182,17 +251,17 @@ func Test_should_update_a_user(t *testing.T) {
 	user := &model.User{
 		Id:       uuid.NewString(),
 		Username: username,
-		ShowRoles: []model.ShowRole{
-			{ShowId: firstShowUuid, Role: model.PRODUCER},
+		ShowRoles: []domainRole.ShowRole{
+			{ShowId: firstShowUuid, Role: domainRole.PRODUCER},
 		},
 	}
 
 	userUpdate := &model.User{
 		Id:       user.Id,
 		Username: "new username",
-		ShowRoles: []model.ShowRole{
-			{ShowId: firstShowUuid, Role: model.EDITOR},
-			{ShowId: secondShowUuid, Role: model.PRODUCER},
+		ShowRoles: []domainRole.ShowRole{
+			{ShowId: firstShowUuid, Role: domainRole.EDITOR},
+			{ShowId: secondShowUuid, Role: domainRole.PRODUCER},
 		},
 	}
 
@@ -213,21 +282,21 @@ func Test_should_update_a_user(t *testing.T) {
 	})
 
 	t.Run("should query updated user", func(t *testing.T) {
-		if fetchedUser, err := repository.GetUserOrNil(user.Id); err != nil {
+		if fetchedUser, err := repository.GetUserByIdOrNil(user.Id); err != nil {
 			t.Fatal(err)
 		} else {
-			sort.Sort(model.ByRole(fetchedUser.ShowRoles))
-			sort.Sort(model.ByRole(userUpdate.ShowRoles))
+			sort.Sort(domainRole.ByRole(fetchedUser.ShowRoles))
+			sort.Sort(domainRole.ByRole(userUpdate.ShowRoles))
 			assert.Equal(t, userUpdate, fetchedUser)
 		}
 	})
 
 	t.Run("should remove showRoles", func(t *testing.T) {
-		userUpdate.ShowRoles = []model.ShowRole{}
+		userUpdate.ShowRoles = []domainRole.ShowRole{}
 		err := repository.UpdateUser(userUpdate)
 		assert.Nil(t, err)
 
-		if fetchedUser, err := repository.GetUserOrNil(user.Id); err != nil {
+		if fetchedUser, err := repository.GetUserByIdOrNil(user.Id); err != nil {
 			t.Fatal(err)
 		} else {
 			assert.Empty(t, fetchedUser.ShowRoles)

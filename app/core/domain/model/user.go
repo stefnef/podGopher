@@ -1,7 +1,10 @@
 package model
 
+import "podGopher/core/domain/role"
+
 type User struct {
 	Id        string
 	Username  string
-	ShowRoles []ShowRole
+	IsAdmin   bool
+	ShowRoles []domainRole.ShowRole
 }

@@ -11,6 +11,7 @@ components:
               value:
                 id: "producer-user-id"
                 username: "producer@example.com"
+                isAdmin: false
                 showRoles:
                   - showId: "show-id"
                     role: "producer"
@@ -23,12 +24,15 @@ components:
       required:
         - id
         - username
+        - isAdmin
         - showRoles
       properties:
         id:
           $ref: "../model/user.yaml#/components/schemas/userId"
         username:
           $ref: "../model/user.yaml#/components/schemas/username"
+        isAdmin:
+          $ref: "../model/user.yaml#/components/schemas/isAdmin"
         showRoles:
           type: array
           items:

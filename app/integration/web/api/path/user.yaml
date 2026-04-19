@@ -1,12 +1,27 @@
-user:
+showRole:
+  post:
+    tags:
+      - user
+    description: Assign an existing user to a show
+    #TODO add security
+    operationId: assignShowUser
+    parameters:
+      - $ref: "../parameter/user.yaml#/components/parameters/userId"
+    requestBody:
+      $ref: "../request/user.yaml#/components/requestBodies/showRolePostBody"
+    responses:
+      201:
+        $ref: "../response/user.yaml#/components/responses/userResponse"
+
+createUser:
   post:
     tags:
       - user
     description: Create a new user
-    parameters:
-      - $ref: "../parameter/show.yaml#/components/parameters/showId"
+    #TODO add security
+    operationId: createUser
     requestBody:
-      $ref: "../request/user.yaml#/components/requestBodies/userPostBody"
+      $ref: "../request/user.yaml#/components/requestBodies/createUserPostBody"
     responses:
       201:
         $ref: "../response/user.yaml#/components/responses/userResponse"

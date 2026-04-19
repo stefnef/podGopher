@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	domainError "podGopher/core/domain/error"
-	"podGopher/core/domain/model"
+	"podGopher/core/domain/role"
 	"podGopher/core/port/inbound"
 	"podGopher/core/port/inbound/user"
 	"podGopher/integration/web/auth"
@@ -110,35 +110,33 @@ func Test_should_call_service_on_create_user(t *testing.T) {
 		`some-show-id`,
 		`{"Username":"some username", "Role": "Editor"}`,
 		&user.CreateUserCommand{
-			ShowId:   "some-show-id",
-			Role:     "Editor",
 			Username: "some username",
 		},
 		&user.CreateUserResponse{
 			Id:       "some-id",
 			Username: "Mocked Username",
-			ShowRoles: []model.ShowRole{
+			ShowRoles: []domainRole.ShowRole{
 				{
 					ShowId: "show-id",
-					Role:   model.EDITOR,
+					Role:   domainRole.EDITOR,
 				},
 				{
 					ShowId: "other-show-id",
-					Role:   model.PRODUCER,
+					Role:   domainRole.PRODUCER,
 				},
 			},
 		},
 		&userResponseDto{
 			Id:       "some-id",
 			Username: "Mocked Username",
-			ShowRoles: []model.ShowRole{
+			ShowRoles: []domainRole.ShowRole{
 				{
 					ShowId: "show-id",
-					Role:   model.EDITOR,
+					Role:   domainRole.EDITOR,
 				},
 				{
 					ShowId: "other-show-id",
-					Role:   model.PRODUCER,
+					Role:   domainRole.PRODUCER,
 				},
 			},
 		},

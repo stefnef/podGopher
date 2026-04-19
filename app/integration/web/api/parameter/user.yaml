@@ -1,0 +1,8 @@
+components:
+  parameters:
+    userId:
+      in: path
+      required: true
+      name: userId
+      schema:
+        $ref: "../model/user.yaml#/components/schemas/userId"

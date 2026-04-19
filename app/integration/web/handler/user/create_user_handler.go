@@ -3,7 +3,7 @@ package user
 import (
 	"net/http"
 	domainError "podGopher/core/domain/error"
-	"podGopher/core/domain/model"
+	"podGopher/core/domain/role"
 	"podGopher/core/port/inbound"
 	"podGopher/core/port/inbound/user"
 	"podGopher/integration/web/auth"
@@ -31,9 +31,9 @@ type CreateUserRequestDto struct {
 }
 
 type userResponseDto struct {
-	Id        string           `json:"id" binding:"required"`
-	Username  string           `json:"username" binding:"required"`
-	ShowRoles []model.ShowRole `json:"showRoles" binding:"required"`
+	Id        string                `json:"id" binding:"required"`
+	Username  string                `json:"username" binding:"required"`
+	ShowRoles []domainRole.ShowRole `json:"showRoles" binding:"required"`
 }
 
 func (h *CreateUserHandler) GetRoute() *handler.Route {
@@ -62,7 +62,7 @@ func (h *CreateUserHandler) Handle(context *gin.Context) {
 }
 
 func (h *CreateUserHandler) handleCreateUser(context *gin.Context, request *CreateUserRequestDto) {
-	createUserCommand := &user.CreateUserCommand{ShowId: context.Param("showId"), Username: request.Username, Role: request.Role}
+	createUserCommand := &user.CreateUserCommand{Username: request.Username}
 	if createdUser, err := h.port.CreateUser(createUserCommand); err != nil {
 		_ = context.Error(err)
 	} else {

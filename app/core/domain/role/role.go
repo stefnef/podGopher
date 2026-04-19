@@ -1,4 +1,6 @@
-package model
+package domainRole
+
+import "strings"
 
 type ShowRole struct {
 	ShowId string
@@ -21,19 +23,22 @@ func (b ByRole) Swap(i, j int) {
 type ROLE int
 
 func ValueToRole(name string) ROLE {
-	return valueToRole[name]
+	return valueToRole[strings.ToUpper(name)]
 }
 
 var roleNames = map[ROLE]string{
 	FOLLOWER: "FOLLOWER",
 	PRODUCER: "PRODUCER",
 	EDITOR:   "EDITOR",
+	ADMIN:    "ADMIN",
+	UNKNOWN:  "UNKNOWN",
 }
 
 var valueToRole = map[string]ROLE{
 	"FOLLOWER": FOLLOWER,
 	"PRODUCER": PRODUCER,
 	"EDITOR":   EDITOR,
+	"ADMIN":    ADMIN,
 }
 
 func (r ROLE) Name() string {
@@ -41,7 +46,9 @@ func (r ROLE) Name() string {
 }
 
 const (
-	FOLLOWER ROLE = iota
-	PRODUCER
+	UNKNOWN ROLE = iota
+	FOLLOWER
 	EDITOR
+	PRODUCER
+	ADMIN
 )

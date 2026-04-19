@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"podGopher/adapter/outbound/repository/HelperSql"
 	"podGopher/core/domain/model"
+	domainRole "podGopher/core/domain/role"
 )
 
 type PostgresUserOutAdapter struct {
@@ -84,12 +85,12 @@ func (adapter *PostgresUserOutAdapter) deleteShowUserMappingEntries(user *model.
 func (adapter *PostgresUserOutAdapter) createUserEntry(user *model.User, transaction *sql.Tx) (err error) {
 	var stmt *sql.Stmt
 
-	if stmt, err = transaction.Prepare("INSERT INTO podcast_user (id, username) VALUES ($1, $2);"); err != nil {
+	if stmt, err = transaction.Prepare("INSERT INTO podcast_user (id, username, is_admin) VALUES ($1, $2, $3);"); err != nil {
 		return err
 	}
 	defer HelperSql.CloseStatement(stmt)
 
-	if _, err = stmt.Exec(user.Id, user.Username); err != nil {
+	if _, err = stmt.Exec(user.Id, user.Username, user.IsAdmin); err != nil {
 		return err
 	}
 
@@ -111,9 +112,9 @@ func (adapter *PostgresUserOutAdapter) updateUserEntry(user *model.User, transac
 	return nil
 }
 
-func (adapter *PostgresUserOutAdapter) ExistsByUsername(showId string, username string) bool {
-	query := "SELECT EXISTS(SELECT 1 from show_users su LEFT JOIN podcast_user pu on pu.id = su.user_id where su.show_id = $1 and pu.username = $2)"
-	row := adapter.db.QueryRow(query, showId, username)
+func (adapter *PostgresUserOutAdapter) ExistsByShowIdAndByUserId(showId string, userId string) bool {
+	query := "SELECT EXISTS(SELECT 1 from show_users su LEFT JOIN podcast_user pu on pu.id = su.user_id where su.show_id = $1 and pu.id = $2)"
+	row := adapter.db.QueryRow(query, showId, userId)
 
 	var exists bool
 	err := row.Scan(&exists)
@@ -123,12 +124,39 @@ func (adapter *PostgresUserOutAdapter) ExistsByUsername(showId string, username 
 	return exists
 }
 
-func (adapter *PostgresUserOutAdapter) GetUserOrNil(id string) (user *model.User, err error) {
+func (adapter *PostgresUserOutAdapter) ExistsByUsername(username string) bool {
+	query := "SELECT EXISTS(SELECT 1 from podcast_user where username = $1)"
+	row := adapter.db.QueryRow(query, username)
+
+	var exists bool
+	err := row.Scan(&exists)
+	if err != nil {
+		return false
+	}
+	return exists
+}
+
+func (adapter *PostgresUserOutAdapter) GetUserByIdOrNil(id string) (user *model.User, err error) {
 	query := `
-        SELECT pu.id, pu.username, u_roles.show_id, u_roles.role 
+        SELECT pu.id, pu.username, pu.is_admin, u_roles.show_id, u_roles.role 
         FROM podcast_user pu 
         LEFT JOIN user_roles u_roles ON pu.id = u_roles.user_id 
         WHERE pu.id = $1;
+    `
+	rows, _ := adapter.db.Query(query, id)
+	defer func(rows *sql.Rows) {
+		_ = rows.Close()
+	}(rows)
+
+	return parseUserWithRoles(rows)
+}
+
+func (adapter *PostgresUserOutAdapter) GetUserByUsernameOrNil(id string) (user *model.User, err error) {
+	query := `
+        SELECT pu.id, pu.username, pu.is_admin, u_roles.show_id, u_roles.role 
+        FROM podcast_user pu 
+        LEFT JOIN user_roles u_roles ON pu.id = u_roles.user_id 
+        WHERE pu.username = $1;
     `
 	rows, _ := adapter.db.Query(query, id)
 	defer func(rows *sql.Rows) {
@@ -145,11 +173,12 @@ func parseUserWithRoles(rows *sql.Rows) (user *model.User, err error) {
 		var (
 			userId   string
 			username string
+			isAdmin  bool
 			showId   sql.NullString
 			role     sql.NullString
 		)
 
-		if err = rows.Scan(&userId, &username, &showId, &role); err != nil {
+		if err = rows.Scan(&userId, &username, &isAdmin, &showId, &role); err != nil {
 			return nil, err
 		}
 
@@ -157,6 +186,7 @@ func parseUserWithRoles(rows *sql.Rows) (user *model.User, err error) {
 			user = &model.User{
 				Id:       userId,
 				Username: username,
+				IsAdmin:  isAdmin,
 			}
 		}
 
@@ -167,9 +197,9 @@ func parseUserWithRoles(rows *sql.Rows) (user *model.User, err error) {
 
 	if user != nil {
 		for showId, role := range userRolesSet {
-			user.ShowRoles = append(user.ShowRoles, model.ShowRole{
+			user.ShowRoles = append(user.ShowRoles, domainRole.ShowRole{
 				ShowId: showId,
-				Role:   model.ValueToRole(role),
+				Role:   domainRole.ValueToRole(role),
 			})
 		}
 	}

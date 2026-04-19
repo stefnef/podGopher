@@ -16,4 +16,5 @@ const (
 	UpdateDistribution
 	GetRSS
 	CreateUser
+	AssignUser //TODO use enum constant
 )

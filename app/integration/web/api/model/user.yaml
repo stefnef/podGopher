@@ -6,9 +6,20 @@ components:
       maxLength: 256
       example: "producer@example.com"
 
+    password:
+      type: string
+      minLength: 1
+      maxLength: 256
+      example: "some-password"
+
     userId:
       description: "unique user id"
       type: string
       minLength: 16
       maxLength: 256
       example: "producer-user-id"
+
+    isAdmin:
+      description: "whether the user is an admin"
+      type: boolean
+      example: false
