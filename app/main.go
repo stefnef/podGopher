@@ -78,36 +78,89 @@ func (app *App) Stop() {
 	app.ctx.Done()
 }
 
-func (app *App) createPortMap() inbound.PortMap {
-	var showRepository = repositoryShow.NewPostgresShowRepository(app.db)
-	var episodeRepository = repositoryEpisode.NewPostgresEpisodeRepository(app.db)
-	var distributionRepository = repositoryDistribution.NewPostgresDistributionRepository(app.db)
-	var rssRepository = repositoryRSS.NewPostgresRSSRepository(app.db)
-	var userRepository = repositoryUser.NewPostgresUserRepository(app.db)
+type repositoryOutAdapters struct {
+	showRepository         *repositoryShow.PostgresShowOutAdapter
+	episodeRepository      *repositoryEpisode.PostgresEpisodeOutAdapter
+	distributionRepository *repositoryDistribution.PostgresDistributionOutAdapter
+	rssRepository          *repositoryRSS.PostgresRssOutAdapter
+	userRepository         *repositoryUser.PostgresUserOutAdapter
+}
 
-	var createShowPort = show.NewCreateShowService(showRepository)
-	var getShowPort = show.NewGetShowService(showRepository)
-	var createEpisodePort = episode.NewCreateEpisodeService(showRepository, episodeRepository)
-	var getEpisodePort = episode.NewGetEpisodeService(showRepository, episodeRepository)
-	var createDistributionPort = distribution.NewCreateDistributionService(showRepository, distributionRepository)
-	var getDistributionPort = distribution.NewGetDistributionService(showRepository, distributionRepository)
-	var updateDistributionPort = distribution.NewUpdateDistributionService(showRepository, episodeRepository, distributionRepository, distributionRepository)
-	var getRSSPort = rss.NewGetRSSService(rssRepository)
-	var createUserPort = user.NewCreateUserService(userRepository, nil) //TODO use adapter
-	var assignUserPort = user.NewAssignUserService(showRepository, userRepository, userRepository)
+func initRepositories(app *App) repositoryOutAdapters {
+	return repositoryOutAdapters{
+		showRepository:         repositoryShow.NewPostgresShowRepository(app.db),
+		episodeRepository:      repositoryEpisode.NewPostgresEpisodeRepository(app.db),
+		distributionRepository: repositoryDistribution.NewPostgresDistributionRepository(app.db),
+		rssRepository:          repositoryRSS.NewPostgresRSSRepository(app.db),
+		userRepository:         repositoryUser.NewPostgresUserRepository(app.db),
+	}
+}
+
+type servicePorts struct {
+	createShowPort         *show.CreateShowService
+	getShowPort            *show.GetShowService
+	createEpisodePort      *episode.CreateEpisodeService
+	getEpisodePort         *episode.GetEpisodeService
+	createDistributionPort *distribution.CreateDistributionService
+	getDistributionPort    *distribution.GetDistributionService
+	updateDistributionPort *distribution.UpdateDistributionService
+	getRSSPort             *rss.GetRSSService
+	createUserPort         *user.CreateUserService
+	assignUserPort         *user.AssignUserService
+}
+
+func (s *servicePorts) initShows(repos repositoryOutAdapters) {
+	s.createShowPort = show.NewCreateShowService(repos.showRepository)
+	s.getShowPort = show.NewGetShowService(repos.showRepository)
+}
+
+func (s *servicePorts) initEpisodes(repos repositoryOutAdapters) {
+	s.createEpisodePort = episode.NewCreateEpisodeService(repos.showRepository, repos.episodeRepository)
+	s.getEpisodePort = episode.NewGetEpisodeService(repos.showRepository, repos.episodeRepository)
+}
+
+func (s *servicePorts) initDistributions(repos repositoryOutAdapters) {
+	s.createDistributionPort = distribution.NewCreateDistributionService(repos.showRepository, repos.distributionRepository)
+	s.getDistributionPort = distribution.NewGetDistributionService(repos.showRepository, repos.distributionRepository)
+	s.updateDistributionPort = distribution.NewUpdateDistributionService(repos.showRepository, repos.episodeRepository, repos.distributionRepository, repos.distributionRepository)
+}
+
+func (s *servicePorts) initRSS(repos repositoryOutAdapters) {
+	s.getRSSPort = rss.NewGetRSSService(repos.rssRepository)
+}
+
+func (s *servicePorts) initUsers(repos repositoryOutAdapters) {
+	s.createUserPort = user.NewCreateUserService(repos.userRepository, nil)
+	s.assignUserPort = user.NewAssignUserService(repos.showRepository, repos.userRepository, repos.userRepository)
+}
+
+func initServices(app *App) *servicePorts {
+	var repos = initRepositories(app)
+
+	var services = new(servicePorts)
+	services.initShows(repos)
+	services.initEpisodes(repos)
+	services.initDistributions(repos)
+	services.initRSS(repos)
+	services.initUsers(repos)
+	return services
+}
+
+func (app *App) createPortMap() inbound.PortMap {
+	var services = initServices(app)
 
 	return inbound.PortMap{
-		inbound.CreateShow:         createShowPort,
-		inbound.GetShow:            getShowPort,
-		inbound.GetAllShows:        getShowPort,
-		inbound.CreateEpisode:      createEpisodePort,
-		inbound.GetEpisode:         getEpisodePort,
-		inbound.CreateDistribution: createDistributionPort,
-		inbound.GetDistribution:    getDistributionPort,
-		inbound.UpdateDistribution: updateDistributionPort,
-		inbound.GetRSS:             getRSSPort,
-		inbound.CreateUser:         createUserPort,
-		inbound.AssignUser:         assignUserPort,
+		inbound.CreateShow:         services.createShowPort,
+		inbound.GetShow:            services.getShowPort,
+		inbound.GetAllShows:        services.getShowPort,
+		inbound.CreateEpisode:      services.createEpisodePort,
+		inbound.GetEpisode:         services.getEpisodePort,
+		inbound.CreateDistribution: services.createDistributionPort,
+		inbound.GetDistribution:    services.getDistributionPort,
+		inbound.UpdateDistribution: services.updateDistributionPort,
+		inbound.GetRSS:             services.getRSSPort,
+		inbound.CreateUser:         services.createUserPort,
+		inbound.AssignUser:         services.assignUserPort,
 	}
 }
 
