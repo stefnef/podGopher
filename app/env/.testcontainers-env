@@ -3,3 +3,4 @@ DBUser:user
 DBPassword:password
 AdminUser:admin
 AdminPassword:password
+CredentialService:None

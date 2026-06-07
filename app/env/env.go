@@ -22,6 +22,7 @@ const (
 	MigrationDir       Name = "MigrationDir"
 	AdminUser          Name = "AdminUser"
 	AdminPassword      Name = "AdminPassword"
+	CredentialService  Name = "CredentialService"
 	OAuth2Domain       Name = "OAuth2Domain"
 	OAuth2ClientId     Name = "OAuth2ClientId"
 	OAuth2ClientSecret Name = "OAuth2ClientSecret"

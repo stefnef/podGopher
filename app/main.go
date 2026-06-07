@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	oktaAuth "podGopher/adapter/outbound/credentials/okta/user"
 	repositoryDistribution "podGopher/adapter/outbound/repository/postgres/distribution"
 	repositoryEpisode "podGopher/adapter/outbound/repository/postgres/episode"
 	"podGopher/adapter/outbound/repository/postgres/migration"
@@ -54,18 +55,18 @@ func NewApp(environmentFilePath string) *App {
 	app.createSqlDb()
 
 	app.startMigration()
-	app.createWebRouter()
+	app.configureServicesAndWebRouter()
 
 	return app
 }
 
-func (app *App) createWebRouter() {
+func (app *App) configureServicesAndWebRouter() {
 	var portMap = app.createPortMap()
-	var adminAuth = app.createAuth()
+	var adminAuth = app.createAdminAuth()
 	app.router = web.NewRouter(portMap, adminAuth)
 }
 
-func (app *App) createAuth() auth.AdminAuth {
+func (app *App) createAdminAuth() auth.AdminAuth {
 	return auth.NewAdminAuth(env.AdminUser.GetValue(), env.AdminPassword.GetValue())
 }
 
@@ -97,16 +98,17 @@ func initRepositories(app *App) repositoryOutAdapters {
 }
 
 type servicePorts struct {
-	createShowPort         *show.CreateShowService
-	getShowPort            *show.GetShowService
-	createEpisodePort      *episode.CreateEpisodeService
-	getEpisodePort         *episode.GetEpisodeService
-	createDistributionPort *distribution.CreateDistributionService
-	getDistributionPort    *distribution.GetDistributionService
-	updateDistributionPort *distribution.UpdateDistributionService
-	getRSSPort             *rss.GetRSSService
-	createUserPort         *user.CreateUserService
-	assignUserPort         *user.AssignUserService
+	createShowPort            *show.CreateShowService
+	getShowPort               *show.GetShowService
+	createEpisodePort         *episode.CreateEpisodeService
+	getEpisodePort            *episode.GetEpisodeService
+	createDistributionPort    *distribution.CreateDistributionService
+	getDistributionPort       *distribution.GetDistributionService
+	updateDistributionPort    *distribution.UpdateDistributionService
+	getRSSPort                *rss.GetRSSService
+	createUserPort            *user.CreateUserService
+	assignUserPort            *user.AssignUserService
+	createUserCredentialsPort *oktaAuth.OktaUserOutAdapter
 }
 
 func (s *servicePorts) initShows(repos repositoryOutAdapters) {
@@ -129,8 +131,16 @@ func (s *servicePorts) initRSS(repos repositoryOutAdapters) {
 	s.getRSSPort = rss.NewGetRSSService(repos.rssRepository)
 }
 
+func (s *servicePorts) initCredentialService() {
+	if env.CredentialService.GetValue() == "OAuth2" {
+		s.createUserCredentialsPort = oktaAuth.NewOktaAuthCredentialService(env.OAuth2Domain.GetValue(), env.OAuth2ClientId.GetValue(), env.OAuth2ClientSecret.GetValue())
+	} else if env.CredentialService.GetValue() != "None" {
+		panic("Invalid credential service")
+	}
+}
+
 func (s *servicePorts) initUsers(repos repositoryOutAdapters) {
-	s.createUserPort = user.NewCreateUserService(repos.userRepository, nil)
+	s.createUserPort = user.NewCreateUserService(repos.userRepository, s.createUserCredentialsPort)
 	s.assignUserPort = user.NewAssignUserService(repos.showRepository, repos.userRepository, repos.userRepository)
 }
 
@@ -142,6 +152,7 @@ func initServices(app *App) *servicePorts {
 	services.initEpisodes(repos)
 	services.initDistributions(repos)
 	services.initRSS(repos)
+	services.initCredentialService()
 	services.initUsers(repos)
 	return services
 }

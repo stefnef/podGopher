@@ -7,6 +7,7 @@ MigrationDir:adapter/outbound/repository/postgres/migration/files
 AdminUser:admin
 AdminPassword:password
 
+CredentialService:OAuth2
 OAuth2Domain:OAuth2Domain
 OAuth2ClientId:OAuth2ClientId
 OAuth2ClientSecret:OAuth2ClientSecret
